@@ -29,21 +29,53 @@
 </head>
 <body class="selection:bg-pink-600 selection:text-white pb-20 sm:pb-8">
 
+  <!-- AdBlock Detection Bait Element -->
+  <div id="adBlockBait" class="ad_banner adsense_ad adsbox ad-banner pub_300x250" style="position:absolute; top:-9999px; left:-9999px; width:1px; height:1px;">&nbsp;</div>
+
+  <!-- ============================================================ -->
+  <!-- ANTI-ADBLOCK MODAL / BANNER (HIGH CONVERTING) -->
+  <!-- ============================================================ -->
+  <div id="adblockModal" class="hidden fixed inset-0 z-50 bg-black/95 backdrop-blur-2xl flex items-center justify-center p-4">
+    <div class="glass-panel max-w-md w-full p-6 sm:p-8 border border-amber-500/40 shadow-2xl shadow-amber-950/80 rounded-3xl text-center relative overflow-hidden">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-500 via-rose-500 to-pink-600 flex items-center justify-center mx-auto mb-4 shadow-xl shadow-amber-500/30">
+        <i data-lucide="shield-alert" class="w-8 h-8 text-white"></i>
+      </div>
+
+      <span class="inline-block px-3 py-1 bg-amber-500/20 border border-amber-500/40 text-amber-300 font-extrabold text-[11px] rounded-full uppercase tracking-wider mb-2">
+        ⚠️ विज्ञापन अवरोधक सक्रिय (AdBlocker Detected)
+      </span>
+      <h2 class="font-serif font-black text-xl sm:text-2xl text-white mb-3">
+        कृपया AdBlocker को बंद करें
+      </h2>
+
+      <p class="text-gray-300 text-xs leading-relaxed mb-6">
+        यह वेबसाइट 100% मुफ़्त है। सभी VIP मॉडल्स के 4K वीडियो और एक्सक्लूसिव गैलरी देखने के लिए कृपया अपने ब्राउज़र में AdBlocker को बंद (Disable) करें या इस साइट को Allow करें।
+      </p>
+
+      <div class="space-y-3">
+        <button id="btnReloadAdblock" class="btn-vip-glow w-full py-3.5 text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2">
+          <i data-lucide="refresh-cw" class="w-4 h-4 text-white"></i>
+          <span>🔄 मैंने AdBlock बंद कर दिया है (Reload Page)</span>
+        </button>
+        <button id="btnDismissAdblock" class="w-full py-2.5 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white rounded-xl text-xs font-semibold transition">
+          विज्ञापन के साथ जारी रखें (Continue)
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- ============================================================ -->
   <!-- HIGH-CONVERTING DISCLAIMER POPUP (SMARTLINK MONETIZED) -->
   <!-- ============================================================ -->
   <div id="disclaimerModal" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-2xl flex items-center justify-center p-4 transition-all duration-300">
     <div class="glass-panel max-w-md w-full p-6 sm:p-8 border border-pink-500/40 shadow-2xl shadow-pink-950/80 rounded-3xl text-center relative overflow-hidden animate-float">
-      <!-- Glow Decor -->
       <div class="absolute -top-16 -right-16 w-36 h-36 bg-pink-600/30 rounded-full blur-2xl pointer-events-none"></div>
       <div class="absolute -bottom-16 -left-16 w-36 h-36 bg-purple-600/30 rounded-full blur-2xl pointer-events-none"></div>
 
-      <!-- Icon -->
       <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-pink-600 via-purple-600 to-amber-500 flex items-center justify-center mx-auto mb-4 shadow-xl shadow-pink-600/40">
         <i data-lucide="shield-check" class="w-8 h-8 text-white"></i>
       </div>
 
-      <!-- Heading -->
       <span class="inline-block px-3 py-1 bg-pink-950/60 border border-pink-500/30 text-pink-300 font-extrabold text-[11px] rounded-full uppercase tracking-wider mb-2">
         💎 18+ VIP कंटेंट डिस्क्लेमर
       </span>
@@ -51,18 +83,16 @@
         VIP ग्लैमर वीडियो हब में आपका स्वागत है
       </h2>
 
-      <!-- Description -->
       <p class="text-gray-300 text-xs leading-relaxed mb-6">
         इस वेबसाइट पर टॉप फैशन मॉडल्स, एक्सक्लूसिव 4K वीडियो और ग्लैमर पोर्टफोलियो शामिल हैं। आगे बढ़ने के लिए कृपया पुष्टि करें कि आप 18+ वर्ष के हैं और हमारे नियमों से सहमत हैं।
       </p>
 
-      <!-- Buttons -->
       <div class="space-y-3">
-        <button id="btnAcceptDisclaimer" class="btn-vip-glow w-full py-3.5 text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 shadow-xl shadow-pink-900/40">
+        <button id="btnAcceptDisclaimer" class="btn-vip-glow w-full py-3.5 text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 shadow-xl shadow-pink-900/40 cursor-pointer">
           <i data-lucide="check-circle-2" class="w-4 h-4 text-white"></i>
           <span>🔥 हाँ, मैं सहमत हूँ - वेबसाइट में प्रवेश करें</span>
         </button>
-        <button id="btnDeclineDisclaimer" class="w-full py-2.5 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white rounded-xl text-xs font-semibold transition">
+        <button id="btnDeclineDisclaimer" class="w-full py-2.5 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white rounded-xl text-xs font-semibold transition cursor-pointer">
           बाहर जाएं (Exit)
         </button>
       </div>
@@ -138,7 +168,7 @@
   <!-- TOP 728x90 ADSTERRA BANNER -->
   <div id="topBanner728Container" class="max-w-7xl mx-auto px-4 my-3 text-center overflow-hidden flex justify-center items-center">
     <div class="inline-block p-1 bg-black/40 rounded-2xl border border-white/10 shadow-lg min-h-[90px] min-w-[300px]">
-      <script type="text/javascript">
+      <script>
         atOptions = {
           'key' : '109bfc08902b9073c69aa9a8e3dda390',
           'format' : 'iframe',
