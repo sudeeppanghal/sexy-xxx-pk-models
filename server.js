@@ -47,25 +47,9 @@ app.use((req, res, next) => {
   next();
 });
 
-// Multer storage setup
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const uploadPath = path.join(__dirname, 'uploads');
-    if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath, { recursive: true });
-    }
-    cb(null, uploadPath);
-  },
-  filename: function (req, file, cb) {
-    const randomName = require('crypto').randomBytes(16).toString('hex');
-    const ext = path.extname(file.originalname).toLowerCase();
-    const safeExt = ['.jpg', '.jpeg', '.png', '.webp', '.gif'].includes(ext) ? ext : '.jpg';
-    cb(null, `model-${Date.now()}-${randomName}${safeExt}`);
-  }
-});
-
+// Memory / Disk storage setup with Base64 permanent fallback
 const upload = multer({
-  storage: storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/jpg'];
@@ -78,8 +62,8 @@ const upload = multer({
 });
 
 app.use(cors());
-app.use(express.json({ limit: '5mb' }));
-app.use(express.urlencoded({ extended: true, limit: '5mb' }));
+app.use(express.json({ limit: '15mb' }));
+app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -203,7 +187,7 @@ app.get('/go/:id', (req, res) => {
 });
 
 // -------------------------------------------------------------
-// SECURE ADMIN AUTH & MANAGEMENT ROUTES (100% English API)
+// SECURE ADMIN AUTH & MANAGEMENT ROUTES
 // -------------------------------------------------------------
 
 app.post('/api/admin/login', (req, res) => {
@@ -289,7 +273,6 @@ app.get('/api/admin/adsterra-stats', requireAdmin, async (req, res) => {
                 lastUpdated: data.dbLastUpdateTime || new Date().toLocaleTimeString()
               });
             } else {
-              // Return real live connection status with calculated real traffic estimates
               const est = calculateEstimatedAdsterra(realMetrics);
               est.liveApiConnected = true;
               est.lastUpdated = data?.dbLastUpdateTime || new Date().toLocaleTimeString();
@@ -337,23 +320,27 @@ app.get('/api/admin/models', requireAdmin, (req, res) => {
   }
 });
 
+// Admin: Upload image (Persistent Base64)
 app.post('/api/admin/upload', requireAdmin, upload.single('image'), (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ success: false, message: 'No image file uploaded.' });
     }
-    const fileUrl = `/uploads/${req.file.filename}`;
-    res.json({ success: true, url: fileUrl, filename: req.file.filename });
+    // Convert to permanent base64 data URI
+    const dataUri = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+    res.json({ success: true, url: dataUri });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
 });
 
+// Admin: Create model (with persistent base64 image)
 app.post('/api/admin/models', requireAdmin, upload.single('imageFile'), (req, res) => {
   try {
     const modelData = { ...req.body };
     if (req.file) {
-      modelData.image = `/uploads/${req.file.filename}`;
+      // Store permanently as Base64 Data URI inside database
+      modelData.image = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
     }
     if (typeof modelData.gallery === 'string') {
       try {
@@ -375,11 +362,13 @@ app.post('/api/admin/models', requireAdmin, upload.single('imageFile'), (req, re
   }
 });
 
+// Admin: Update model (with persistent base64 image)
 app.put('/api/admin/models/:id', requireAdmin, upload.single('imageFile'), (req, res) => {
   try {
     const updateData = { ...req.body };
     if (req.file) {
-      updateData.image = `/uploads/${req.file.filename}`;
+      // Store permanently as Base64 Data URI inside database
+      updateData.image = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
     }
     if (typeof updateData.gallery === 'string') {
       try {
