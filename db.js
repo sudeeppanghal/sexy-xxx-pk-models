@@ -14,12 +14,10 @@ if (!fs.existsSync(UPLOADS_DIR)) {
   fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 }
 
-// Timing-safe password hashing with salt
 function hashPassword(password, salt = 'VIP_LUXE_SECURE_SALT_9211') {
   return crypto.createHmac('sha256', salt).update(password).digest('hex');
 }
 
-// Timing-safe equality comparison to prevent timing attacks
 function timingSafeCompare(a, b) {
   if (typeof a !== 'string' || typeof b !== 'string') return false;
   const bufA = Buffer.from(a);
@@ -28,7 +26,6 @@ function timingSafeCompare(a, b) {
   return crypto.timingSafeEqual(bufA, bufB);
 }
 
-// Initial seed models
 const SEED_MODELS = [
   {
     id: "model-1",
@@ -185,13 +182,23 @@ const DEFAULT_SETTINGS = {
   ctaButtonText: "🔥 मेरे सभी प्रीमियम वीडियो देखें - यहाँ क्लिक करें",
   globalCtaLink: "https://t.me/yourvipchannel",
   telegramLink: "https://t.me/yourvipchannel",
-  adminPin: "admin123",
-  adminPasswordHash: hashPassword("admin123"),
+  adminPin: "Luxe@9211#Admin",
+  adminPasswordHash: hashPassword("Luxe@9211#Admin"),
   enableAgeGate: false,
-  themeColor: "ruby-glow"
+  themeColor: "ruby-glow",
+  
+  // Adsterra Monetization Settings
+  adsterraSmartLink: "https://www.effectivecpmnetwork.com/rm9cqers?key=53f807fa771a60ba28a6dbc43af423a1",
+  enableSmartLinkOnClicks: true,
+  socialBarScript: "https://pl30926092.effectivecpmnetwork.com/7c/d7/31/7cd7318b8d42d394a693054855bc9ae9.js",
+  enableSocialBar: true,
+  nativeBannerScript: "https://pl30926090.effectivecpmnetwork.com/e57d2a5991c2d320d1835502c0693cb4/invoke.js",
+  nativeBannerContainerId: "container-e57d2a5991c2d320d1835502c0693cb4",
+  enableNativeBanner: true,
+  banner728x90Key: "109bfc08902b9073c69aa9a8e3dda390",
+  enableBanner728x90: true
 };
 
-// Database structure helper
 class Database {
   constructor() {
     this.data = {
@@ -199,7 +206,7 @@ class Database {
       settings: {},
       adminTokens: []
     };
-    this.failedAttempts = new Map(); // IP -> { count, lockedUntil }
+    this.failedAttempts = new Map();
     this.load();
   }
 
@@ -213,6 +220,9 @@ class Database {
         }
         if (!this.data.settings || Object.keys(this.data.settings).length === 0) {
           this.data.settings = DEFAULT_SETTINGS;
+        } else {
+          // Merge any missing ad settings
+          this.data.settings = { ...DEFAULT_SETTINGS, ...this.data.settings };
         }
         if (!this.data.adminTokens) {
           this.data.adminTokens = [];
@@ -361,12 +371,10 @@ class Database {
     return this.getSettings();
   }
 
-  // Rate-limited & Brute-force protected Admin Authentication
   verifyAdmin(password, clientIp = '127.0.0.1') {
     const now = Date.now();
     const ipData = this.failedAttempts.get(clientIp) || { count: 0, lockedUntil: 0 };
 
-    // Check if IP is currently locked out
     if (ipData.lockedUntil > now) {
       const waitMinutes = Math.ceil((ipData.lockedUntil - now) / 60000);
       return {
@@ -377,30 +385,24 @@ class Database {
 
     const inputHash = hashPassword(password);
     const valid = timingSafeCompare(inputHash, this.data.settings.adminPasswordHash) ||
-                  timingSafeCompare(password, this.data.settings.adminPin || "admin123");
+                  timingSafeCompare(password, this.data.settings.adminPin || "Luxe@9211#Admin");
 
     if (valid) {
-      // Reset failed attempts on success
       this.failedAttempts.delete(clientIp);
-
-      // Generate 256-bit cryptographically secure token
       const token = "sec_" + crypto.randomBytes(32).toString('hex');
       this.data.adminTokens.push({
         token,
         clientIp,
         createdAt: now,
-        expiresAt: now + (1000 * 60 * 60 * 24) // 24 hours
+        expiresAt: now + (1000 * 60 * 60 * 24)
       });
-
-      // Cleanup expired tokens
       this.data.adminTokens = this.data.adminTokens.filter(t => t.expiresAt > now);
       this.save();
       return { success: true, token };
     } else {
-      // Increment failed attempt counter
       ipData.count += 1;
       if (ipData.count >= 5) {
-        ipData.lockedUntil = now + (1000 * 60 * 15); // Lock out for 15 minutes
+        ipData.lockedUntil = now + (1000 * 60 * 15);
         this.failedAttempts.set(clientIp, ipData);
         return {
           success: false,
@@ -449,4 +451,7 @@ class Database {
 }
 
 const db = new Database();
+db.data.settings = { ...DEFAULT_SETTINGS, ...db.data.settings };
+db.save();
+
 module.exports = { db, hashPassword };
