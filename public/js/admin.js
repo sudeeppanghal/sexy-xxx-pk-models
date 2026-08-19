@@ -45,6 +45,14 @@ const adTodayClicks = document.getElementById('adTodayClicks');
 const inputAdsterraApiToken = document.getElementById('inputAdsterraApiToken');
 const btnSaveAdsterraApiKey = document.getElementById('btnSaveAdsterraApiKey');
 const btnRefreshAdStats = document.getElementById('btnRefreshAdStats');
+const changeApiWrapper = document.getElementById('changeApiWrapper');
+
+// Toggle Change API Input
+window.toggleApiInput = function() {
+  if (changeApiWrapper) {
+    changeApiWrapper.classList.toggle('hidden');
+  }
+};
 
 // Model Form Modal Elements
 const modelFormModal = document.getElementById('modelFormModal');
@@ -127,7 +135,6 @@ async function checkAuth() {
     if (data.success && data.authenticated) {
       showDashboard();
       loadAllAdminData();
-      // Auto refresh stats every 30 seconds
       setInterval(loadRealStats, 30000);
       setInterval(loadAdsterraLiveStats, 45000);
     } else {
@@ -243,7 +250,6 @@ async function loadRealStats() {
       statTotalClicks.innerText = s.totalClicks || 0;
       statCtr.innerText = s.ctr || '0.0%';
 
-      // Device calculations
       const mobile = s.devices?.mobile || 0;
       const desktop = s.devices?.desktop || 0;
       const totalDev = mobile + desktop;
@@ -307,7 +313,8 @@ if (btnSaveAdsterraApiKey) {
       });
       const data = await res.json();
       if (data.success) {
-        showToast('Adsterra API Token linked and verified successfully!', 'success');
+        showToast('Adsterra API Token updated successfully!', 'success');
+        if (changeApiWrapper) changeApiWrapper.classList.add('hidden');
         loadAdsterraLiveStats();
       }
     } catch (e) {
@@ -469,7 +476,6 @@ async function loadAdminSettings() {
     if (data.success && data.settings) {
       siteSettings = data.settings;
       
-      // Ad Settings
       settingSmartLinkUrl.value = siteSettings.adsterraSmartLink || '';
       settingEnableSmartLink.checked = siteSettings.enableSmartLinkOnClicks !== false;
       settingSocialBarScript.value = siteSettings.socialBarScript || '';
@@ -480,10 +486,9 @@ async function loadAdminSettings() {
       settingBanner728Key.value = siteSettings.banner728x90Key || '';
       settingEnableBanner728x90.checked = siteSettings.enableBanner728x90 !== false;
       if (inputAdsterraApiToken) {
-        inputAdsterraApiToken.value = siteSettings.adsterraApiToken || '';
+        inputAdsterraApiToken.value = siteSettings.adsterraApiToken || '3897aae75b2bfa4492f9bf4145aac236';
       }
 
-      // Site Settings
       settingSiteName.value = siteSettings.siteName || '';
       settingSiteTagline.value = siteSettings.siteTagline || '';
       settingAnnouncement.value = siteSettings.announcement || '';
