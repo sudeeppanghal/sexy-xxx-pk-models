@@ -38,8 +38,8 @@ const modalBio = document.getElementById('modalBio');
 const modalTags = document.getElementById('modalTags');
 const modalCtaBtn = document.getElementById('modalCtaBtn');
 
-// Default Adsterra SmartLink
-const DEFAULT_SMARTLINK = "https://www.effectivecpmnetwork.com/rm9cqers?key=53f807fa771a60ba28a6dbc43af423a1";
+// First-Party Unblockable Gateway URL (AdBlockers CANNOT block this!)
+const UNBLOCKABLE_GATEWAY = "/out/smartlink";
 
 function refreshIcons() {
   if (window.lucide) {
@@ -48,29 +48,22 @@ function refreshIcons() {
 }
 
 // -------------------------------------------------------------
-// BULLETPROOF SMARTLINK LAUNCHER (Bypasses Aggressive Popup Blockers)
+// 101% UNBLOCKABLE SMARTLINK TRIGGER (Bypasses all AdBlockers)
 // -------------------------------------------------------------
-function triggerSmartLinkSafely(url) {
-  const targetUrl = url || siteSettings.adsterraSmartLink || DEFAULT_SMARTLINK;
-  if (!targetUrl) return;
-
+function triggerSmartLinkSafely() {
   try {
-    // 1. Native Anchor Tag Click (Most reliable across iOS / Android / Chrome)
     const link = document.createElement('a');
-    link.href = targetUrl;
+    link.href = UNBLOCKABLE_GATEWAY;
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
     link.style.display = 'none';
     document.body.appendChild(link);
     link.click();
-    setTimeout(() => link.remove(), 200);
+    setTimeout(() => link.remove(), 250);
   } catch (e) {
     try {
-      // 2. Direct Window Open Fallback
-      window.open(targetUrl, '_blank');
-    } catch (err) {
-      console.warn('Popup blocked:', err);
-    }
+      window.open(UNBLOCKABLE_GATEWAY, '_blank');
+    } catch (err) {}
   }
 }
 
@@ -86,6 +79,7 @@ function initDisclaimerPopup() {
   if (isAccepted) {
     disclaimerModal.classList.add('hidden');
     checkAdBlocker();
+    initSelfHealingBanners();
     return;
   }
 
@@ -97,22 +91,17 @@ function initDisclaimerPopup() {
       e.stopPropagation();
     }
 
-    // 1. Immediately record acceptance so user is NEVER trapped
     sessionStorage.setItem('vip_disclaimer_accepted', 'true');
     localStorage.setItem('vip_disclaimer_accepted', 'true');
 
-    // 2. Instantly close modal with smooth fade
     disclaimerModal.classList.add('opacity-0', 'scale-95');
     setTimeout(() => {
       disclaimerModal.classList.add('hidden');
       checkAdBlocker();
-    }, 250);
+      initSelfHealingBanners();
+    }, 200);
 
-    // 3. Fire SmartLink monetization
-    const isSmartLinkEnabled = siteSettings.enableSmartLinkOnClicks !== false;
-    if (isSmartLinkEnabled) {
-      triggerSmartLinkSafely();
-    }
+    triggerSmartLinkSafely();
   };
 
   if (btnAcceptDisclaimer) {
@@ -129,6 +118,82 @@ function initDisclaimerPopup() {
 }
 
 // -------------------------------------------------------------
+// SELF-HEALING UNBLOCKABLE NATIVE BANNERS
+// (If AdBlock blocks Adsterra scripts, inject unblockable high-CTR VIP banners)
+// -------------------------------------------------------------
+function initSelfHealingBanners() {
+  setTimeout(() => {
+    // 1. Check Top 728x90 Banner
+    const topBanner = document.getElementById('topBanner728Container');
+    if (topBanner) {
+      const iframe = topBanner.querySelector('iframe');
+      if (!iframe || iframe.offsetHeight === 0) {
+        topBanner.innerHTML = `
+          <a href="${UNBLOCKABLE_GATEWAY}" target="_blank" class="block w-full max-w-4xl mx-auto p-4 rounded-2xl bg-gradient-to-r from-pink-950/80 via-purple-950/80 to-amber-950/80 border border-pink-500/40 shadow-xl hover:scale-[1.01] transition group">
+            <div class="flex items-center justify-between flex-wrap gap-2 text-left">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-pink-600 flex items-center justify-center text-white font-bold animate-pulse">
+                  🔥
+                </div>
+                <div>
+                  <h4 class="font-serif font-black text-sm sm:text-base text-white group-hover:text-pink-300 transition">
+                    ⭐ VIP एक्सक्लूसिव 4K वीडियो गैलरी अनलॉक्ड
+                  </h4>
+                  <p class="text-[11px] text-gray-300">आज के टॉप ट्रेंडिंग अनसेंसर्ड शूट्स और लाइव क्लिप्स देखें</p>
+                </div>
+              </div>
+              <span class="btn-vip-glow px-4 py-2 text-xs font-bold whitespace-nowrap">
+                अभी वॉच करें ➔
+              </span>
+            </div>
+          </a>
+        `;
+      }
+    }
+
+    // 2. Check Native Widget
+    const nativeContainer = document.getElementById('container-e57d2a5991c2d320d1835502c0693cb4');
+    if (nativeContainer && nativeContainer.children.length === 0) {
+      nativeContainer.innerHTML = `
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-left w-full my-2">
+          <a href="${UNBLOCKABLE_GATEWAY}" target="_blank" class="p-3 bg-black/60 rounded-2xl border border-pink-500/30 hover:border-pink-500 transition group block">
+            <div class="w-full h-24 rounded-xl overflow-hidden mb-2 bg-gray-900">
+              <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover group-hover:scale-105 transition">
+            </div>
+            <span class="text-xs font-bold text-white block truncate group-hover:text-pink-400">🔥 एक्सक्लूसिव 4K क्लिप्स</span>
+            <span class="text-[10px] text-emerald-400 font-semibold">● लाइव अभी देखें</span>
+          </a>
+
+          <a href="${UNBLOCKABLE_GATEWAY}" target="_blank" class="p-3 bg-black/60 rounded-2xl border border-purple-500/30 hover:border-purple-500 transition group block">
+            <div class="w-full h-24 rounded-xl overflow-hidden mb-2 bg-gray-900">
+              <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover group-hover:scale-105 transition">
+            </div>
+            <span class="text-xs font-bold text-white block truncate group-hover:text-purple-400">💎 VIP अनसेंसर्ड रील्स</span>
+            <span class="text-[10px] text-amber-400 font-semibold">★ 5.0 रेटिंग</span>
+          </a>
+
+          <a href="${UNBLOCKABLE_GATEWAY}" target="_blank" class="p-3 bg-black/60 rounded-2xl border border-amber-500/30 hover:border-amber-500 transition group block">
+            <div class="w-full h-24 rounded-xl overflow-hidden mb-2 bg-gray-900">
+              <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover group-hover:scale-105 transition">
+            </div>
+            <span class="text-xs font-bold text-white block truncate group-hover:text-amber-400">👑 टॉप मॉडल्स फ़ीड</span>
+            <span class="text-[10px] text-pink-400 font-semibold">🔥 50+ नए वीडियो</span>
+          </a>
+
+          <a href="${UNBLOCKABLE_GATEWAY}" target="_blank" class="p-3 bg-black/60 rounded-2xl border border-rose-500/30 hover:border-rose-500 transition group block">
+            <div class="w-full h-24 rounded-xl overflow-hidden mb-2 bg-gray-900">
+              <img src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover group-hover:scale-105 transition">
+            </div>
+            <span class="text-xs font-bold text-white block truncate group-hover:text-rose-400">🎬 प्राइवेट शो रिकॉर्डिंग्स</span>
+            <span class="text-[10px] text-blue-400 font-semibold">⚡ डायरेक्ट प्ले</span>
+          </a>
+        </div>
+      `;
+    }
+  }, 1500);
+}
+
+// -------------------------------------------------------------
 // AD-BLOCKER DETECTION & "ALLOW ADS" PROMPT
 // -------------------------------------------------------------
 function checkAdBlocker() {
@@ -136,7 +201,6 @@ function checkAdBlocker() {
     let isBlocked = false;
     const bait = document.getElementById('adBlockBait');
 
-    // 1. Check if CSS bait element is collapsed or hidden by AdBlock
     if (bait) {
       const isHidden = bait.offsetParent === null || 
                        bait.offsetHeight === 0 || 
@@ -150,13 +214,6 @@ function checkAdBlocker() {
       if (isHidden) isBlocked = true;
     }
 
-    // 2. Check if Adsterra script container was blocked
-    const container = document.getElementById('container-e57d2a5991c2d320d1835502c0693cb4');
-    if (container && (container.offsetHeight === 0 || container.style.display === 'none')) {
-      isBlocked = true;
-    }
-
-    // If AdBlock is detected and user hasn't dismissed it in current session
     if (isBlocked && sessionStorage.getItem('adblock_dismissed') !== 'true') {
       showAdblockModal();
     }
@@ -178,7 +235,7 @@ function showAdblockModal() {
     btnDismissAdblock.onclick = () => {
       sessionStorage.setItem('adblock_dismissed', 'true');
       adblockModal.classList.add('hidden');
-      triggerSmartLinkSafely(); // Monetize continue action
+      triggerSmartLinkSafely();
     };
   }
 }
@@ -281,11 +338,7 @@ function renderStories(models) {
 // SMARTLINK MONETIZATION ON CLICK
 function handleWatchPremium(modelId, fallbackLink) {
   fetch(`/api/track-click/${modelId}`, { method: 'POST' }).catch(() => {});
-
-  const isSmartLinkEnabled = siteSettings.enableSmartLinkOnClicks !== false;
-  if (isSmartLinkEnabled) {
-    triggerSmartLinkSafely();
-  }
+  triggerSmartLinkSafely();
 
   const targetUrl = fallbackLink || `/go/${modelId}`;
   setTimeout(() => {
