@@ -200,6 +200,12 @@
       "token": "tok_b33b3f19cd5e21d769b51229572040d2",
       "createdAt": 1787144315719,
       "expiresAt": 1787749115719
+    },
+    {
+      "token": "sec_7c3afdc0e85e52471fed91a95325e73bcf1166c10ee167274557ffea573b97bb",
+      "clientIp": "1.2.3.4",
+      "createdAt": 1787150166310,
+      "expiresAt": 1787236566310
     }
   ]
 }
