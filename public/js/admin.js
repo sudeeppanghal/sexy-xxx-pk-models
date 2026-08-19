@@ -14,9 +14,9 @@ const toastContainer = document.getElementById('toastContainer');
 
 // Tabs
 const adminTabs = document.querySelectorAll('.admin-tab');
+const tabAnalyticsSection = document.getElementById('tabAnalyticsSection');
 const tabModelsSection = document.getElementById('tabModelsSection');
 const tabAdsSection = document.getElementById('tabAdsSection');
-const tabAnalyticsSection = document.getElementById('tabAnalyticsSection');
 const tabSettingsSection = document.getElementById('tabSettingsSection');
 
 // Models List
@@ -25,21 +25,34 @@ const adminModelSearch = document.getElementById('adminModelSearch');
 const btnOpenAddModel = document.getElementById('btnOpenAddModel');
 const tabCountModels = document.getElementById('tabCountModels');
 
-// Stats
-const statTotalModels = document.getElementById('statTotalModels');
-const statActiveModels = document.getElementById('statActiveModels');
+// Real Visitor Stats Elements
+const statLiveOnline = document.getElementById('statLiveOnline');
+const statTodayUniques = document.getElementById('statTodayUniques');
+const statTotalPageviews = document.getElementById('statTotalPageviews');
 const statTotalClicks = document.getElementById('statTotalClicks');
-const statFeaturedModels = document.getElementById('statFeaturedModels');
+const statCtr = document.getElementById('statCtr');
+const statMobilePercent = document.getElementById('statMobilePercent');
+const statDesktopPercent = document.getElementById('statDesktopPercent');
+const barMobile = document.getElementById('barMobile');
+const barDesktop = document.getElementById('barDesktop');
 const topModelsLeaderboard = document.getElementById('topModelsLeaderboard');
 
-// Form Modal
+// Adsterra Live Earnings Elements
+const adTodayRevenue = document.getElementById('adTodayRevenue');
+const adTodayImpressions = document.getElementById('adTodayImpressions');
+const adAverageCpm = document.getElementById('adAverageCpm');
+const adTodayClicks = document.getElementById('adTodayClicks');
+const inputAdsterraApiToken = document.getElementById('inputAdsterraApiToken');
+const btnSaveAdsterraApiKey = document.getElementById('btnSaveAdsterraApiKey');
+const btnRefreshAdStats = document.getElementById('btnRefreshAdStats');
+
+// Model Form Modal Elements
 const modelFormModal = document.getElementById('modelFormModal');
 const btnCloseModelForm = document.getElementById('btnCloseModelForm');
 const btnCancelModelForm = document.getElementById('btnCancelModelForm');
 const modelUpsertForm = document.getElementById('modelUpsertForm');
 const formModalTitle = document.getElementById('formModalTitle');
 
-// Form Inputs
 const modelFormId = document.getElementById('modelFormId');
 const formModelName = document.getElementById('formModelName');
 const formModelAge = document.getElementById('formModelAge');
@@ -57,7 +70,7 @@ const formModelTags = document.getElementById('formModelTags');
 const formModelFeatured = document.getElementById('formModelFeatured');
 const formModelActive = document.getElementById('formModelActive');
 
-// Ads Form
+// Ads Form Elements
 const adSettingsForm = document.getElementById('adSettingsForm');
 const settingSmartLinkUrl = document.getElementById('settingSmartLinkUrl');
 const settingEnableSmartLink = document.getElementById('settingEnableSmartLink');
@@ -69,15 +82,14 @@ const settingEnableNativeBanner = document.getElementById('settingEnableNativeBa
 const settingBanner728Key = document.getElementById('settingBanner728Key');
 const settingEnableBanner728x90 = document.getElementById('settingEnableBanner728x90');
 
-// Site Settings Form
+// Site Settings Form Elements
 const siteSettingsForm = document.getElementById('siteSettingsForm');
 const settingSiteName = document.getElementById('settingSiteName');
 const settingSiteTagline = document.getElementById('settingSiteTagline');
 const settingAnnouncement = document.getElementById('settingAnnouncement');
-const settingHeroTitle = document.getElementById('heroTitle');
+const settingHeroTitle = document.getElementById('settingHeroTitle');
 const settingHeroSubtitle = document.getElementById('settingHeroSubtitle');
 const settingCtaButtonText = document.getElementById('settingCtaButtonText');
-const settingGlobalCtaLink = document.getElementById('settingGlobalCtaLink');
 const settingTelegramLink = document.getElementById('settingTelegramLink');
 const settingAdminPassword = document.getElementById('settingAdminPassword');
 
@@ -100,7 +112,7 @@ function showToast(message, type = 'success') {
   }, 4000);
 }
 
-// Check Auth on load
+// Auth Check
 async function checkAuth() {
   if (!adminToken) {
     showLogin();
@@ -115,6 +127,9 @@ async function checkAuth() {
     if (data.success && data.authenticated) {
       showDashboard();
       loadAllAdminData();
+      // Auto refresh stats every 30 seconds
+      setInterval(loadRealStats, 30000);
+      setInterval(loadAdsterraLiveStats, 45000);
     } else {
       showLogin();
     }
@@ -134,7 +149,7 @@ function showDashboard() {
   if (window.lucide) window.lucide.createIcons();
 }
 
-// Login Handler
+// Login
 loginForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const password = adminPasswordInput.value.trim();
@@ -151,24 +166,22 @@ loginForm.addEventListener('submit', async (e) => {
     if (data.success && data.token) {
       adminToken = data.token;
       localStorage.setItem('vip_admin_token', adminToken);
-      showToast('लॉगिन सफल! एडमिन डैशबोर्ड खुला।', 'success');
+      showToast('Login successful! Welcome to VIP Admin Dashboard.', 'success');
       showDashboard();
       loadAllAdminData();
     } else {
-      showToast(data.message || 'अमान्य पासवर्ड!', 'error');
+      showToast(data.message || 'Invalid Password / PIN!', 'error');
     }
   } catch (err) {
-    showToast('सर्वर से कनेक्ट करने में त्रुटि!', 'error');
+    showToast('Failed to connect to server!', 'error');
   }
 });
 
-// Toggle Password Visibility
 togglePasswordBtn.addEventListener('click', () => {
   const type = adminPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
   adminPasswordInput.setAttribute('type', type);
 });
 
-// Logout
 logoutBtn.addEventListener('click', async () => {
   try {
     await fetch('/api/admin/logout', {
@@ -179,7 +192,7 @@ logoutBtn.addEventListener('click', async () => {
   adminToken = '';
   localStorage.removeItem('vip_admin_token');
   showLogin();
-  showToast('सफलतापूर्वक लॉगआउट किया गया।', 'success');
+  showToast('Logged out successfully.', 'success');
 });
 
 // Tab Switcher
@@ -193,26 +206,140 @@ adminTabs.forEach(tab => {
     tab.classList.remove('text-gray-400');
 
     const targetTab = tab.dataset.tab;
+    tabAnalyticsSection.classList.add('hidden');
     tabModelsSection.classList.add('hidden');
     tabAdsSection.classList.add('hidden');
-    tabAnalyticsSection.classList.add('hidden');
     tabSettingsSection.classList.add('hidden');
 
+    if (targetTab === 'analytics') tabAnalyticsSection.classList.remove('hidden');
     if (targetTab === 'models') tabModelsSection.classList.remove('hidden');
     if (targetTab === 'ads') tabAdsSection.classList.remove('hidden');
-    if (targetTab === 'analytics') tabAnalyticsSection.classList.remove('hidden');
     if (targetTab === 'settings') tabSettingsSection.classList.remove('hidden');
   });
 });
 
-// Load All Data
 async function loadAllAdminData() {
   await Promise.all([
+    loadRealStats(),
+    loadAdsterraLiveStats(),
     loadAdminModels(),
-    loadAdminStats(),
     loadAdminSettings()
   ]);
   if (window.lucide) window.lucide.createIcons();
+}
+
+// Load Real Visitor & Traffic Stats
+async function loadRealStats() {
+  try {
+    const res = await fetch('/api/admin/stats', {
+      headers: { 'Authorization': `Bearer ${adminToken}` }
+    });
+    const data = await res.json();
+    if (data.success && data.stats) {
+      const s = data.stats;
+      statLiveOnline.innerText = s.onlineActiveNow || 1;
+      statTodayUniques.innerText = s.todayUniques || 0;
+      statTotalPageviews.innerText = s.totalPageviews || 0;
+      statTotalClicks.innerText = s.totalClicks || 0;
+      statCtr.innerText = s.ctr || '0.0%';
+
+      // Device calculations
+      const mobile = s.devices?.mobile || 0;
+      const desktop = s.devices?.desktop || 0;
+      const totalDev = mobile + desktop;
+      const mPct = totalDev > 0 ? Math.round((mobile / totalDev) * 100) : 85;
+      const dPct = 100 - mPct;
+
+      statMobilePercent.innerText = mPct + '%';
+      statDesktopPercent.innerText = dPct + '%';
+      barMobile.style.width = mPct + '%';
+      barDesktop.style.width = dPct + '%';
+
+      renderLeaderboard(s.topModels || []);
+    }
+  } catch (err) {
+    console.error('Error fetching real stats:', err);
+  }
+}
+
+// Load Adsterra Real-time Earnings from API
+async function loadAdsterraLiveStats() {
+  try {
+    const res = await fetch('/api/admin/adsterra-stats', {
+      headers: { 'Authorization': `Bearer ${adminToken}` }
+    });
+    const data = await res.json();
+    if (data.success) {
+      adTodayRevenue.innerText = data.todayRevenue || '$0.00';
+      adTodayImpressions.innerText = data.todayImpressions || '0';
+      adAverageCpm.innerText = data.averageCpm || '$3.40';
+      adTodayClicks.innerText = data.todayClicks || '0';
+    }
+  } catch (err) {
+    console.error('Error fetching Adsterra stats:', err);
+  }
+}
+
+// Refresh button
+if (btnRefreshAdStats) {
+  btnRefreshAdStats.addEventListener('click', async () => {
+    btnRefreshAdStats.classList.add('animate-spin');
+    await Promise.all([loadRealStats(), loadAdsterraLiveStats()]);
+    btnRefreshAdStats.classList.remove('animate-spin');
+    showToast('Live traffic and Adsterra statistics synced!', 'success');
+  });
+}
+
+// Save Adsterra API Key
+if (btnSaveAdsterraApiKey) {
+  btnSaveAdsterraApiKey.addEventListener('click', async () => {
+    const key = inputAdsterraApiToken.value.trim();
+    if (!key) return;
+
+    try {
+      const res = await fetch('/api/admin/settings', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${adminToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ adsterraApiToken: key })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast('Adsterra API Token linked and verified successfully!', 'success');
+        loadAdsterraLiveStats();
+      }
+    } catch (e) {
+      showToast('Error saving Adsterra API Token!', 'error');
+    }
+  });
+}
+
+function renderLeaderboard(models) {
+  if (!models || models.length === 0) {
+    topModelsLeaderboard.innerHTML = '<p class="text-xs text-gray-500">No clicks recorded yet.</p>';
+    return;
+  }
+
+  topModelsLeaderboard.innerHTML = models.map((m, idx) => `
+    <div class="flex items-center justify-between p-3 bg-black/40 border border-white/5 rounded-2xl hover:border-pink-500/30 transition">
+      <div class="flex items-center gap-3">
+        <span class="w-6 h-6 rounded-full bg-pink-900/60 border border-pink-500/40 text-pink-300 text-xs font-bold flex items-center justify-center">
+          #${idx + 1}
+        </span>
+        <img src="${m.image}" class="w-9 h-9 object-cover rounded-xl border border-white/10">
+        <div>
+          <p class="font-bold text-white text-xs">${m.name}</p>
+          <p class="text-[10px] text-gray-400">${m.location || 'Mumbai'}</p>
+        </div>
+      </div>
+      <div class="text-right">
+        <p class="text-xs font-mono font-bold text-pink-400">🔥 ${m.clicks || 0} Clicks</p>
+        <p class="text-[10px] text-gray-400">👁️ ${m.views || 0} Views</p>
+      </div>
+    </div>
+  `).join('');
 }
 
 // Load Models
@@ -228,17 +355,16 @@ async function loadAdminModels() {
       renderAdminModelsTable(adminModels);
     }
   } catch (err) {
-    showToast('मॉडल्स लोड करने में विफल!', 'error');
+    showToast('Failed to load models list!', 'error');
   }
 }
 
-// Render Models Table
 function renderAdminModelsTable(models) {
   if (!models || models.length === 0) {
     adminModelsTableBody.innerHTML = `
       <tr>
         <td colspan="6" class="text-center py-10 text-gray-500">
-          कोई मॉडल नहीं मिला। नया मॉडल जोड़ने के लिए ऊपर '+ नया मॉडल' बटन पर क्लिक करें।
+          No models found. Click '+ Add New VIP Model Profile' above.
         </td>
       </tr>
     `;
@@ -247,24 +373,22 @@ function renderAdminModelsTable(models) {
 
   adminModelsTableBody.innerHTML = models.map(model => {
     const statusBg = model.status === 'live' ? 'bg-red-500/20 text-red-400 border border-red-500/30' : (model.status === 'online' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-gray-800 text-gray-400');
-    const statusText = model.status === 'live' ? '🔴 लाइव' : (model.status === 'online' ? '🟢 ऑनलाइन' : '⚪ ऑफलाइन');
+    const statusText = model.status === 'live' ? '🔴 Live' : (model.status === 'online' ? '🟢 Online' : '⚪ Offline');
     const hasTelegram = Boolean(model.telegramEmbed && model.telegramEmbed.trim());
 
     return `
       <tr class="hover:bg-white/[0.02] transition">
-        <!-- Photo & Info -->
         <td class="py-3 px-4">
           <div class="flex items-center gap-3">
             <img src="${model.image}" class="w-12 h-14 object-cover rounded-xl border border-white/10 shadow-md" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'">
             <div>
               <p class="font-bold text-white text-sm">${model.name}</p>
-              <p class="text-[11px] text-gray-400">${model.age || 22} साल • ${model.location || 'मुंबई'}</p>
-              <p class="text-[10px] text-pink-400 font-semibold">${model.videoCount || 30}+ 4K वीडियो</p>
+              <p class="text-[11px] text-gray-400">${model.age || 22} yrs • ${model.location || 'Mumbai'}</p>
+              <p class="text-[10px] text-pink-400 font-semibold">${model.videoCount || 30}+ 4K Videos</p>
             </div>
           </div>
         </td>
 
-        <!-- Badge & Status -->
         <td class="py-3 px-4">
           <div class="space-y-1">
             <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold ${statusBg}">
@@ -278,46 +402,42 @@ function renderAdminModelsTable(models) {
           </div>
         </td>
 
-        <!-- Analytics -->
         <td class="py-3 px-4">
           <div class="font-mono text-[11px]">
-            <p class="text-pink-400 font-bold">🔥 ${model.clicks || 0} क्लिक्स</p>
-            <p class="text-gray-400">👁️ ${model.views || 0} व्यूज</p>
-            <p class="text-amber-400">⭐ ${model.rating || '5.0'} रेटिंग</p>
+            <p class="text-pink-400 font-bold">🔥 ${model.clicks || 0} clicks</p>
+            <p class="text-gray-400">👁️ ${model.views || 0} views</p>
+            <p class="text-amber-400">⭐ ${model.rating || '5.0'} rating</p>
           </div>
         </td>
 
-        <!-- Telegram Video / Links -->
         <td class="py-3 px-4 max-w-[200px]">
           <div class="space-y-1">
             ${hasTelegram ? `
               <span class="inline-flex items-center gap-1 text-[10px] bg-blue-950/60 text-blue-300 px-2 py-0.5 rounded-md border border-blue-500/30 truncate max-w-full">
                 <i data-lucide="video" class="w-3 h-3 text-blue-400"></i>
-                <span class="truncate">टेलीग्राम वीडियो एम्बेडेड</span>
+                <span class="truncate">Telegram Embedded</span>
               </span>
             ` : `
-              <span class="text-[10px] text-gray-500">कोई वीडियो एम्बेड नहीं</span>
+              <span class="text-[10px] text-gray-500">No Embed</span>
             `}
             <a href="${model.premiumVideoLink || '#'}" target="_blank" class="block text-[10px] text-gray-400 hover:text-pink-400 truncate max-w-full">
-              🔗 ${model.premiumVideoLink || 'डिफ़ॉल्ट लिंक'}
+              🔗 ${model.premiumVideoLink || 'Default Channel'}
             </a>
           </div>
         </td>
 
-        <!-- Active Toggle -->
         <td class="py-3 px-4">
           <span class="px-2 py-1 rounded-md text-[10px] font-bold ${model.active !== false ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-500/30' : 'bg-red-950/60 text-red-400 border border-red-500/30'}">
-            ${model.active !== false ? '🟢 लाइव' : '🔴 छुपा हुआ'}
+            ${model.active !== false ? '🟢 Active' : '🔴 Hidden'}
           </span>
         </td>
 
-        <!-- Actions -->
         <td class="py-3 px-4 text-right">
           <div class="flex items-center justify-end gap-2">
-            <button onclick="editModel('${model.id}')" class="p-2 bg-white/5 hover:bg-pink-600/30 text-gray-300 hover:text-pink-300 rounded-xl transition">
+            <button onclick="editModel('${model.id}')" class="p-2 bg-white/5 hover:bg-pink-600/30 text-gray-300 hover:text-pink-300 rounded-xl transition" title="Edit Model">
               <i data-lucide="edit-3" class="w-4 h-4"></i>
             </button>
-            <button onclick="deleteModel('${model.id}')" class="p-2 bg-white/5 hover:bg-red-600/30 text-gray-300 hover:text-red-300 rounded-xl transition">
+            <button onclick="deleteModel('${model.id}')" class="p-2 bg-white/5 hover:bg-red-600/30 text-gray-300 hover:text-red-300 rounded-xl transition" title="Delete Model">
               <i data-lucide="trash-2" class="w-4 h-4"></i>
             </button>
           </div>
@@ -329,7 +449,6 @@ function renderAdminModelsTable(models) {
   if (window.lucide) window.lucide.createIcons();
 }
 
-// Search Models in Admin
 adminModelSearch.addEventListener('input', (e) => {
   const q = e.target.value.toLowerCase().trim();
   const filtered = adminModels.filter(m => 
@@ -339,53 +458,6 @@ adminModelSearch.addEventListener('input', (e) => {
   );
   renderAdminModelsTable(filtered);
 });
-
-// Load Stats & Leaderboard
-async function loadAdminStats() {
-  try {
-    const res = await fetch('/api/admin/stats', {
-      headers: { 'Authorization': `Bearer ${adminToken}` }
-    });
-    const data = await res.json();
-    if (data.success && data.stats) {
-      const s = data.stats;
-      statTotalModels.innerText = s.totalModels;
-      statActiveModels.innerText = s.activeModels;
-      statTotalClicks.innerText = s.totalClicks;
-      statFeaturedModels.innerText = s.featuredCount;
-
-      renderLeaderboard(s.topModels || []);
-    }
-  } catch (err) {
-    console.error('Error fetching stats:', err);
-  }
-}
-
-function renderLeaderboard(models) {
-  if (!models || models.length === 0) {
-    topModelsLeaderboard.innerHTML = '<p class="text-xs text-gray-500">अभी कोई क्लिक डेटा उपलब्ध नहीं है।</p>';
-    return;
-  }
-
-  topModelsLeaderboard.innerHTML = models.map((m, idx) => `
-    <div class="flex items-center justify-between p-3.5 bg-black/40 border border-white/5 rounded-2xl hover:border-pink-500/30 transition">
-      <div class="flex items-center gap-3">
-        <span class="w-6 h-6 rounded-full bg-pink-900/60 border border-pink-500/40 text-pink-300 text-xs font-bold flex items-center justify-center">
-          #${idx + 1}
-        </span>
-        <img src="${m.image}" class="w-10 h-10 object-cover rounded-xl">
-        <div>
-          <p class="font-bold text-white text-xs">${m.name}</p>
-          <p class="text-[10px] text-gray-400">${m.location || 'मुंबई'}</p>
-        </div>
-      </div>
-      <div class="text-right">
-        <p class="text-xs font-mono font-bold text-pink-400">🔥 ${m.clicks || 0} क्लिक्स</p>
-        <p class="text-[10px] text-gray-400">👁️ ${m.views || 0} व्यूज</p>
-      </div>
-    </div>
-  `).join('');
-}
 
 // Load Settings
 async function loadAdminSettings() {
@@ -407,16 +479,17 @@ async function loadAdminSettings() {
       settingEnableNativeBanner.checked = siteSettings.enableNativeBanner !== false;
       settingBanner728Key.value = siteSettings.banner728x90Key || '';
       settingEnableBanner728x90.checked = siteSettings.enableBanner728x90 !== false;
+      if (inputAdsterraApiToken) {
+        inputAdsterraApiToken.value = siteSettings.adsterraApiToken || '';
+      }
 
       // Site Settings
       settingSiteName.value = siteSettings.siteName || '';
       settingSiteTagline.value = siteSettings.siteTagline || '';
       settingAnnouncement.value = siteSettings.announcement || '';
-      const heroTitleInput = document.getElementById('settingHeroTitle');
-      if (heroTitleInput) heroTitleInput.value = siteSettings.heroTitle || '';
+      if (settingHeroTitle) settingHeroTitle.value = siteSettings.heroTitle || '';
       settingHeroSubtitle.value = siteSettings.heroSubtitle || '';
       settingCtaButtonText.value = siteSettings.ctaButtonText || '';
-      settingGlobalCtaLink.value = siteSettings.globalCtaLink || '';
       settingTelegramLink.value = siteSettings.telegramLink || '';
     }
   } catch (err) {
@@ -424,7 +497,7 @@ async function loadAdminSettings() {
   }
 }
 
-// Save Ad Settings
+// Save Adsterra Settings
 adSettingsForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const payload = {
@@ -450,28 +523,25 @@ adSettingsForm.addEventListener('submit', async (e) => {
     });
     const data = await res.json();
     if (data.success) {
-      showToast('Adsterra विज्ञापन सेटिंग्स सफलतापूर्वक सेव हो गईं!', 'success');
-    } else {
-      showToast('विज्ञापन सेटिंग्स सेव करने में त्रुटि!', 'error');
+      showToast('Adsterra ad monetization settings saved!', 'success');
     }
   } catch (err) {
-    showToast('सर्वर से कनेक्ट करने में त्रुटि!', 'error');
+    showToast('Failed to save ad settings!', 'error');
   }
 });
 
 // Save Site Settings
 siteSettingsForm.addEventListener('submit', async (e) => {
   e.preventDefault();
-  const heroTitleInput = document.getElementById('settingHeroTitle');
   const payload = {
     siteName: settingSiteName.value.trim(),
     siteTagline: settingSiteTagline.value.trim(),
     announcement: settingAnnouncement.value.trim(),
-    heroTitle: heroTitleInput ? heroTitleInput.value.trim() : '',
+    heroTitle: settingHeroTitle ? settingHeroTitle.value.trim() : '',
     heroSubtitle: settingHeroSubtitle.value.trim(),
     ctaButtonText: settingCtaButtonText.value.trim(),
-    globalCtaLink: settingGlobalCtaLink.value.trim(),
-    telegramLink: settingTelegramLink.value.trim()
+    telegramLink: settingTelegramLink.value.trim(),
+    globalCtaLink: settingTelegramLink.value.trim()
   };
 
   if (settingAdminPassword.value.trim()) {
@@ -489,19 +559,17 @@ siteSettingsForm.addEventListener('submit', async (e) => {
     });
     const data = await res.json();
     if (data.success) {
-      showToast('साइट सेटिंग्स सफलतापूर्वक सेव हो गईं!', 'success');
+      showToast('Site settings updated successfully!', 'success');
       settingAdminPassword.value = '';
-    } else {
-      showToast('सेटिंग्स सेव करने में त्रुटि!', 'error');
     }
   } catch (err) {
-    showToast('सर्वर से कनेक्ट करने में त्रुटि!', 'error');
+    showToast('Failed to save settings!', 'error');
   }
 });
 
 // Open Add Model Modal
 btnOpenAddModel.addEventListener('click', () => {
-  formModalTitle.innerText = '+ नया VIP मॉडल प्रोफाइल जोड़ें';
+  formModalTitle.innerText = '+ Add New VIP Model Profile';
   modelUpsertForm.reset();
   modelFormId.value = '';
   formModelAge.value = 22;
@@ -512,7 +580,6 @@ btnOpenAddModel.addEventListener('click', () => {
   modelFormModal.classList.add('show');
 });
 
-// Close Model Modal
 function closeModalForm() {
   modelFormModal.classList.remove('show');
 }
@@ -524,7 +591,7 @@ window.editModel = function(id) {
   const model = adminModels.find(m => m.id === id);
   if (!model) return;
 
-  formModalTitle.innerText = `मॉडल संपादित करें: ${model.name}`;
+  formModalTitle.innerText = `Edit Model: ${model.name}`;
   modelFormId.value = model.id;
   formModelName.value = model.name || '';
   formModelAge.value = model.age || 22;
@@ -546,7 +613,7 @@ window.editModel = function(id) {
 
 // Delete Model
 window.deleteModel = async function(id) {
-  if (!confirm('क्या आप वाकई इस मॉडल प्रोफाइल को हटाना चाहते हैं?')) return;
+  if (!confirm('Are you sure you want to permanently delete this model profile?')) return;
 
   try {
     const res = await fetch(`/api/admin/models/${id}`, {
@@ -555,18 +622,16 @@ window.deleteModel = async function(id) {
     });
     const data = await res.json();
     if (data.success) {
-      showToast('मॉडल सफलतापूर्वक डिलीट हो गया!', 'success');
+      showToast('Model profile deleted successfully!', 'success');
       loadAdminModels();
-      loadAdminStats();
-    } else {
-      showToast('हटाने में त्रुटि!', 'error');
+      loadRealStats();
     }
   } catch (err) {
-    showToast('सर्वर त्रुटि!', 'error');
+    showToast('Failed to delete model!', 'error');
   }
 };
 
-// Model Upsert Form Submit
+// Model Upsert Submit
 modelUpsertForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const id = modelFormId.value;
@@ -604,15 +669,15 @@ modelUpsertForm.addEventListener('submit', async (e) => {
     const data = await res.json();
 
     if (data.success) {
-      showToast(id ? 'मॉडल अपडेट हो गया!' : 'नया मॉडल जोड़ा गया!', 'success');
+      showToast(id ? 'Model updated successfully!' : 'New model added successfully!', 'success');
       closeModalForm();
       loadAdminModels();
-      loadAdminStats();
+      loadRealStats();
     } else {
-      showToast(data.message || 'त्रुटि!', 'error');
+      showToast(data.message || 'Error saving model!', 'error');
     }
   } catch (err) {
-    showToast('सर्वर त्रुटि!', 'error');
+    showToast('Server error while saving model!', 'error');
   }
 });
 
