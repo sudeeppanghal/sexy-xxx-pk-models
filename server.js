@@ -8,7 +8,17 @@ const { db } = require('./db');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Multer storage setup for image uploads
+// Security: Enforce Security Headers
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  next();
+});
+
+// Multer storage setup for image uploads with strict sanitization
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const uploadPath = path.join(__dirname, 'uploads');
@@ -18,28 +28,38 @@ const storage = multer.diskStorage({
     cb(null, uploadPath);
   },
   filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    const ext = path.extname(file.originalname).toLowerCase() || '.jpg';
-    cb(null, 'model-' + uniqueSuffix + ext);
+    const randomName = require('crypto').randomBytes(16).toString('hex');
+    const ext = path.extname(file.originalname).toLowerCase();
+    const safeExt = ['.jpg', '.jpeg', '.png', '.webp', '.gif'].includes(ext) ? ext : '.jpg';
+    cb(null, `model-${Date.now()}-${randomName}${safeExt}`);
   }
 });
 
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 15 * 1024 * 1024 }, // 15MB max
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB max limit
   fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) {
+    const allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/jpg'];
+    if (allowedMimes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('Only image files are allowed!'), false);
+      cb(new Error('सुरक्षा चेतावनी: केवल इमेज फाइल्स (.jpg, .png, .webp) की अनुमति है!'), false);
     }
   }
 });
 
-// Middleware
+// Middleware with payload limits
 app.use(cors());
-app.use(express.json({ limit: '20mb' }));
-app.use(express.urlencoded({ extended: true, limit: '20mb' }));
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ extended: true, limit: '5mb' }));
+
+// Helper to get real client IP (behind Cloudflare / Render proxy)
+function getClientIp(req) {
+  return req.headers['cf-connecting-ip'] || 
+         req.headers['x-forwarded-for']?.split(',')[0].trim() || 
+         req.socket.remoteAddress || 
+         '127.0.0.1';
+}
 
 // Static directories
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -51,14 +71,15 @@ function requireAdmin(req, res, next) {
   let token = null;
 
   if (authHeader && authHeader.startsWith('Bearer ')) {
-    token = authHeader.substring(7);
+    token = authHeader.substring(7).trim();
   } else if (authHeader) {
-    token = authHeader;
+    token = authHeader.trim();
   }
 
   if (!token || !db.validateToken(token)) {
-    return res.status(401).json({ success: false, message: 'Unauthorized. Please login as admin.' });
+    return res.status(401).json({ success: false, message: 'अनाधिकृत अनुरोध! कृपया एडमिन लॉगिन करें।' });
   }
+  req.adminToken = token;
   next();
 }
 
@@ -66,13 +87,18 @@ function requireAdmin(req, res, next) {
 // PUBLIC API ROUTES
 // -------------------------------------------------------------
 
-// Get site settings
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', time: new Date().toISOString() });
+});
+
+// Get site settings (sensitive hashes stripped)
 app.get('/api/settings', (req, res) => {
   try {
     const settings = db.getSettings();
     res.json({ success: true, settings });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 
@@ -90,14 +116,14 @@ app.get('/api/models', (req, res) => {
       } else if (category === 'top') {
         models = models.filter(m => m.rating >= 4.9);
       } else if (category === 'new') {
-        models = models.filter(m => (m.badge && m.badge.includes('NEW')) || (m.tags && m.tags.some(t => t.toLowerCase().includes('new'))));
+        models = models.filter(m => (m.badge && (m.badge.includes('NEW') || m.badge.includes('नया') || m.badge.includes('नई'))) || (m.tags && m.tags.some(t => t.toLowerCase().includes('new'))));
       } else {
-        models = models.filter(m => m.tags && m.tags.some(t => t.toLowerCase() === category.toLowerCase()));
+        models = models.filter(m => m.tags && m.tags.some(t => t.toLowerCase() === String(category).toLowerCase()));
       }
     }
 
     if (search) {
-      const q = search.toLowerCase();
+      const q = String(search).toLowerCase().trim();
       models = models.filter(m =>
         m.name.toLowerCase().includes(q) ||
         (m.location && m.location.toLowerCase().includes(q)) ||
@@ -116,7 +142,7 @@ app.get('/api/models', (req, res) => {
 
     res.json({ success: true, count: models.length, models });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 
@@ -130,7 +156,7 @@ app.get('/api/models/:id', (req, res) => {
     db.recordView(model.id);
     res.json({ success: true, model });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 
@@ -145,11 +171,11 @@ app.post('/api/track-click/:id', (req, res) => {
     const destination = model.premiumVideoLink || db.getSettings().globalCtaLink || '#';
     res.json({ success: true, clicks, destination });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 
-// Direct redirection link for marketing & buttons (e.g., /go/model-1)
+// Direct redirection link
 app.get('/go/:id', (req, res) => {
   try {
     const model = db.getModelById(req.params.id);
@@ -165,16 +191,19 @@ app.get('/go/:id', (req, res) => {
 });
 
 // -------------------------------------------------------------
-// ADMIN AUTH & MANAGEMENT ROUTES
+// SECURE ADMIN AUTH & MANAGEMENT ROUTES
 // -------------------------------------------------------------
 
-// Admin login
+// Admin login with Brute-Force Rate Limiting
 app.post('/api/admin/login', (req, res) => {
   const { password } = req.body;
-  if (!password) {
-    return res.status(400).json({ success: false, message: 'Password is required' });
+  if (!password || typeof password !== 'string') {
+    return res.status(400).json({ success: false, message: 'पासवर्ड आवश्यक है।' });
   }
-  const result = db.verifyAdmin(password);
+
+  const clientIp = getClientIp(req);
+  const result = db.verifyAdmin(password.trim(), clientIp);
+
   if (result.success) {
     res.json({ success: true, token: result.token });
   } else {
@@ -187,23 +216,29 @@ app.get('/api/admin/check', requireAdmin, (req, res) => {
   res.json({ success: true, authenticated: true });
 });
 
+// Admin logout / Revoke Token
+app.post('/api/admin/logout', requireAdmin, (req, res) => {
+  db.revokeToken(req.adminToken);
+  res.json({ success: true, message: 'Logged out successfully' });
+});
+
 // Admin stats
 app.get('/api/admin/stats', requireAdmin, (req, res) => {
   try {
     const stats = db.getStats();
     res.json({ success: true, stats });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 
-// Admin: Get all models (including inactive)
+// Admin: Get all models
 app.get('/api/admin/models', requireAdmin, (req, res) => {
   try {
     const models = db.getModels(false);
     res.json({ success: true, count: models.length, models });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 
@@ -211,7 +246,7 @@ app.get('/api/admin/models', requireAdmin, (req, res) => {
 app.post('/api/admin/upload', requireAdmin, upload.single('image'), (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ success: false, message: 'No image uploaded' });
+      return res.status(400).json({ success: false, message: 'कोई इमेज अपलोड नहीं की गई।' });
     }
     const fileUrl = `/uploads/${req.file.filename}`;
     res.json({ success: true, url: fileUrl, filename: req.file.filename });
@@ -237,16 +272,13 @@ app.post('/api/admin/models', requireAdmin, upload.single('imageFile'), (req, re
     if (typeof modelData.tags === 'string') {
       modelData.tags = modelData.tags.split(',').map(s => s.trim()).filter(Boolean);
     }
-    if (modelData.featured === 'true' || modelData.featured === true) modelData.featured = true;
-    else modelData.featured = false;
-
-    if (modelData.active === 'false' || modelData.active === false) modelData.active = false;
-    else modelData.active = true;
+    modelData.featured = modelData.featured === 'true' || modelData.featured === true;
+    modelData.active = modelData.active !== 'false' && modelData.active !== false;
 
     const newModel = db.createModel(modelData);
     res.status(201).json({ success: true, model: newModel });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: 'Error saving model' });
   }
 });
 
@@ -280,7 +312,7 @@ app.put('/api/admin/models/:id', requireAdmin, upload.single('imageFile'), (req,
     }
     res.json({ success: true, model: updated });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: 'Error updating model' });
   }
 });
 
@@ -291,9 +323,9 @@ app.delete('/api/admin/models/:id', requireAdmin, (req, res) => {
     if (!success) {
       return res.status(404).json({ success: false, message: 'Model not found' });
     }
-    res.json({ success: true, message: 'Model deleted successfully' });
+    res.json({ success: true, message: 'मॉडल प्रोफाइल सफलतापूर्वक डिलीट हो गई।' });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: 'Error deleting model' });
   }
 });
 
@@ -303,7 +335,7 @@ app.get('/api/admin/settings', requireAdmin, (req, res) => {
     const settings = db.getSettings();
     res.json({ success: true, settings });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: 'Error fetching settings' });
   }
 });
 
@@ -313,7 +345,7 @@ app.put('/api/admin/settings', requireAdmin, (req, res) => {
     const updatedSettings = db.updateSettings(req.body);
     res.json({ success: true, settings: updatedSettings });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: 'Error updating settings' });
   }
 });
 
@@ -327,12 +359,16 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Global Error Handler
+app.use((err, req, res, next) => {
+  res.status(500).json({ success: false, message: err.message || 'Internal Server Error' });
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`====================================================`);
-  console.log(`🔥 VIP Models & Premium Videos Platform Running!`);
+  console.log(`🔒 VIP Models Platform Running (Hardened Security Active)`);
   console.log(`🌐 Public Landing Page: http://localhost:${PORT}`);
   console.log(`👑 Admin Dashboard:     http://localhost:${PORT}/admin`);
-  console.log(`🔑 Default Admin PIN:   admin123`);
   console.log(`====================================================`);
 });
