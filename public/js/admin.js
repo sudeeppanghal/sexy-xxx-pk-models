@@ -107,6 +107,7 @@ const settingShareFile = document.getElementById('settingShareFile');
 const settingShareImage = document.getElementById('settingShareImage');
 const settingShareTitle = document.getElementById('settingShareTitle');
 const sharePreviewImg = document.getElementById('sharePreviewImg');
+const sharePreviewNote = document.getElementById('sharePreviewNote');
 
 // Toast Notification
 function showToast(message, type = 'success') {
@@ -173,7 +174,7 @@ if (formModelFile) {
       const dataUrl = await compressImage(formModelFile.files[0]);
       formModelImageUrl.value = dataUrl;
       if (formModelPreviewImg) formModelPreviewImg.src = dataUrl;
-      showToast('Model photo optimized and ready!', 'success');
+      showToast('Model photo optimized and preview loaded!', 'success');
     } catch (e) {
       showToast('Error processing model photo!', 'error');
     }
@@ -188,25 +189,35 @@ if (formModelImageUrl) {
   });
 }
 
-// Social Share File Input Listeners
+// Social Share File Input Listeners (WhatsApp & TinyURL Preview)
 if (settingShareFile) {
   settingShareFile.addEventListener('change', async () => {
     if (settingShareFile.files.length === 0) return;
     try {
+      showToast('Processing social photo...', 'success');
       const dataUrl = await compressImage(settingShareFile.files[0], 1200, 0.85);
       settingShareImage.value = dataUrl;
-      if (sharePreviewImg) sharePreviewImg.src = dataUrl;
-      showToast('Social preview photo optimized! Click "Save Site Settings" to save.', 'success');
+      if (sharePreviewImg) {
+        sharePreviewImg.src = dataUrl;
+      }
+      if (sharePreviewNote) {
+        sharePreviewNote.innerText = "✓ New photo ready! Click 'Save Site Settings' below.";
+      }
+      showToast('Photo loaded! Now click "Save Site Settings" button at bottom.', 'success');
     } catch (e) {
-      showToast('Error processing social photo!', 'error');
+      showToast('Error processing selected photo!', 'error');
     }
   });
 }
 
 if (settingShareImage) {
   settingShareImage.addEventListener('input', (e) => {
-    if (sharePreviewImg && e.target.value.trim()) {
-      sharePreviewImg.src = e.target.value.trim();
+    const val = e.target.value.trim();
+    if (val && sharePreviewImg) {
+      if (val.startsWith('http') || val.startsWith('data:image')) {
+        sharePreviewImg.src = val;
+        if (sharePreviewNote) sharePreviewNote.innerText = "Preview loaded from URL";
+      }
     }
   });
 }
@@ -636,6 +647,14 @@ adSettingsForm.addEventListener('submit', async (e) => {
 // Save Site Settings
 siteSettingsForm.addEventListener('submit', async (e) => {
   e.preventDefault();
+  
+  let shareImg = settingShareImage.value.trim();
+  // If user accidentally entered tinyurl or a non-image website, clear it or warn
+  if (shareImg.includes('tinyurl.com') || shareImg.includes('bit.ly') || shareImg.includes('sexy-xxx-pk.com')) {
+    showToast('⚠️ Please choose an image file (e.g. .png / .jpg), not a website or TinyURL link!', 'error');
+    return;
+  }
+
   const payload = {
     siteName: settingSiteName.value.trim(),
     siteTagline: settingSiteTagline.value.trim(),
@@ -645,7 +664,7 @@ siteSettingsForm.addEventListener('submit', async (e) => {
     ctaButtonText: settingCtaButtonText.value.trim(),
     telegramLink: settingTelegramLink.value.trim(),
     globalCtaLink: settingTelegramLink.value.trim(),
-    shareImage: settingShareImage.value.trim(),
+    shareImage: shareImg || siteSettings.shareImage || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1200&q=85',
     shareTitle: settingShareTitle.value.trim()
   };
 
@@ -664,8 +683,9 @@ siteSettingsForm.addEventListener('submit', async (e) => {
     });
     const data = await res.json();
     if (data.success) {
-      showToast('Site & Social Share Preview settings saved!', 'success');
+      showToast('Site & Social Share Preview photo saved successfully!', 'success');
       settingAdminPassword.value = '';
+      if (sharePreviewNote) sharePreviewNote.innerText = "✓ Saved & Live on WhatsApp / Web!";
     }
   } catch (err) {
     showToast('Failed to save settings!', 'error');
