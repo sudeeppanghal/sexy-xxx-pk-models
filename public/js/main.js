@@ -16,7 +16,12 @@ const sortSelect = document.getElementById('sortSelect');
 const countAll = document.getElementById('countAll');
 const mobileDockTelegram = document.getElementById('mobileDockTelegram');
 
-// Modal Elements
+// Disclaimer Modal Elements
+const disclaimerModal = document.getElementById('disclaimerModal');
+const btnAcceptDisclaimer = document.getElementById('btnAcceptDisclaimer');
+const btnDeclineDisclaimer = document.getElementById('btnDeclineDisclaimer');
+
+// Model Modal Elements
 const modelModal = document.getElementById('modelModal');
 const modalClose = document.getElementById('modalClose');
 const modalMediaContainer = document.getElementById('modalMediaContainer');
@@ -28,12 +33,49 @@ const modalBio = document.getElementById('modalBio');
 const modalTags = document.getElementById('modalTags');
 const modalCtaBtn = document.getElementById('modalCtaBtn');
 
-// Default Adsterra SmartLink fallback
+// Default Adsterra SmartLink
 const DEFAULT_SMARTLINK = "https://www.effectivecpmnetwork.com/rm9cqers?key=53f807fa771a60ba28a6dbc43af423a1";
 
 function refreshIcons() {
   if (window.lucide) {
     window.lucide.createIcons();
+  }
+}
+
+// Initialize Disclaimer Popup with SmartLink Monetization
+function initDisclaimerPopup() {
+  if (!disclaimerModal) return;
+
+  const accepted = sessionStorage.getItem('vip_disclaimer_accepted');
+  if (accepted === 'true') {
+    disclaimerModal.classList.add('hidden');
+  } else {
+    disclaimerModal.classList.remove('hidden');
+  }
+
+  // Accept button: Trigger SmartLink in new tab + unlock website!
+  if (btnAcceptDisclaimer) {
+    btnAcceptDisclaimer.addEventListener('click', () => {
+      const smartLink = siteSettings.adsterraSmartLink || DEFAULT_SMARTLINK;
+      if (smartLink) {
+        // High CPM Monetized trigger on entry!
+        const adTab = window.open(smartLink, '_blank');
+        if (adTab) adTab.focus();
+      }
+
+      sessionStorage.setItem('vip_disclaimer_accepted', 'true');
+      disclaimerModal.classList.add('opacity-0', 'scale-95');
+      setTimeout(() => {
+        disclaimerModal.classList.add('hidden');
+      }, 300);
+    });
+  }
+
+  // Decline button: redirect away
+  if (btnDeclineDisclaimer) {
+    btnDeclineDisclaimer.addEventListener('click', () => {
+      window.location.href = 'https://www.google.com';
+    });
   }
 }
 
@@ -133,36 +175,28 @@ function renderStories(models) {
 }
 
 // SMARTLINK MONETIZATION ON CLICK
-// Trigger Adsterra SmartLink in a new tab first to maximize CPM revenue, then open model target!
 function handleWatchPremium(modelId, fallbackLink) {
   const smartLink = siteSettings.adsterraSmartLink || DEFAULT_SMARTLINK;
   const isSmartLinkEnabled = siteSettings.enableSmartLinkOnClicks !== false;
 
-  // 1. Record click for internal analytics
   fetch(`/api/track-click/${modelId}`, { method: 'POST' }).catch(() => {});
 
   if (isSmartLinkEnabled && smartLink) {
-    // Open high CPM SmartLink in new tab
     const adWindow = window.open(smartLink, '_blank');
-    if (adWindow) {
-      adWindow.focus();
-    }
+    if (adWindow) adWindow.focus();
   }
 
-  // 2. Open model's target destination
   const targetUrl = fallbackLink || `/go/${modelId}`;
   setTimeout(() => {
     window.location.href = targetUrl;
-  }, 100);
+  }, 120);
 }
 
-// Global SmartLink click trigger
 window.handleSmartLinkDirect = function() {
   const smartLink = siteSettings.adsterraSmartLink || DEFAULT_SMARTLINK;
   window.open(smartLink, '_blank');
 };
 
-// Helper to format Telegram embed URL
 function getTelegramEmbedUrl(rawUrl) {
   if (!rawUrl) return null;
   let url = rawUrl.trim();
@@ -174,7 +208,7 @@ function getTelegramEmbedUrl(rawUrl) {
   return url;
 }
 
-// Render Model Cards (Large Photo + Button ON TOP)
+// Render Model Cards
 function renderModels(models) {
   if (!models || models.length === 0) {
     modelsGrid.innerHTML = '';
@@ -187,7 +221,7 @@ function renderModels(models) {
     const ctaText = siteSettings.ctaButtonText || "🔥 मेरे सभी प्रीमियम वीडियो देखें - यहाँ क्लिक करें";
     const statusClass = model.status === 'live' ? 'badge-status-live' : (model.status === 'online' ? 'badge-status-online' : 'bg-gray-800 text-gray-400 text-[10px] px-2 py-0.5 rounded-full');
     const statusText = model.status === 'live' ? '🔴 लाइव' : (model.status === 'online' ? '🟢 ऑनलाइन' : '⚪ ऑफलाइन');
-    const videoDest = model.premiumVideoLink || siteSettings.globalCtaLink || '#';
+    const videoDest = model.premiumVideoLink || siteSettings.globalCtaLink || 'https://t.me/riyakumarix7';
     const delayClass = `delay-${(idx % 6) + 1}`;
 
     return `
@@ -249,7 +283,6 @@ function renderModels(models) {
           </p>
 
           <div class="flex items-center justify-between pt-2.5 border-t border-white/5">
-            <!-- Tags -->
             <div class="flex flex-wrap gap-1.5">
               ${(model.tags || ['ग्लैमर', '4K']).slice(0, 2).map(tag => `
                 <span class="px-2.5 py-0.5 bg-white/5 border border-white/10 rounded-full text-[11px] font-semibold text-gray-400">
@@ -258,7 +291,6 @@ function renderModels(models) {
               `).join('')}
             </div>
 
-            <!-- Video Count Badge -->
             <div class="text-xs font-bold text-pink-400 flex items-center gap-1">
               <i data-lucide="film" class="w-3.5 h-3.5 text-purple-400"></i>
               <span>${model.videoCount || 30}+ वीडियो</span>
@@ -322,7 +354,7 @@ window.openModelModal = async function(id) {
     </span>
   `).join('');
 
-  const dest = model.premiumVideoLink || siteSettings.globalCtaLink || '#';
+  const dest = model.premiumVideoLink || siteSettings.globalCtaLink || 'https://t.me/riyakumarix7';
   modalCtaBtn.onclick = () => {
     handleWatchPremium(model.id, dest);
   };
@@ -335,14 +367,12 @@ modalClose.addEventListener('click', () => {
   modelModal.classList.remove('show');
 });
 
-// Close modal on backdrop click
 modelModal.addEventListener('click', (e) => {
   if (e.target === modelModal) {
     modelModal.classList.remove('show');
   }
 });
 
-// Set category filter programmatically (used by mobile bottom dock)
 window.setCategoryFilter = function(category) {
   currentCategory = category;
   filterTabs.forEach(t => {
@@ -354,7 +384,6 @@ window.setCategoryFilter = function(category) {
   if (grid) grid.scrollIntoView({ behavior: 'smooth' });
 };
 
-// Event Listeners for Filters
 filterTabs.forEach(tab => {
   tab.addEventListener('click', () => {
     filterTabs.forEach(t => t.classList.remove('active'));
@@ -364,7 +393,6 @@ filterTabs.forEach(tab => {
   });
 });
 
-// Search input handling
 let searchTimeout;
 function handleSearch(e) {
   clearTimeout(searchTimeout);
@@ -377,7 +405,6 @@ function handleSearch(e) {
 searchInput.addEventListener('input', handleSearch);
 mobileSearchInput.addEventListener('input', handleSearch);
 
-// Sort dropdown
 sortSelect.addEventListener('change', (e) => {
   currentSort = e.target.value;
   loadModels();
@@ -385,6 +412,7 @@ sortSelect.addEventListener('change', (e) => {
 
 // Initial boot
 document.addEventListener('DOMContentLoaded', () => {
+  initDisclaimerPopup();
   loadSettings();
   loadModels();
   refreshIcons();
