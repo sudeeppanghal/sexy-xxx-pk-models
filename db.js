@@ -14,11 +14,21 @@ if (!fs.existsSync(UPLOADS_DIR)) {
   fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 }
 
-function hashPassword(password) {
-  return crypto.createHash('sha256').update(password).digest('hex');
+// Timing-safe password hashing with salt
+function hashPassword(password, salt = 'VIP_LUXE_SECURE_SALT_9211') {
+  return crypto.createHmac('sha256', salt).update(password).digest('hex');
 }
 
-// Initial seed models with professional glamour portraits & Telegram video support
+// Timing-safe equality comparison to prevent timing attacks
+function timingSafeCompare(a, b) {
+  if (typeof a !== 'string' || typeof b !== 'string') return false;
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) return false;
+  return crypto.timingSafeEqual(bufA, bufB);
+}
+
+// Initial seed models
 const SEED_MODELS = [
   {
     id: "model-1",
@@ -29,9 +39,7 @@ const SEED_MODELS = [
     status: "online",
     image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=85",
     gallery: [
-      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=85",
-      "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=85",
-      "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=85"
+      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=85"
     ],
     bio: "इंटरनेशनल फैशन मॉडल व इन्फ्लुएंसर। एक्सक्लूसिव फोटोशूट्स, बिहाइंड-द-सीन्स और स्पेशल प्रीमियम वीडियो यहाँ देखें।",
     premiumVideoLink: "https://t.me/yourvipchannel",
@@ -55,8 +63,7 @@ const SEED_MODELS = [
     status: "live",
     image: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=800&q=85",
     gallery: [
-      "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=800&q=85",
-      "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=800&q=85"
+      "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=800&q=85"
     ],
     bio: "शानदार स्टाइल, बोल्ड लुक्स और एक्सक्लूसिव वीडियो का प्रीमियम कलेक्शन केवल मेरे खास फैंस के लिए।",
     premiumVideoLink: "https://t.me/yourvipchannel",
@@ -80,8 +87,7 @@ const SEED_MODELS = [
     status: "online",
     image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=85",
     gallery: [
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=85",
-      "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=85"
+      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=85"
     ],
     bio: "क्यूट स्माइल और दिलकश अंदाज़। मेरे नए डांस रील्स और प्राइवेट व्लॉग वीडियो अभी अनलॉक करें।",
     premiumVideoLink: "https://t.me/yourvipchannel",
@@ -105,8 +111,7 @@ const SEED_MODELS = [
     status: "online",
     image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=85",
     gallery: [
-      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=85",
-      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=85"
+      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=85"
     ],
     bio: "हाई-फैशन रनवे मॉडल। नए सिनेमैटिक एपिसोड्स और एक्सक्लूसिव वीडियो सीरीज तुरंत देखें।",
     premiumVideoLink: "https://t.me/yourvipchannel",
@@ -180,7 +185,6 @@ const DEFAULT_SETTINGS = {
   ctaButtonText: "🔥 मेरे सभी प्रीमियम वीडियो देखें - यहाँ क्लिक करें",
   globalCtaLink: "https://t.me/yourvipchannel",
   telegramLink: "https://t.me/yourvipchannel",
-  onlyfansLink: "",
   adminPin: "admin123",
   adminPasswordHash: hashPassword("admin123"),
   enableAgeGate: false,
@@ -195,6 +199,7 @@ class Database {
       settings: {},
       adminTokens: []
     };
+    this.failedAttempts = new Map(); // IP -> { count, lockedUntil }
     this.load();
   }
 
@@ -251,23 +256,23 @@ class Database {
   }
 
   createModel(modelData) {
-    const id = "model-" + crypto.randomBytes(4).toString('hex');
+    const id = "model-" + crypto.randomBytes(6).toString('hex');
     const newModel = {
       id,
-      name: modelData.name || "VIP Model",
-      age: parseInt(modelData.age) || 22,
-      location: modelData.location || "मुंबई, भारत",
-      badge: modelData.badge || "🔥 हॉट",
-      status: modelData.status || "online",
-      image: modelData.image || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=85",
+      name: String(modelData.name || "VIP Model").slice(0, 100),
+      age: Math.min(Math.max(parseInt(modelData.age) || 21, 18), 99),
+      location: String(modelData.location || "मुंबई, भारत").slice(0, 100),
+      badge: String(modelData.badge || "🔥 हॉट").slice(0, 50),
+      status: ["online", "live", "offline"].includes(modelData.status) ? modelData.status : "online",
+      image: String(modelData.image || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=85"),
       gallery: Array.isArray(modelData.gallery) ? modelData.gallery : [modelData.image || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=85"],
-      bio: modelData.bio || "एक्सक्लूसिव ग्लैमर शूट्स और वीडियो।",
-      premiumVideoLink: modelData.premiumVideoLink || this.data.settings.globalCtaLink || "https://t.me/yourvipchannel",
-      telegramEmbed: modelData.telegramEmbed || "",
-      premiumPrice: modelData.premiumPrice || "VIP वीडियो पास",
-      rating: parseFloat(modelData.rating) || 5.0,
-      videoCount: parseInt(modelData.videoCount) || 30,
-      tags: Array.isArray(modelData.tags) ? modelData.tags : (modelData.tags ? modelData.tags.split(',').map(t => t.trim()) : ["ग्लैमर", "VIP", "4K"]),
+      bio: String(modelData.bio || "एक्सक्लूसिव ग्लैमर शूट्स और वीडियो।").slice(0, 500),
+      premiumVideoLink: String(modelData.premiumVideoLink || this.data.settings.globalCtaLink || "https://t.me/yourvipchannel"),
+      telegramEmbed: String(modelData.telegramEmbed || ""),
+      premiumPrice: String(modelData.premiumPrice || "VIP वीडियो पास").slice(0, 50),
+      rating: parseFloat(Math.min(Math.max(parseFloat(modelData.rating) || 5.0, 1.0), 5.0).toFixed(1)),
+      videoCount: Math.max(parseInt(modelData.videoCount) || 30, 0),
+      tags: Array.isArray(modelData.tags) ? modelData.tags.map(t => String(t).slice(0, 30)) : (modelData.tags ? modelData.tags.split(',').map(t => t.trim().slice(0, 30)) : ["ग्लैमर", "VIP", "4K"]),
       featured: Boolean(modelData.featured),
       active: modelData.active !== undefined ? Boolean(modelData.active) : true,
       clicks: 0,
@@ -289,12 +294,15 @@ class Database {
       ...existing,
       ...updateData,
       id: existing.id,
-      age: updateData.age !== undefined ? parseInt(updateData.age) : existing.age,
-      rating: updateData.rating !== undefined ? parseFloat(updateData.rating) : existing.rating,
-      videoCount: updateData.videoCount !== undefined ? parseInt(updateData.videoCount) : existing.videoCount,
-      tags: Array.isArray(updateData.tags) ? updateData.tags : (typeof updateData.tags === 'string' ? updateData.tags.split(',').map(t => t.trim()) : existing.tags),
+      name: updateData.name ? String(updateData.name).slice(0, 100) : existing.name,
+      age: updateData.age !== undefined ? Math.min(Math.max(parseInt(updateData.age) || 21, 18), 99) : existing.age,
+      location: updateData.location ? String(updateData.location).slice(0, 100) : existing.location,
+      bio: updateData.bio ? String(updateData.bio).slice(0, 500) : existing.bio,
+      rating: updateData.rating !== undefined ? parseFloat(Math.min(Math.max(parseFloat(updateData.rating) || 5.0, 1.0), 5.0).toFixed(1)) : existing.rating,
+      videoCount: updateData.videoCount !== undefined ? Math.max(parseInt(updateData.videoCount) || 0, 0) : existing.videoCount,
+      tags: Array.isArray(updateData.tags) ? updateData.tags.map(t => String(t).slice(0, 30)) : (typeof updateData.tags === 'string' ? updateData.tags.split(',').map(t => t.trim().slice(0, 30)) : existing.tags),
       gallery: Array.isArray(updateData.gallery) ? updateData.gallery : existing.gallery,
-      telegramEmbed: updateData.telegramEmbed !== undefined ? updateData.telegramEmbed : (existing.telegramEmbed || "")
+      telegramEmbed: updateData.telegramEmbed !== undefined ? String(updateData.telegramEmbed) : (existing.telegramEmbed || "")
     };
 
     this.save();
@@ -332,13 +340,17 @@ class Database {
   }
 
   getSettings() {
-    return { ...this.data.settings, adminPasswordHash: undefined };
+    const copy = { ...this.data.settings };
+    delete copy.adminPasswordHash;
+    delete copy.adminPin;
+    return copy;
   }
 
   updateSettings(newSettings) {
-    if (newSettings.adminPassword) {
-      this.data.settings.adminPasswordHash = hashPassword(newSettings.adminPassword);
-      this.data.settings.adminPin = newSettings.adminPassword;
+    if (newSettings.adminPassword && newSettings.adminPassword.trim().length >= 6) {
+      const cleanPass = newSettings.adminPassword.trim();
+      this.data.settings.adminPasswordHash = hashPassword(cleanPass);
+      this.data.settings.adminPin = cleanPass;
       delete newSettings.adminPassword;
     }
     this.data.settings = {
@@ -349,27 +361,73 @@ class Database {
     return this.getSettings();
   }
 
-  verifyAdmin(password) {
+  // Rate-limited & Brute-force protected Admin Authentication
+  verifyAdmin(password, clientIp = '127.0.0.1') {
+    const now = Date.now();
+    const ipData = this.failedAttempts.get(clientIp) || { count: 0, lockedUntil: 0 };
+
+    // Check if IP is currently locked out
+    if (ipData.lockedUntil > now) {
+      const waitMinutes = Math.ceil((ipData.lockedUntil - now) / 60000);
+      return {
+        success: false,
+        message: `सुरक्षा लॉक: बहुत अधिक गलत प्रयास। कृपया ${waitMinutes} मिनट बाद पुनः प्रयास करें।`
+      };
+    }
+
     const inputHash = hashPassword(password);
-    const valid = inputHash === this.data.settings.adminPasswordHash || password === (this.data.settings.adminPin || "admin123");
+    const valid = timingSafeCompare(inputHash, this.data.settings.adminPasswordHash) ||
+                  timingSafeCompare(password, this.data.settings.adminPin || "admin123");
+
     if (valid) {
-      const token = "tok_" + crypto.randomBytes(16).toString('hex');
+      // Reset failed attempts on success
+      this.failedAttempts.delete(clientIp);
+
+      // Generate 256-bit cryptographically secure token
+      const token = "sec_" + crypto.randomBytes(32).toString('hex');
       this.data.adminTokens.push({
         token,
-        createdAt: Date.now(),
-        expiresAt: Date.now() + 1000 * 60 * 60 * 24 * 7
+        clientIp,
+        createdAt: now,
+        expiresAt: now + (1000 * 60 * 60 * 24) // 24 hours
       });
-      this.data.adminTokens = this.data.adminTokens.filter(t => t.expiresAt > Date.now());
+
+      // Cleanup expired tokens
+      this.data.adminTokens = this.data.adminTokens.filter(t => t.expiresAt > now);
       this.save();
       return { success: true, token };
+    } else {
+      // Increment failed attempt counter
+      ipData.count += 1;
+      if (ipData.count >= 5) {
+        ipData.lockedUntil = now + (1000 * 60 * 15); // Lock out for 15 minutes
+        this.failedAttempts.set(clientIp, ipData);
+        return {
+          success: false,
+          message: "सुरक्षा लॉक: लगातार 5 गलत पासवर्ड दर्ज किए गए। 15 मिनट के लिए लॉक कर दिया गया है।"
+        };
+      } else {
+        this.failedAttempts.set(clientIp, ipData);
+        const remaining = 5 - ipData.count;
+        return {
+          success: false,
+          message: `गलत पासवर्ड! आपके पास ${remaining} प्रयास शेष हैं।`
+        };
+      }
     }
-    return { success: false, message: "गलत एडमिन पासवर्ड" };
   }
 
   validateToken(token) {
-    if (!token) return false;
-    const found = this.data.adminTokens.find(t => t.token === token && t.expiresAt > Date.now());
+    if (!token || typeof token !== 'string') return false;
+    const now = Date.now();
+    const found = this.data.adminTokens.find(t => t.token === token && t.expiresAt > now);
     return Boolean(found);
+  }
+
+  revokeToken(token) {
+    if (!token) return;
+    this.data.adminTokens = this.data.adminTokens.filter(t => t.token !== token);
+    this.save();
   }
 
   getStats() {
@@ -391,8 +449,4 @@ class Database {
 }
 
 const db = new Database();
-db.data.models = SEED_MODELS;
-db.data.settings = DEFAULT_SETTINGS;
-db.save();
-
 module.exports = { db, hashPassword };
