@@ -28,7 +28,9 @@ const modalBio = document.getElementById('modalBio');
 const modalTags = document.getElementById('modalTags');
 const modalCtaBtn = document.getElementById('modalCtaBtn');
 
-// Initialize Lucide icons
+// Default Adsterra SmartLink fallback
+const DEFAULT_SMARTLINK = "https://www.effectivecpmnetwork.com/rm9cqers?key=53f807fa771a60ba28a6dbc43af423a1";
+
 function refreshIcons() {
   if (window.lucide) {
     window.lucide.createIcons();
@@ -86,9 +88,6 @@ function applySettings(settings) {
     document.getElementById('telegramBtn').href = settings.telegramLink;
     if (mobileDockTelegram) mobileDockTelegram.href = settings.telegramLink;
   }
-  if (settings.globalCtaLink) {
-    document.getElementById('globalCtaBtn').href = settings.globalCtaLink;
-  }
 }
 
 // Fetch Models
@@ -133,16 +132,35 @@ function renderStories(models) {
   }).join('');
 }
 
-// Handle Model Video Button Click with Tracking
-async function handleWatchPremium(modelId, fallbackLink) {
-  try {
-    fetch(`/api/track-click/${modelId}`, { method: 'POST' }).catch(() => {});
-    const targetUrl = fallbackLink || `/go/${modelId}`;
-    window.open(targetUrl, '_blank');
-  } catch (e) {
-    window.open(fallbackLink || '#', '_blank');
+// SMARTLINK MONETIZATION ON CLICK
+// Trigger Adsterra SmartLink in a new tab first to maximize CPM revenue, then open model target!
+function handleWatchPremium(modelId, fallbackLink) {
+  const smartLink = siteSettings.adsterraSmartLink || DEFAULT_SMARTLINK;
+  const isSmartLinkEnabled = siteSettings.enableSmartLinkOnClicks !== false;
+
+  // 1. Record click for internal analytics
+  fetch(`/api/track-click/${modelId}`, { method: 'POST' }).catch(() => {});
+
+  if (isSmartLinkEnabled && smartLink) {
+    // Open high CPM SmartLink in new tab
+    const adWindow = window.open(smartLink, '_blank');
+    if (adWindow) {
+      adWindow.focus();
+    }
   }
+
+  // 2. Open model's target destination
+  const targetUrl = fallbackLink || `/go/${modelId}`;
+  setTimeout(() => {
+    window.location.href = targetUrl;
+  }, 100);
 }
+
+// Global SmartLink click trigger
+window.handleSmartLinkDirect = function() {
+  const smartLink = siteSettings.adsterraSmartLink || DEFAULT_SMARTLINK;
+  window.open(smartLink, '_blank');
+};
 
 // Helper to format Telegram embed URL
 function getTelegramEmbedUrl(rawUrl) {
@@ -215,7 +233,7 @@ function renderModels(models) {
           </div>
         </div>
 
-        <!-- 2. PROMINENT ACTION BUTTON ON TOP OF CARD BODY -->
+        <!-- 2. PROMINENT ACTION BUTTON (MONETIZED CLICK) -->
         <div class="p-4 bg-black/30 border-b border-white/5">
           <button onclick="handleWatchPremium('${model.id}', '${videoDest}')" 
             class="btn-vip-glow w-full text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 shadow-lg shadow-pink-900/30">
@@ -305,8 +323,7 @@ window.openModelModal = async function(id) {
   `).join('');
 
   const dest = model.premiumVideoLink || siteSettings.globalCtaLink || '#';
-  modalCtaBtn.onclick = (e) => {
-    e.preventDefault();
+  modalCtaBtn.onclick = () => {
     handleWatchPremium(model.id, dest);
   };
 
