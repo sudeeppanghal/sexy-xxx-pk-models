@@ -395,7 +395,7 @@
             <span>Global Site Settings, Social Share Photo & Security PIN</span>
           </h3>
 
-          <!-- SOCIAL SHARE PREVIEW SECTION (WHATSAPP, FACEBOOK, TELEGRAM) -->
+          <!-- SOCIAL SHARE PREVIEW SECTION -->
           <div class="p-5 bg-gradient-to-r from-pink-950/40 via-purple-950/40 to-black/60 rounded-2xl border border-pink-500/40 space-y-4">
             <div class="flex items-center gap-2">
               <i data-lucide="share-2" class="w-5 h-5 text-pink-400"></i>
@@ -421,7 +421,6 @@
                 </div>
               </div>
 
-              <!-- Live Image Preview Thumbnail -->
               <div class="flex flex-col items-center justify-center p-3 bg-black/80 rounded-2xl border border-white/10 text-center">
                 <span class="text-[10px] uppercase font-bold text-pink-400 mb-1.5">Live WhatsApp Preview:</span>
                 <img id="sharePreviewImg" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80" 
@@ -483,7 +482,7 @@
     </main>
   </div>
 
-  <!-- ADD / EDIT MODEL MODAL FORM -->
+  <!-- ADD / EDIT MODEL MODAL FORM WITH LIVE PHOTO PREVIEW -->
   <div id="modelFormModal" class="modal-backdrop">
     <div class="modal-card-popup p-6 sm:p-8 max-w-2xl">
       <div class="flex items-center justify-between pb-4 mb-6 border-b border-white/10">
@@ -541,12 +540,19 @@
           </div>
         </div>
 
-        <div class="pt-2">
-          <label class="block text-xs font-bold uppercase text-pink-400 mb-1.5">Model Photo (Upload Image File OR Paste Direct Image URL) *</label>
-          <div class="space-y-2">
-            <input type="file" id="formModelFile" accept="image/*" class="w-full text-xs text-gray-400 file:mr-3 file:py-1.5 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-pink-600 file:text-white hover:file:bg-pink-700 cursor-pointer">
-            <input type="url" id="formModelImageUrl" placeholder="Or paste direct image URL (https://...)"
-              class="w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:border-pink-500">
+        <!-- MODEL PHOTO WITH INSTANT LIVE THUMBNAIL -->
+        <div class="pt-2 p-3 bg-black/40 rounded-2xl border border-white/10 space-y-3">
+          <label class="block text-xs font-bold uppercase text-pink-400 mb-1">
+            Model Photo (Select File from Device OR Paste URL) *
+          </label>
+          <div class="flex flex-col sm:flex-row items-center gap-4">
+            <img id="formModelPreviewImg" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80" 
+              class="w-16 h-20 object-cover rounded-xl border border-white/20 shadow-md flex-shrink-0">
+            <div class="w-full space-y-2">
+              <input type="file" id="formModelFile" accept="image/*" class="w-full text-xs text-gray-400 file:mr-3 file:py-1.5 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-pink-600 file:text-white hover:file:bg-pink-700 cursor-pointer">
+              <input type="url" id="formModelImageUrl" placeholder="Or paste direct image URL (https://...)"
+                class="w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:border-pink-500">
+            </div>
           </div>
         </div>
 
