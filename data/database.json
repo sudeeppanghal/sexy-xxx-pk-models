@@ -202,7 +202,20 @@
     "enableNativeBanner": true,
     "banner728x90Key": "109bfc08902b9073c69aa9a8e3dda390",
     "enableBanner728x90": true,
+    "adsterraApiToken": "3897aae75b2bfa4492f9bf4145aac236",
     "onlyfansLink": ""
   },
-  "adminTokens": []
+  "adminTokens": [],
+  "analytics": {
+    "uniqueVisitors": {},
+    "pageviews": 0,
+    "clicks": 0,
+    "devices": {
+      "mobile": 0,
+      "desktop": 0
+    },
+    "countries": {},
+    "hourlyViews": {},
+    "recentEvents": []
+  }
 }
