@@ -17,26 +17,25 @@
   <!-- Toast Notification Container -->
   <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
-  <!-- Admin Login Overlay -->
-  <div id="loginModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-4">
+  <!-- Admin Login Overlay (100% Clean & Secret - No Hint Shown) -->
+  <div id="loginModal" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
     <div class="glass-panel max-w-md w-full p-8 border border-pink-500/30 shadow-2xl shadow-pink-950/60 rounded-3xl text-center">
       <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-pink-600 to-amber-500 flex items-center justify-center mx-auto mb-5 shadow-lg shadow-pink-600/40">
         <i data-lucide="lock" class="w-8 h-8 text-white"></i>
       </div>
       <h2 class="font-serif font-black text-2xl text-white mb-2">VIP एडमिन पोर्टल</h2>
-      <p class="text-gray-400 text-xs mb-6">मॉडल्स, टेलीग्राम वीडियो एम्बेड और साइट सेटिंग्स प्रबंधित करने के लिए मास्टर पासवर्ड / पिन दर्ज करें।</p>
+      <p class="text-gray-400 text-xs mb-6">मॉडल्स, वीडियो लिंक्स और साइट सेटिंग्स प्रबंधित करने के लिए अपना सुरक्षित मास्टर पासवर्ड दर्ज करें।</p>
 
       <form id="loginForm" class="space-y-4">
         <div class="text-left">
           <label class="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-2">मास्टर पासवर्ड / पिन दर्ज करें</label>
           <div class="relative">
-            <input type="password" id="adminPasswordInput" placeholder="पासवर्ड दर्ज करें (डिफ़ॉल्ट: admin123)" required
+            <input type="password" id="adminPasswordInput" placeholder="पासवर्ड दर्ज करें (Enter Password)" required
               class="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500">
             <button type="button" id="togglePasswordBtn" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white">
               <i data-lucide="eye" class="w-4 h-4"></i>
             </button>
           </div>
-          <p class="text-[11px] text-pink-400/80 mt-1">डिफ़ॉल्ट पिन: <code class="font-bold">admin123</code></p>
         </div>
 
         <button type="submit" id="loginSubmitBtn" class="btn-vip-glow w-full py-3.5 text-sm font-bold">
@@ -330,7 +329,7 @@
           </div>
         </div>
 
-        <!-- Telegram Video Embed Post Link (NEW) -->
+        <!-- Telegram Video Embed Post Link -->
         <div class="pt-1">
           <label class="block text-xs font-bold uppercase text-blue-400 mb-1.5">
             🎬 टेलीग्राम वीडियो एम्बेड लिंक (Telegram Post Video Embed URL)
@@ -340,7 +339,7 @@
           <p class="text-[11px] text-gray-400 mt-1">यहाँ किसी भी टेलीग्राम पोस्ट का लिंक डालें। यह वीडियो सीधे मॉडल के प्लेयर में एम्बेड होकर चलेगा।</p>
         </div>
 
-        <!-- Seductive Bio -->
+        <!-- Bio -->
         <div>
           <label class="block text-xs font-bold uppercase text-gray-300 mb-1.5">ग्लैमरस बायो / विवरण</label>
           <textarea id="formModelBio" rows="2" placeholder="इंटरनेशनल फैशन मॉडल व इन्फ्लुएंसर। एक्सक्लूसिव फोटोशूट्स और वीडियो..."
