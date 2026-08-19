@@ -31,7 +31,7 @@ function getClientCountry(req) {
   return req.headers['cf-ipcountry'] || 'IN';
 }
 
-// Track real visitor on public page requests (Excludes /admin, /api, static files, and admin sessions)
+// Track real visitor on public page requests
 app.use((req, res, next) => {
   const p = req.path;
   const isStatic = p.startsWith('/css') || p.startsWith('/js') || p.startsWith('/uploads') || p.endsWith('.png') || p.endsWith('.jpg') || p.endsWith('.ico');
@@ -47,7 +47,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Memory / Disk storage setup with Base64 permanent fallback
+// Memory storage setup with Base64 permanent fallback
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024 },
@@ -84,6 +84,40 @@ function requireAdmin(req, res, next) {
   req.adminToken = token;
   next();
 }
+
+// -------------------------------------------------------------
+// 101% UNBLOCKABLE ANTI-ADBLOCK GATEWAY ROUTES
+// (These route through your own domain so AdBlockers CANNOT block them)
+// -------------------------------------------------------------
+
+app.get(['/out/smartlink', '/vip/watch', '/stream/play', '/access/unlock'], (req, res) => {
+  try {
+    const settings = db.getSettings();
+    const smartLink = settings.adsterraSmartLink || "https://www.effectivecpmnetwork.com/rm9cqers?key=53f807fa771a60ba28a6dbc43af423a1";
+    db.recordRealClick();
+    res.redirect(smartLink);
+  } catch (err) {
+    res.redirect('/');
+  }
+});
+
+app.get('/go/:id', (req, res) => {
+  try {
+    const model = db.getModelById(req.params.id);
+    const settings = db.getSettings();
+    const smartLink = settings.adsterraSmartLink || "https://www.effectivecpmnetwork.com/rm9cqers?key=53f807fa771a60ba28a6dbc43af423a1";
+    
+    if (model) {
+      db.recordClick(model.id);
+    } else {
+      db.recordRealClick();
+    }
+    
+    res.redirect(smartLink);
+  } catch (err) {
+    res.redirect('/');
+  }
+});
 
 // -------------------------------------------------------------
 // PUBLIC API ROUTES
@@ -169,20 +203,6 @@ app.post('/api/track-click/:id', (req, res) => {
     res.json({ success: true, clicks, destination });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error' });
-  }
-});
-
-app.get('/go/:id', (req, res) => {
-  try {
-    const model = db.getModelById(req.params.id);
-    if (!model) {
-      return res.redirect('/');
-    }
-    db.recordClick(model.id);
-    const destination = model.premiumVideoLink || db.getSettings().globalCtaLink || '/';
-    res.redirect(destination);
-  } catch (err) {
-    res.redirect('/');
   }
 });
 
@@ -326,7 +346,6 @@ app.post('/api/admin/upload', requireAdmin, upload.single('image'), (req, res) =
     if (!req.file) {
       return res.status(400).json({ success: false, message: 'No image file uploaded.' });
     }
-    // Convert to permanent base64 data URI
     const dataUri = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
     res.json({ success: true, url: dataUri });
   } catch (err) {
@@ -339,7 +358,6 @@ app.post('/api/admin/models', requireAdmin, upload.single('imageFile'), (req, re
   try {
     const modelData = { ...req.body };
     if (req.file) {
-      // Store permanently as Base64 Data URI inside database
       modelData.image = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
     }
     if (typeof modelData.gallery === 'string') {
@@ -367,7 +385,6 @@ app.put('/api/admin/models/:id', requireAdmin, upload.single('imageFile'), (req,
   try {
     const updateData = { ...req.body };
     if (req.file) {
-      // Store permanently as Base64 Data URI inside database
       updateData.image = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
     }
     if (typeof updateData.gallery === 'string') {
