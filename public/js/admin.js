@@ -1,8 +1,7 @@
-// State
+// Admin State
 let adminToken = localStorage.getItem('vip_admin_token') || '';
 let adminModels = [];
-let adminStats = {};
-let adminSettings = {};
+let siteSettings = {};
 
 // DOM Elements
 const loginModal = document.getElementById('loginModal');
@@ -16,27 +15,31 @@ const toastContainer = document.getElementById('toastContainer');
 // Tabs
 const adminTabs = document.querySelectorAll('.admin-tab');
 const tabModelsSection = document.getElementById('tabModelsSection');
+const tabAdsSection = document.getElementById('tabAdsSection');
 const tabAnalyticsSection = document.getElementById('tabAnalyticsSection');
 const tabSettingsSection = document.getElementById('tabSettingsSection');
 
-// Stats Elements
+// Models List
+const adminModelsTableBody = document.getElementById('adminModelsTableBody');
+const adminModelSearch = document.getElementById('adminModelSearch');
+const btnOpenAddModel = document.getElementById('btnOpenAddModel');
+const tabCountModels = document.getElementById('tabCountModels');
+
+// Stats
 const statTotalModels = document.getElementById('statTotalModels');
 const statActiveModels = document.getElementById('statActiveModels');
 const statTotalClicks = document.getElementById('statTotalClicks');
 const statFeaturedModels = document.getElementById('statFeaturedModels');
-const tabCountModels = document.getElementById('tabCountModels');
-const adminModelsTableBody = document.getElementById('adminModelsTableBody');
-const adminModelSearch = document.getElementById('adminModelSearch');
 const topModelsLeaderboard = document.getElementById('topModelsLeaderboard');
 
-// Model Form Modal
+// Form Modal
 const modelFormModal = document.getElementById('modelFormModal');
-const btnOpenAddModel = document.getElementById('btnOpenAddModel');
 const btnCloseModelForm = document.getElementById('btnCloseModelForm');
 const btnCancelModelForm = document.getElementById('btnCancelModelForm');
-const formModalTitle = document.getElementById('formModalTitle');
 const modelUpsertForm = document.getElementById('modelUpsertForm');
+const formModalTitle = document.getElementById('formModalTitle');
 
+// Form Inputs
 const modelFormId = document.getElementById('modelFormId');
 const formModelName = document.getElementById('formModelName');
 const formModelAge = document.getElementById('formModelAge');
@@ -54,12 +57,24 @@ const formModelTags = document.getElementById('formModelTags');
 const formModelFeatured = document.getElementById('formModelFeatured');
 const formModelActive = document.getElementById('formModelActive');
 
-// Settings Form Elements
+// Ads Form
+const adSettingsForm = document.getElementById('adSettingsForm');
+const settingSmartLinkUrl = document.getElementById('settingSmartLinkUrl');
+const settingEnableSmartLink = document.getElementById('settingEnableSmartLink');
+const settingSocialBarScript = document.getElementById('settingSocialBarScript');
+const settingEnableSocialBar = document.getElementById('settingEnableSocialBar');
+const settingNativeBannerScript = document.getElementById('settingNativeBannerScript');
+const settingNativeBannerContainerId = document.getElementById('settingNativeBannerContainerId');
+const settingEnableNativeBanner = document.getElementById('settingEnableNativeBanner');
+const settingBanner728Key = document.getElementById('settingBanner728Key');
+const settingEnableBanner728x90 = document.getElementById('settingEnableBanner728x90');
+
+// Site Settings Form
 const siteSettingsForm = document.getElementById('siteSettingsForm');
 const settingSiteName = document.getElementById('settingSiteName');
 const settingSiteTagline = document.getElementById('settingSiteTagline');
 const settingAnnouncement = document.getElementById('settingAnnouncement');
-const settingHeroTitle = document.getElementById('settingHeroTitle');
+const settingHeroTitle = document.getElementById('heroTitle');
 const settingHeroSubtitle = document.getElementById('settingHeroSubtitle');
 const settingCtaButtonText = document.getElementById('settingCtaButtonText');
 const settingGlobalCtaLink = document.getElementById('settingGlobalCtaLink');
@@ -69,44 +84,26 @@ const settingAdminPassword = document.getElementById('settingAdminPassword');
 // Toast Notification
 function showToast(message, type = 'success') {
   const toast = document.createElement('div');
-  const bgClass = type === 'success' ? 'bg-emerald-950/90 border-emerald-500/50 text-emerald-300' : 'bg-red-950/90 border-red-500/50 text-red-300';
-  const iconName = type === 'success' ? 'check-circle' : 'alert-circle';
-  
-  toast.className = `flex items-center gap-2.5 px-4 py-3 rounded-xl border shadow-xl backdrop-blur-md text-xs font-semibold transform transition-all duration-300 pointer-events-auto ${bgClass}`;
+  toast.className = `p-4 rounded-2xl text-xs font-bold shadow-2xl flex items-center gap-2 border transition duration-300 transform translate-y-2 pointer-events-auto ${
+    type === 'success' ? 'bg-emerald-950 text-emerald-200 border-emerald-500/40' : 'bg-red-950 text-red-200 border-red-500/40'
+  }`;
   toast.innerHTML = `
-    <i data-lucide="${iconName}" class="w-4 h-4"></i>
+    <i data-lucide="${type === 'success' ? 'check-circle' : 'alert-triangle'}" class="w-4 h-4"></i>
     <span>${message}</span>
   `;
-
   toastContainer.appendChild(toast);
   if (window.lucide) window.lucide.createIcons();
 
   setTimeout(() => {
-    toast.style.opacity = '0';
-    toast.style.transform = 'translateY(-10px)';
+    toast.classList.add('opacity-0', 'translate-x-4');
     setTimeout(() => toast.remove(), 300);
-  }, 3500);
+  }, 4000);
 }
 
-function refreshIcons() {
-  if (window.lucide) {
-    window.lucide.createIcons();
-  }
-}
-
-// Password toggle
-if (togglePasswordBtn) {
-  togglePasswordBtn.addEventListener('click', () => {
-    const isPass = adminPasswordInput.type === 'password';
-    adminPasswordInput.type = isPass ? 'text' : 'password';
-  });
-}
-
-// Authentication Check
+// Check Auth on load
 async function checkAuth() {
   if (!adminToken) {
-    loginModal.classList.remove('hidden');
-    adminApp.classList.add('hidden');
+    showLogin();
     return;
   }
 
@@ -115,23 +112,29 @@ async function checkAuth() {
       headers: { 'Authorization': `Bearer ${adminToken}` }
     });
     const data = await res.json();
-    if (data.authenticated) {
-      loginModal.classList.add('hidden');
-      adminApp.classList.remove('hidden');
+    if (data.success && data.authenticated) {
+      showDashboard();
       loadAllAdminData();
     } else {
-      localStorage.removeItem('vip_admin_token');
-      adminToken = '';
-      loginModal.classList.remove('hidden');
-      adminApp.classList.add('hidden');
+      showLogin();
     }
   } catch (err) {
-    loginModal.classList.remove('hidden');
-    adminApp.classList.add('hidden');
+    showLogin();
   }
 }
 
-// Login Submit
+function showLogin() {
+  loginModal.classList.remove('hidden');
+  adminApp.classList.add('hidden');
+}
+
+function showDashboard() {
+  loginModal.classList.add('hidden');
+  adminApp.classList.remove('hidden');
+  if (window.lucide) window.lucide.createIcons();
+}
+
+// Login Handler
 loginForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const password = adminPasswordInput.value.trim();
@@ -144,246 +147,42 @@ loginForm.addEventListener('submit', async (e) => {
       body: JSON.stringify({ password })
     });
     const data = await res.json();
+
     if (data.success && data.token) {
       adminToken = data.token;
       localStorage.setItem('vip_admin_token', adminToken);
-      loginModal.classList.add('hidden');
-      adminApp.classList.remove('hidden');
-      showToast('एडमिन एक्सेस स्वीकृत! स्वागत है।');
+      showToast('लॉगिन सफल! एडमिन डैशबोर्ड खुला।', 'success');
+      showDashboard();
       loadAllAdminData();
     } else {
-      showToast(data.message || 'गलत मास्टर पासवर्ड दर्ज किया गया है', 'error');
+      showToast(data.message || 'अमान्य पासवर्ड!', 'error');
     }
   } catch (err) {
-    showToast('सर्वर से कनेक्ट करने में विफल', 'error');
+    showToast('सर्वर से कनेक्ट करने में त्रुटि!', 'error');
   }
+});
+
+// Toggle Password Visibility
+togglePasswordBtn.addEventListener('click', () => {
+  const type = adminPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+  adminPasswordInput.setAttribute('type', type);
 });
 
 // Logout
-logoutBtn.addEventListener('click', () => {
-  localStorage.removeItem('vip_admin_token');
+logoutBtn.addEventListener('click', async () => {
+  try {
+    await fetch('/api/admin/logout', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${adminToken}` }
+    });
+  } catch (e) {}
   adminToken = '';
-  loginModal.classList.remove('hidden');
-  adminApp.classList.add('hidden');
-  showToast('सफलतापूर्वक लॉगआउट कर दिया गया है।');
+  localStorage.removeItem('vip_admin_token');
+  showLogin();
+  showToast('सफलतापूर्वक लॉगआउट किया गया।', 'success');
 });
 
-// Load All Data
-async function loadAllAdminData() {
-  await Promise.all([
-    fetchAdminModels(),
-    fetchAdminStats(),
-    fetchAdminSettings()
-  ]);
-  refreshIcons();
-}
-
-// Fetch Models
-async function fetchAdminModels() {
-  try {
-    const res = await fetch('/api/admin/models', {
-      headers: { 'Authorization': `Bearer ${adminToken}` }
-    });
-    const data = await res.json();
-    if (data.success) {
-      adminModels = data.models;
-      renderAdminTable(adminModels);
-      updateStatCounts();
-    }
-  } catch (err) {
-    console.error('Error fetching admin models:', err);
-  }
-}
-
-// Fetch Stats
-async function fetchAdminStats() {
-  try {
-    const res = await fetch('/api/admin/stats', {
-      headers: { 'Authorization': `Bearer ${adminToken}` }
-    });
-    const data = await res.json();
-    if (data.success) {
-      adminStats = data.stats;
-      statTotalModels.innerText = adminStats.totalModels;
-      statActiveModels.innerText = adminStats.activeModels;
-      statTotalClicks.innerText = adminStats.totalClicks;
-      statFeaturedModels.innerText = adminStats.featuredCount;
-      tabCountModels.innerText = adminStats.totalModels;
-      renderLeaderboard(adminStats.topModels || []);
-    }
-  } catch (err) {
-    console.error('Error fetching stats:', err);
-  }
-}
-
-// Fetch Settings
-async function fetchAdminSettings() {
-  try {
-    const res = await fetch('/api/admin/settings', {
-      headers: { 'Authorization': `Bearer ${adminToken}` }
-    });
-    const data = await res.json();
-    if (data.success && data.settings) {
-      adminSettings = data.settings;
-      settingSiteName.value = adminSettings.siteName || '';
-      settingSiteTagline.value = adminSettings.siteTagline || '';
-      settingAnnouncement.value = adminSettings.announcement || '';
-      settingHeroTitle.value = adminSettings.heroTitle || '';
-      settingHeroSubtitle.value = adminSettings.heroSubtitle || '';
-      settingCtaButtonText.value = adminSettings.ctaButtonText || '';
-      settingGlobalCtaLink.value = adminSettings.globalCtaLink || '';
-      settingTelegramLink.value = adminSettings.telegramLink || '';
-    }
-  } catch (err) {
-    console.error('Error fetching settings:', err);
-  }
-}
-
-// Render Models Table
-function renderAdminTable(models) {
-  if (!models || models.length === 0) {
-    adminModelsTableBody.innerHTML = `
-      <tr>
-        <td colspan="6" class="text-center py-8 text-gray-500">
-          कोई मॉडल नहीं मिला। नया प्रोफाइल बनाने के लिए "+ नया मॉडल प्रोफाइल जोड़ें" पर क्लिक करें।
-        </td>
-      </tr>
-    `;
-    return;
-  }
-
-  adminModelsTableBody.innerHTML = models.map(model => `
-    <tr class="hover:bg-white/[0.02] transition">
-      <!-- Photo & Info -->
-      <td class="py-3.5 px-4">
-        <div class="flex items-center gap-3">
-          <img src="${model.image}" alt="${model.name}" class="w-12 h-14 object-cover rounded-xl border border-white/10" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'">
-          <div>
-            <div class="font-bold text-white text-sm flex items-center gap-1.5">
-              <span>${model.name}</span>
-              <span class="text-pink-400 font-mono text-xs font-normal">(${model.age || 22} साल)</span>
-              ${model.featured ? '<span class="text-amber-400 text-xs">⭐</span>' : ''}
-            </div>
-            <p class="text-gray-400 text-[11px]">${model.location || 'मुंबई, भारत'}</p>
-          </div>
-        </div>
-      </td>
-
-      <!-- Status & Badge -->
-      <td class="py-3.5 px-4">
-        <div class="space-y-1">
-          <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold ${model.badge && (model.badge.includes('VIP') || model.badge.includes('एक्सक्लूसिव')) ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-pink-500/20 text-pink-300 border border-pink-500/30'}">
-            ${model.badge || 'हॉट'}
-          </span>
-          <div class="text-[11px] text-gray-400">
-            स्थिति: <span class="${model.status === 'live' ? 'text-red-400 font-bold' : (model.status === 'online' ? 'text-emerald-400 font-bold' : 'text-gray-500')}">${model.status === 'live' ? 'लाइव' : (model.status === 'online' ? 'ऑनलाइन' : 'ऑफलाइन')}</span>
-          </div>
-        </div>
-      </td>
-
-      <!-- Stats -->
-      <td class="py-3.5 px-4">
-        <div class="text-[11px] space-y-0.5">
-          <div class="text-pink-400 font-bold flex items-center gap-1">
-            <i data-lucide="mouse-pointer-click" class="w-3 h-3"></i>
-            <span>${model.clicks || 0} वीडियो क्लिक्स</span>
-          </div>
-          <div class="text-gray-400 flex items-center gap-1">
-            <i data-lucide="eye" class="w-3 h-3"></i>
-            <span>${model.views || 0} व्यूज</span>
-          </div>
-        </div>
-      </td>
-
-      <!-- Destination Link & Telegram Embed -->
-      <td class="py-3.5 px-4 max-w-xs">
-        <div class="space-y-1">
-          ${model.telegramEmbed ? `
-            <span class="inline-flex items-center gap-1 text-[10px] text-blue-300 bg-blue-950/60 px-2 py-0.5 rounded-md border border-blue-500/30 font-semibold">
-              <i data-lucide="send" class="w-2.5 h-2.5"></i> Telegram Video
-            </span>
-          ` : '<span class="text-[10px] text-gray-500">फोटो व्यूअर</span>'}
-          <a href="${model.premiumVideoLink || '#'}" target="_blank" class="text-blue-400 hover:underline text-[11px] truncate block max-w-[200px]" title="${model.premiumVideoLink}">
-            ${model.premiumVideoLink || 'डिफ़ॉल्ट लिंक'}
-          </a>
-        </div>
-      </td>
-
-      <!-- Active Toggle -->
-      <td class="py-3.5 px-4">
-        <button onclick="toggleModelActive('${model.id}', ${!model.active})" class="px-3 py-1 rounded-full text-[10px] font-bold transition ${model.active ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-900/60' : 'bg-gray-800 text-gray-400 border border-gray-700 hover:bg-gray-700'}">
-          ${model.active ? '🟢 सक्रिय (Live)' : '⚪ छुपा हुआ'}
-        </button>
-      </td>
-
-      <!-- Actions -->
-      <td class="py-3.5 px-4 text-right">
-        <div class="flex items-center justify-end gap-2">
-          <button onclick="editModel('${model.id}')" class="p-2 bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white rounded-xl transition" title="एडिट करें">
-            <i data-lucide="edit-3" class="w-4 h-4 text-pink-400"></i>
-          </button>
-          <button onclick="deleteModel('${model.id}')" class="p-2 bg-red-950/30 hover:bg-red-900/50 text-red-400 hover:text-red-300 rounded-xl transition" title="डिलीट करें">
-            <i data-lucide="trash-2" class="w-4 h-4"></i>
-          </button>
-        </div>
-      </td>
-    </tr>
-  `).join('');
-
-  refreshIcons();
-}
-
-function updateStatCounts() {
-  statTotalModels.innerText = adminModels.length;
-  statActiveModels.innerText = adminModels.filter(m => m.active).length;
-  statFeaturedModels.innerText = adminModels.filter(m => m.featured).length;
-  tabCountModels.innerText = adminModels.length;
-}
-
-// Render Leaderboard
-function renderLeaderboard(models) {
-  if (!models || models.length === 0) {
-    topModelsLeaderboard.innerHTML = `<p class="text-gray-500 text-xs">अभी कोई क्लिक डेटा उपलब्ध नहीं है।</p>`;
-    return;
-  }
-
-  const maxClicks = Math.max(...models.map(m => m.clicks || 0), 1);
-
-  topModelsLeaderboard.innerHTML = models.map((model, idx) => {
-    const percent = Math.round(((model.clicks || 0) / maxClicks) * 100);
-    return `
-      <div class="bg-black/40 border border-white/5 rounded-2xl p-4 flex items-center justify-between gap-4">
-        <div class="flex items-center gap-3.5 flex-1">
-          <span class="font-black text-sm ${idx === 0 ? 'text-amber-400 font-serif' : 'text-gray-400'}">#${idx + 1}</span>
-          <img src="${model.image}" class="w-11 h-11 object-cover rounded-xl border border-white/10" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'">
-          <div class="flex-1 min-w-0">
-            <h4 class="font-bold text-xs text-white truncate">${model.name}</h4>
-            <div class="w-full bg-white/5 rounded-full h-1.5 mt-2 overflow-hidden">
-              <div class="bg-gradient-to-r from-pink-500 to-amber-500 h-full rounded-full" style="width: ${percent}%"></div>
-            </div>
-          </div>
-        </div>
-        <div class="text-right">
-          <span class="font-black text-pink-400 text-sm">${model.clicks || 0}</span>
-          <span class="block text-[10px] text-gray-400 uppercase font-semibold">क्लिक्स</span>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-// Filter Table
-adminModelSearch.addEventListener('input', (e) => {
-  const q = e.target.value.toLowerCase();
-  const filtered = adminModels.filter(m => 
-    m.name.toLowerCase().includes(q) ||
-    (m.badge && m.badge.toLowerCase().includes(q)) ||
-    (m.location && m.location.toLowerCase().includes(q))
-  );
-  renderAdminTable(filtered);
-});
-
-// Tab Switch
+// Tab Switcher
 adminTabs.forEach(tab => {
   tab.addEventListener('click', () => {
     adminTabs.forEach(t => {
@@ -393,28 +192,324 @@ adminTabs.forEach(tab => {
     tab.classList.add('active', 'bg-pink-600', 'text-white');
     tab.classList.remove('text-gray-400');
 
-    const tabName = tab.dataset.tab;
+    const targetTab = tab.dataset.tab;
     tabModelsSection.classList.add('hidden');
+    tabAdsSection.classList.add('hidden');
     tabAnalyticsSection.classList.add('hidden');
     tabSettingsSection.classList.add('hidden');
 
-    if (tabName === 'models') tabModelsSection.classList.remove('hidden');
-    else if (tabName === 'analytics') tabAnalyticsSection.classList.remove('hidden');
-    else if (tabName === 'settings') tabSettingsSection.classList.remove('hidden');
+    if (targetTab === 'models') tabModelsSection.classList.remove('hidden');
+    if (targetTab === 'ads') tabAdsSection.classList.remove('hidden');
+    if (targetTab === 'analytics') tabAnalyticsSection.classList.remove('hidden');
+    if (targetTab === 'settings') tabSettingsSection.classList.remove('hidden');
   });
+});
+
+// Load All Data
+async function loadAllAdminData() {
+  await Promise.all([
+    loadAdminModels(),
+    loadAdminStats(),
+    loadAdminSettings()
+  ]);
+  if (window.lucide) window.lucide.createIcons();
+}
+
+// Load Models
+async function loadAdminModels() {
+  try {
+    const res = await fetch('/api/admin/models', {
+      headers: { 'Authorization': `Bearer ${adminToken}` }
+    });
+    const data = await res.json();
+    if (data.success) {
+      adminModels = data.models;
+      tabCountModels.innerText = adminModels.length;
+      renderAdminModelsTable(adminModels);
+    }
+  } catch (err) {
+    showToast('मॉडल्स लोड करने में विफल!', 'error');
+  }
+}
+
+// Render Models Table
+function renderAdminModelsTable(models) {
+  if (!models || models.length === 0) {
+    adminModelsTableBody.innerHTML = `
+      <tr>
+        <td colspan="6" class="text-center py-10 text-gray-500">
+          कोई मॉडल नहीं मिला। नया मॉडल जोड़ने के लिए ऊपर '+ नया मॉडल' बटन पर क्लिक करें।
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  adminModelsTableBody.innerHTML = models.map(model => {
+    const statusBg = model.status === 'live' ? 'bg-red-500/20 text-red-400 border border-red-500/30' : (model.status === 'online' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-gray-800 text-gray-400');
+    const statusText = model.status === 'live' ? '🔴 लाइव' : (model.status === 'online' ? '🟢 ऑनलाइन' : '⚪ ऑफलाइन');
+    const hasTelegram = Boolean(model.telegramEmbed && model.telegramEmbed.trim());
+
+    return `
+      <tr class="hover:bg-white/[0.02] transition">
+        <!-- Photo & Info -->
+        <td class="py-3 px-4">
+          <div class="flex items-center gap-3">
+            <img src="${model.image}" class="w-12 h-14 object-cover rounded-xl border border-white/10 shadow-md" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'">
+            <div>
+              <p class="font-bold text-white text-sm">${model.name}</p>
+              <p class="text-[11px] text-gray-400">${model.age || 22} साल • ${model.location || 'मुंबई'}</p>
+              <p class="text-[10px] text-pink-400 font-semibold">${model.videoCount || 30}+ 4K वीडियो</p>
+            </div>
+          </div>
+        </td>
+
+        <!-- Badge & Status -->
+        <td class="py-3 px-4">
+          <div class="space-y-1">
+            <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold ${statusBg}">
+              ${statusText}
+            </span>
+            <div>
+              <span class="inline-block text-[10px] font-bold text-pink-300 bg-pink-950/40 px-2 py-0.5 rounded-md border border-pink-500/20">
+                ${model.badge || '🔥 VIP'}
+              </span>
+            </div>
+          </div>
+        </td>
+
+        <!-- Analytics -->
+        <td class="py-3 px-4">
+          <div class="font-mono text-[11px]">
+            <p class="text-pink-400 font-bold">🔥 ${model.clicks || 0} क्लिक्स</p>
+            <p class="text-gray-400">👁️ ${model.views || 0} व्यूज</p>
+            <p class="text-amber-400">⭐ ${model.rating || '5.0'} रेटिंग</p>
+          </div>
+        </td>
+
+        <!-- Telegram Video / Links -->
+        <td class="py-3 px-4 max-w-[200px]">
+          <div class="space-y-1">
+            ${hasTelegram ? `
+              <span class="inline-flex items-center gap-1 text-[10px] bg-blue-950/60 text-blue-300 px-2 py-0.5 rounded-md border border-blue-500/30 truncate max-w-full">
+                <i data-lucide="video" class="w-3 h-3 text-blue-400"></i>
+                <span class="truncate">टेलीग्राम वीडियो एम्बेडेड</span>
+              </span>
+            ` : `
+              <span class="text-[10px] text-gray-500">कोई वीडियो एम्बेड नहीं</span>
+            `}
+            <a href="${model.premiumVideoLink || '#'}" target="_blank" class="block text-[10px] text-gray-400 hover:text-pink-400 truncate max-w-full">
+              🔗 ${model.premiumVideoLink || 'डिफ़ॉल्ट लिंक'}
+            </a>
+          </div>
+        </td>
+
+        <!-- Active Toggle -->
+        <td class="py-3 px-4">
+          <span class="px-2 py-1 rounded-md text-[10px] font-bold ${model.active !== false ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-500/30' : 'bg-red-950/60 text-red-400 border border-red-500/30'}">
+            ${model.active !== false ? '🟢 लाइव' : '🔴 छुपा हुआ'}
+          </span>
+        </td>
+
+        <!-- Actions -->
+        <td class="py-3 px-4 text-right">
+          <div class="flex items-center justify-end gap-2">
+            <button onclick="editModel('${model.id}')" class="p-2 bg-white/5 hover:bg-pink-600/30 text-gray-300 hover:text-pink-300 rounded-xl transition">
+              <i data-lucide="edit-3" class="w-4 h-4"></i>
+            </button>
+            <button onclick="deleteModel('${model.id}')" class="p-2 bg-white/5 hover:bg-red-600/30 text-gray-300 hover:text-red-300 rounded-xl transition">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  if (window.lucide) window.lucide.createIcons();
+}
+
+// Search Models in Admin
+adminModelSearch.addEventListener('input', (e) => {
+  const q = e.target.value.toLowerCase().trim();
+  const filtered = adminModels.filter(m => 
+    m.name.toLowerCase().includes(q) || 
+    (m.badge && m.badge.toLowerCase().includes(q)) ||
+    (m.location && m.location.toLowerCase().includes(q))
+  );
+  renderAdminModelsTable(filtered);
+});
+
+// Load Stats & Leaderboard
+async function loadAdminStats() {
+  try {
+    const res = await fetch('/api/admin/stats', {
+      headers: { 'Authorization': `Bearer ${adminToken}` }
+    });
+    const data = await res.json();
+    if (data.success && data.stats) {
+      const s = data.stats;
+      statTotalModels.innerText = s.totalModels;
+      statActiveModels.innerText = s.activeModels;
+      statTotalClicks.innerText = s.totalClicks;
+      statFeaturedModels.innerText = s.featuredCount;
+
+      renderLeaderboard(s.topModels || []);
+    }
+  } catch (err) {
+    console.error('Error fetching stats:', err);
+  }
+}
+
+function renderLeaderboard(models) {
+  if (!models || models.length === 0) {
+    topModelsLeaderboard.innerHTML = '<p class="text-xs text-gray-500">अभी कोई क्लिक डेटा उपलब्ध नहीं है।</p>';
+    return;
+  }
+
+  topModelsLeaderboard.innerHTML = models.map((m, idx) => `
+    <div class="flex items-center justify-between p-3.5 bg-black/40 border border-white/5 rounded-2xl hover:border-pink-500/30 transition">
+      <div class="flex items-center gap-3">
+        <span class="w-6 h-6 rounded-full bg-pink-900/60 border border-pink-500/40 text-pink-300 text-xs font-bold flex items-center justify-center">
+          #${idx + 1}
+        </span>
+        <img src="${m.image}" class="w-10 h-10 object-cover rounded-xl">
+        <div>
+          <p class="font-bold text-white text-xs">${m.name}</p>
+          <p class="text-[10px] text-gray-400">${m.location || 'मुंबई'}</p>
+        </div>
+      </div>
+      <div class="text-right">
+        <p class="text-xs font-mono font-bold text-pink-400">🔥 ${m.clicks || 0} क्लिक्स</p>
+        <p class="text-[10px] text-gray-400">👁️ ${m.views || 0} व्यूज</p>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Load Settings
+async function loadAdminSettings() {
+  try {
+    const res = await fetch('/api/admin/settings', {
+      headers: { 'Authorization': `Bearer ${adminToken}` }
+    });
+    const data = await res.json();
+    if (data.success && data.settings) {
+      siteSettings = data.settings;
+      
+      // Ad Settings
+      settingSmartLinkUrl.value = siteSettings.adsterraSmartLink || '';
+      settingEnableSmartLink.checked = siteSettings.enableSmartLinkOnClicks !== false;
+      settingSocialBarScript.value = siteSettings.socialBarScript || '';
+      settingEnableSocialBar.checked = siteSettings.enableSocialBar !== false;
+      settingNativeBannerScript.value = siteSettings.nativeBannerScript || '';
+      settingNativeBannerContainerId.value = siteSettings.nativeBannerContainerId || '';
+      settingEnableNativeBanner.checked = siteSettings.enableNativeBanner !== false;
+      settingBanner728Key.value = siteSettings.banner728x90Key || '';
+      settingEnableBanner728x90.checked = siteSettings.enableBanner728x90 !== false;
+
+      // Site Settings
+      settingSiteName.value = siteSettings.siteName || '';
+      settingSiteTagline.value = siteSettings.siteTagline || '';
+      settingAnnouncement.value = siteSettings.announcement || '';
+      const heroTitleInput = document.getElementById('settingHeroTitle');
+      if (heroTitleInput) heroTitleInput.value = siteSettings.heroTitle || '';
+      settingHeroSubtitle.value = siteSettings.heroSubtitle || '';
+      settingCtaButtonText.value = siteSettings.ctaButtonText || '';
+      settingGlobalCtaLink.value = siteSettings.globalCtaLink || '';
+      settingTelegramLink.value = siteSettings.telegramLink || '';
+    }
+  } catch (err) {
+    console.error('Error loading settings:', err);
+  }
+}
+
+// Save Ad Settings
+adSettingsForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const payload = {
+    adsterraSmartLink: settingSmartLinkUrl.value.trim(),
+    enableSmartLinkOnClicks: settingEnableSmartLink.checked,
+    socialBarScript: settingSocialBarScript.value.trim(),
+    enableSocialBar: settingEnableSocialBar.checked,
+    nativeBannerScript: settingNativeBannerScript.value.trim(),
+    nativeBannerContainerId: settingNativeBannerContainerId.value.trim(),
+    enableNativeBanner: settingEnableNativeBanner.checked,
+    banner728x90Key: settingBanner728Key.value.trim(),
+    enableBanner728x90: settingEnableBanner728x90.checked
+  };
+
+  try {
+    const res = await fetch('/api/admin/settings', {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${adminToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('Adsterra विज्ञापन सेटिंग्स सफलतापूर्वक सेव हो गईं!', 'success');
+    } else {
+      showToast('विज्ञापन सेटिंग्स सेव करने में त्रुटि!', 'error');
+    }
+  } catch (err) {
+    showToast('सर्वर से कनेक्ट करने में त्रुटि!', 'error');
+  }
+});
+
+// Save Site Settings
+siteSettingsForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const heroTitleInput = document.getElementById('settingHeroTitle');
+  const payload = {
+    siteName: settingSiteName.value.trim(),
+    siteTagline: settingSiteTagline.value.trim(),
+    announcement: settingAnnouncement.value.trim(),
+    heroTitle: heroTitleInput ? heroTitleInput.value.trim() : '',
+    heroSubtitle: settingHeroSubtitle.value.trim(),
+    ctaButtonText: settingCtaButtonText.value.trim(),
+    globalCtaLink: settingGlobalCtaLink.value.trim(),
+    telegramLink: settingTelegramLink.value.trim()
+  };
+
+  if (settingAdminPassword.value.trim()) {
+    payload.adminPassword = settingAdminPassword.value.trim();
+  }
+
+  try {
+    const res = await fetch('/api/admin/settings', {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${adminToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('साइट सेटिंग्स सफलतापूर्वक सेव हो गईं!', 'success');
+      settingAdminPassword.value = '';
+    } else {
+      showToast('सेटिंग्स सेव करने में त्रुटि!', 'error');
+    }
+  } catch (err) {
+    showToast('सर्वर से कनेक्ट करने में त्रुटि!', 'error');
+  }
 });
 
 // Open Add Model Modal
 btnOpenAddModel.addEventListener('click', () => {
-  modelFormModal.classList.add('show');
-  formModalTitle.innerText = "नया मॉडल प्रोफाइल जोड़ें";
+  formModalTitle.innerText = '+ नया VIP मॉडल प्रोफाइल जोड़ें';
   modelUpsertForm.reset();
-  modelFormId.value = "";
-  formModelRating.value = "5.0";
-  formModelVideos.value = "45";
-  formModelTelegramEmbed.value = "";
-  formModelActive.checked = true;
+  modelFormId.value = '';
+  formModelAge.value = 22;
+  formModelRating.value = '5.0';
+  formModelVideos.value = 45;
   formModelFeatured.checked = false;
+  formModelActive.checked = true;
+  modelFormModal.classList.add('show');
 });
 
 // Close Model Modal
@@ -429,18 +524,17 @@ window.editModel = function(id) {
   const model = adminModels.find(m => m.id === id);
   if (!model) return;
 
+  formModalTitle.innerText = `मॉडल संपादित करें: ${model.name}`;
   modelFormId.value = model.id;
-  formModalTitle.innerText = `मॉडल एडिट करें: ${model.name}`;
   formModelName.value = model.name || '';
   formModelAge.value = model.age || 22;
   formModelLocation.value = model.location || '';
   formModelBadge.value = model.badge || '';
   formModelStatus.value = model.status || 'online';
-  formModelVideos.value = model.videoCount || 30;
-  formModelRating.value = model.rating || 5.0;
+  formModelVideos.value = model.videoCount || 45;
+  formModelRating.value = model.rating || '5.0';
   formModelImageUrl.value = model.image || '';
   formModelTelegramEmbed.value = model.telegramEmbed || '';
-  formModelFile.value = '';
   formModelBio.value = model.bio || '';
   formModelVideoLink.value = model.premiumVideoLink || '';
   formModelTags.value = Array.isArray(model.tags) ? model.tags.join(', ') : (model.tags || '');
@@ -452,7 +546,7 @@ window.editModel = function(id) {
 
 // Delete Model
 window.deleteModel = async function(id) {
-  if (!confirm('क्या आप वाकई इस मॉडल प्रोफाइल को हमेशा के लिए डिलीट करना चाहते हैं?')) return;
+  if (!confirm('क्या आप वाकई इस मॉडल प्रोफाइल को हटाना चाहते हैं?')) return;
 
   try {
     const res = await fetch(`/api/admin/models/${id}`, {
@@ -461,43 +555,21 @@ window.deleteModel = async function(id) {
     });
     const data = await res.json();
     if (data.success) {
-      showToast('मॉडल प्रोफाइल सफलतापूर्वक डिलीट हो गई');
-      loadAllAdminData();
+      showToast('मॉडल सफलतापूर्वक डिलीट हो गया!', 'success');
+      loadAdminModels();
+      loadAdminStats();
     } else {
-      showToast(data.message || 'मॉडल डिलीट करने में विफल', 'error');
+      showToast('हटाने में त्रुटि!', 'error');
     }
   } catch (err) {
-    showToast('मॉडल डिलीट करते समय सर्वर त्रुटि', 'error');
+    showToast('सर्वर त्रुटि!', 'error');
   }
 };
 
-// Toggle Active Quick Action
-window.toggleModelActive = async function(id, newStatus) {
-  try {
-    const res = await fetch(`/api/admin/models/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${adminToken}`
-      },
-      body: JSON.stringify({ active: newStatus })
-    });
-    const data = await res.json();
-    if (data.success) {
-      showToast(newStatus ? 'मॉडल अब पब्लिक को दिखाई देगा' : 'मॉडल अब छुपा दिया गया है');
-      loadAllAdminData();
-    }
-  } catch (err) {
-    showToast('स्टेटस अपडेट करने में विफल', 'error');
-  }
-};
-
-// Model Form Submit (Add / Update)
+// Model Upsert Form Submit
 modelUpsertForm.addEventListener('submit', async (e) => {
   e.preventDefault();
-
   const id = modelFormId.value;
-  const isEditing = Boolean(id);
   const formData = new FormData();
 
   formData.append('name', formModelName.value.trim());
@@ -507,86 +579,42 @@ modelUpsertForm.addEventListener('submit', async (e) => {
   formData.append('status', formModelStatus.value);
   formData.append('videoCount', formModelVideos.value);
   formData.append('rating', formModelRating.value);
-  formData.append('bio', formModelBio.value.trim());
   formData.append('telegramEmbed', formModelTelegramEmbed.value.trim());
+  formData.append('bio', formModelBio.value.trim());
   formData.append('premiumVideoLink', formModelVideoLink.value.trim());
   formData.append('tags', formModelTags.value.trim());
   formData.append('featured', formModelFeatured.checked);
   formData.append('active', formModelActive.checked);
 
-  if (formModelFile.files && formModelFile.files[0]) {
+  if (formModelFile.files.length > 0) {
     formData.append('imageFile', formModelFile.files[0]);
   } else if (formModelImageUrl.value.trim()) {
     formData.append('image', formModelImageUrl.value.trim());
   }
 
-  const endpoint = isEditing ? `/api/admin/models/${id}` : '/api/admin/models';
-  const method = isEditing ? 'PUT' : 'POST';
+  const url = id ? `/api/admin/models/${id}` : '/api/admin/models';
+  const method = id ? 'PUT' : 'POST';
 
   try {
-    const res = await fetch(endpoint, {
+    const res = await fetch(url, {
       method: method,
-      headers: {
-        'Authorization': `Bearer ${adminToken}`
-      },
+      headers: { 'Authorization': `Bearer ${adminToken}` },
       body: formData
     });
     const data = await res.json();
+
     if (data.success) {
-      showToast(isEditing ? 'मॉडल प्रोफाइल सफलतापूर्वक अपडेट हो गई!' : 'नया मॉडल सफलतापूर्वक बनाया गया!');
-      closeModelForm();
-      loadAllAdminData();
+      showToast(id ? 'मॉडल अपडेट हो गया!' : 'नया मॉडल जोड़ा गया!', 'success');
+      closeModalForm();
+      loadAdminModels();
+      loadAdminStats();
     } else {
-      showToast(data.message || 'मॉडल प्रोफाइल सेव करने में विफल', 'error');
+      showToast(data.message || 'त्रुटि!', 'error');
     }
   } catch (err) {
-    showToast('मॉडल प्रोफाइल सेव करते समय त्रुटि', 'error');
+    showToast('सर्वर त्रुटि!', 'error');
   }
 });
 
-// Site Settings Form Submit
-siteSettingsForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-
-  const payload = {
-    siteName: settingSiteName.value.trim(),
-    siteTagline: settingSiteTagline.value.trim(),
-    announcement: settingAnnouncement.value.trim(),
-    heroTitle: settingHeroTitle.value.trim(),
-    heroSubtitle: settingHeroSubtitle.value.trim(),
-    ctaButtonText: settingCtaButtonText.value.trim(),
-    globalCtaLink: settingGlobalCtaLink.value.trim(),
-    telegramLink: settingTelegramLink.value.trim()
-  };
-
-  const newPass = settingAdminPassword.value.trim();
-  if (newPass) {
-    payload.adminPassword = newPass;
-  }
-
-  try {
-    const res = await fetch('/api/admin/settings', {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${adminToken}`
-      },
-      body: JSON.stringify(payload)
-    });
-    const data = await res.json();
-    if (data.success) {
-      showToast('साइट सेटिंग्स सफलतापूर्वक अपडेट हो गईं!');
-      settingAdminPassword.value = '';
-    } else {
-      showToast(data.message || 'सेटिंग्स अपडेट करने में विफल', 'error');
-    }
-  } catch (err) {
-    showToast('सेटिंग्स सेव करते समय त्रुटि', 'error');
-  }
-});
-
-// Initial boot
-document.addEventListener('DOMContentLoaded', () => {
-  checkAuth();
-  refreshIcons();
-});
+// Boot
+document.addEventListener('DOMContentLoaded', checkAuth);
