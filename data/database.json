@@ -1,0 +1,205 @@
+{
+  "models": [
+    {
+      "id": "model-1",
+      "name": "रिया शर्मा (Riya Sharma)",
+      "age": 22,
+      "location": "मुंबई, भारत",
+      "badge": "🔥 टॉप ट्रेंडिंग",
+      "status": "online",
+      "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=85",
+      "gallery": [
+        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=85",
+        "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=85",
+        "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=85"
+      ],
+      "bio": "इंटरनेशनल फैशन मॉडल व इन्फ्लुएंसर। एक्सक्लूसिव फोटोशूट्स, बिहाइंड-द-सीन्स और स्पेशल प्रीमियम वीडियो यहाँ देखें।",
+      "premiumVideoLink": "https://t.me/yourvipchannel",
+      "telegramEmbed": "https://t.me/telegram/83",
+      "premiumPrice": "VIP वीडियो पास",
+      "rating": 5,
+      "videoCount": 64,
+      "tags": [
+        "ग्लैमर",
+        "फैशन मॉडल",
+        "4K अल्ट्रा HD",
+        "ट्रेंडिंग"
+      ],
+      "featured": true,
+      "active": true,
+      "clicks": 245,
+      "views": 3120,
+      "createdAt": "2026-08-19T14:01:11.153Z"
+    },
+    {
+      "id": "model-2",
+      "name": "अनाहिता रॉय (Anahita Roy)",
+      "age": 24,
+      "location": "गोवा, भारत",
+      "badge": "💎 VIP एक्सक्लूसिव",
+      "status": "live",
+      "image": "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=800&q=85",
+      "gallery": [
+        "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=800&q=85",
+        "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=800&q=85"
+      ],
+      "bio": "शानदार स्टाइल, बोल्ड लुक्स और एक्सक्लूसिव वीडियो का प्रीमियम कलेक्शन केवल मेरे खास फैंस के लिए।",
+      "premiumVideoLink": "https://t.me/yourvipchannel",
+      "telegramEmbed": "",
+      "premiumPrice": "एक्सक्लूसिव वॉल्ट",
+      "rating": 4.9,
+      "videoCount": 92,
+      "tags": [
+        "बीच वाइब्स",
+        "स्टाइलिश",
+        "स्पेशल शूट",
+        "VIP एक्सेस"
+      ],
+      "featured": true,
+      "active": true,
+      "clicks": 318,
+      "views": 4210,
+      "createdAt": "2026-08-19T14:01:11.154Z"
+    },
+    {
+      "id": "model-3",
+      "name": "तान्या कपूर (Tanya Kapoor)",
+      "age": 21,
+      "location": "दिल्ली, भारत",
+      "badge": "✨ नई सेंसेशन",
+      "status": "online",
+      "image": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=85",
+      "gallery": [
+        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=85",
+        "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=85"
+      ],
+      "bio": "क्यूट स्माइल और दिलकश अंदाज़। मेरे नए डांस रील्स और प्राइवेट व्लॉग वीडियो अभी अनलॉक करें।",
+      "premiumVideoLink": "https://t.me/yourvipchannel",
+      "telegramEmbed": "",
+      "premiumPrice": "प्रीमियम क्लिप्स",
+      "rating": 4.9,
+      "videoCount": 45,
+      "tags": [
+        "क्यूट",
+        "ग्लैमरस",
+        "डांस वीडियो",
+        "HD क्लिप्स"
+      ],
+      "featured": true,
+      "active": true,
+      "clicks": 180,
+      "views": 2450,
+      "createdAt": "2026-08-19T14:01:11.154Z"
+    },
+    {
+      "id": "model-4",
+      "name": "नताशा डिसूजा (Natasha D'Souza)",
+      "age": 23,
+      "location": "बेंगलुरु, भारत",
+      "badge": "👑 टॉप रेटेड",
+      "status": "online",
+      "image": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=85",
+      "gallery": [
+        "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=85",
+        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=85"
+      ],
+      "bio": "हाई-फैशन रनवे मॉडल। नए सिनेमैटिक एपिसोड्स और एक्सक्लूसिव वीडियो सीरीज तुरंत देखें।",
+      "premiumVideoLink": "https://t.me/yourvipchannel",
+      "telegramEmbed": "",
+      "premiumPrice": "फुल एचडी पास",
+      "rating": 5,
+      "videoCount": 110,
+      "tags": [
+        "फैशन शो",
+        "ग्लैम शूट",
+        "VIP 4K",
+        "सिनेमैटिक"
+      ],
+      "featured": true,
+      "active": true,
+      "clicks": 420,
+      "views": 5300,
+      "createdAt": "2026-08-19T14:01:11.154Z"
+    },
+    {
+      "id": "model-5",
+      "name": "सिमरन कौर (Simran Kaur)",
+      "age": 22,
+      "location": "चंडीगढ़, भारत",
+      "badge": "⭐ मोस्ट पॉपुलर",
+      "status": "offline",
+      "image": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=85",
+      "gallery": [
+        "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=85"
+      ],
+      "bio": "शाही खूबसूरती और लाजवाब स्टाइल। मेरे सभी नए वीडियो और फोटो सेट्स का तुरंत एक्सेस पाएं।",
+      "premiumVideoLink": "https://t.me/yourvipchannel",
+      "telegramEmbed": "",
+      "premiumPrice": "तुरंत एक्सेस",
+      "rating": 4.8,
+      "videoCount": 38,
+      "tags": [
+        "देसी ग्लैम",
+        "क्लासिक",
+        "टीज़र",
+        "स्पेशल"
+      ],
+      "featured": false,
+      "active": true,
+      "clicks": 130,
+      "views": 1650,
+      "createdAt": "2026-08-19T14:01:11.154Z"
+    },
+    {
+      "id": "model-6",
+      "name": "ज़ोया खान (Zoya Khan)",
+      "age": 25,
+      "location": "दुबई / मुंबई",
+      "badge": "🔥 सुपर हॉट",
+      "status": "live",
+      "image": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=800&q=85",
+      "gallery": [
+        "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=800&q=85"
+      ],
+      "bio": "लक्ज़री लाइफस्टाइल और इंटरनेशनल मॉडलिंग शूट्स। मेरी एक्सक्लूसिव 4K वीडियो सीरीज़ अभी देखें।",
+      "premiumVideoLink": "https://t.me/yourvipchannel",
+      "telegramEmbed": "",
+      "premiumPrice": "VIP स्पेशल",
+      "rating": 4.9,
+      "videoCount": 84,
+      "tags": [
+        "लक्ज़री",
+        "दुबई शूट",
+        "4K अल्ट्रा",
+        "मेंबर ओनली"
+      ],
+      "featured": false,
+      "active": true,
+      "clicks": 290,
+      "views": 3400,
+      "createdAt": "2026-08-19T14:01:11.154Z"
+    }
+  ],
+  "settings": {
+    "siteName": "GLAMOUR VIP MODELS",
+    "siteTagline": "एक्सक्लूसिव ग्लैमर मॉडल्स और प्रीमियम 4K वीडियो हब",
+    "heroTitle": "टॉप ग्लैमर मॉडल्स के एक्सक्लूसिव और ट्रेंडिंग वीडियो देखें",
+    "heroSubtitle": "हाई-फैशन शूट्स, लाइव सेशन्स और एक्सक्लूसिव 4K वीडियो गैलरी। अपनी पसंदीदा मॉडल चुनें और पूरा वीडियो तुरंत देखें।",
+    "announcement": "⭐ आज का स्पेशल अपडेट: नए एक्सक्लूसिव ग्लैमर वीडियो और लाइव सेशन्स लाइव हैं! ⭐",
+    "ctaButtonText": "🔥 मेरे सभी प्रीमियम वीडियो देखें - यहाँ क्लिक करें",
+    "globalCtaLink": "https://t.me/yourvipchannel",
+    "telegramLink": "https://t.me/yourvipchannel",
+    "onlyfansLink": "",
+    "adminPin": "admin123",
+    "adminPasswordHash": "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9",
+    "enableAgeGate": false,
+    "themeColor": "ruby-glow"
+  },
+  "adminTokens": [
+    {
+      "token": "tok_b33b3f19cd5e21d769b51229572040d2",
+      "createdAt": 1787144315719,
+      "expiresAt": 1787749115719
+    }
+  ]
+}
