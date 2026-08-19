@@ -14,7 +14,7 @@
         "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=85"
       ],
       "bio": "इंटरनेशनल फैशन मॉडल व इन्फ्लुएंसर। एक्सक्लूसिव फोटोशूट्स, बिहाइंड-द-सीन्स और स्पेशल प्रीमियम वीडियो यहाँ देखें।",
-      "premiumVideoLink": "https://t.me/yourvipchannel",
+      "premiumVideoLink": "https://t.me/riyakumarix7",
       "telegramEmbed": "https://t.me/telegram/83",
       "premiumPrice": "VIP वीडियो पास",
       "rating": 5,
@@ -44,7 +44,7 @@
         "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=800&q=85"
       ],
       "bio": "शानदार स्टाइल, बोल्ड लुक्स और एक्सक्लूसिव वीडियो का प्रीमियम कलेक्शन केवल मेरे खास फैंस के लिए।",
-      "premiumVideoLink": "https://t.me/yourvipchannel",
+      "premiumVideoLink": "https://t.me/riyakumarix7",
       "telegramEmbed": "",
       "premiumPrice": "एक्सक्लूसिव वॉल्ट",
       "rating": 4.9,
@@ -74,7 +74,7 @@
         "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=800&q=85"
       ],
       "bio": "क्यूट स्माइल और दिलकश अंदाज़। मेरे नए डांस रील्स और प्राइवेट व्लॉग वीडियो अभी अनलॉक करें।",
-      "premiumVideoLink": "https://t.me/yourvipchannel",
+      "premiumVideoLink": "https://t.me/riyakumarix7",
       "telegramEmbed": "",
       "premiumPrice": "प्रीमियम क्लिप्स",
       "rating": 4.9,
@@ -104,7 +104,7 @@
         "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=85"
       ],
       "bio": "हाई-फैशन रनवे मॉडल। नए सिनेमैटिक एपिसोड्स और एक्सक्लूसिव वीडियो सीरीज तुरंत देखें।",
-      "premiumVideoLink": "https://t.me/yourvipchannel",
+      "premiumVideoLink": "https://t.me/riyakumarix7",
       "telegramEmbed": "",
       "premiumPrice": "फुल एचडी पास",
       "rating": 5,
@@ -133,7 +133,7 @@
         "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=85"
       ],
       "bio": "शाही खूबसूरती और लाजवाब स्टाइल। मेरे सभी नए वीडियो और फोटो सेट्स का तुरंत एक्सेस पाएं।",
-      "premiumVideoLink": "https://t.me/yourvipchannel",
+      "premiumVideoLink": "https://t.me/riyakumarix7",
       "telegramEmbed": "",
       "premiumPrice": "तुरंत एक्सेस",
       "rating": 4.8,
@@ -162,7 +162,7 @@
         "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=800&q=85"
       ],
       "bio": "लक्ज़री लाइफस्टाइल और इंटरनेशनल मॉडलिंग शूट्स। मेरी एक्सक्लूसिव 4K वीडियो सीरीज़ अभी देखें।",
-      "premiumVideoLink": "https://t.me/yourvipchannel",
+      "premiumVideoLink": "https://t.me/riyakumarix7",
       "telegramEmbed": "",
       "premiumPrice": "VIP स्पेशल",
       "rating": 4.9,
@@ -187,13 +187,22 @@
     "heroSubtitle": "हाई-फैशन शूट्स, लाइव सेशन्स और एक्सक्लूसिव 4K वीडियो गैलरी। अपनी पसंदीदा मॉडल चुनें और पूरा वीडियो तुरंत देखें।",
     "announcement": "⭐ आज का स्पेशल अपडेट: नए एक्सक्लूसिव ग्लैमर वीडियो और लाइव सेशन्स लाइव हैं! ⭐",
     "ctaButtonText": "🔥 मेरे सभी प्रीमियम वीडियो देखें - यहाँ क्लिक करें",
-    "globalCtaLink": "https://t.me/yourvipchannel",
-    "telegramLink": "https://t.me/yourvipchannel",
-    "onlyfansLink": "",
+    "globalCtaLink": "https://t.me/riyakumarix7",
+    "telegramLink": "https://t.me/riyakumarix7",
     "adminPin": "Luxe@9211#Admin",
     "adminPasswordHash": "7f1c2b591217369ea9030a2039fe1a4ceeafdf961f4d616e2096fe440cf395bd",
     "enableAgeGate": false,
-    "themeColor": "ruby-glow"
+    "themeColor": "ruby-glow",
+    "adsterraSmartLink": "https://www.effectivecpmnetwork.com/rm9cqers?key=53f807fa771a60ba28a6dbc43af423a1",
+    "enableSmartLinkOnClicks": true,
+    "socialBarScript": "https://pl30926092.effectivecpmnetwork.com/7c/d7/31/7cd7318b8d42d394a693054855bc9ae9.js",
+    "enableSocialBar": true,
+    "nativeBannerScript": "https://pl30926090.effectivecpmnetwork.com/e57d2a5991c2d320d1835502c0693cb4/invoke.js",
+    "nativeBannerContainerId": "container-e57d2a5991c2d320d1835502c0693cb4",
+    "enableNativeBanner": true,
+    "banner728x90Key": "109bfc08902b9073c69aa9a8e3dda390",
+    "enableBanner728x90": true,
+    "onlyfansLink": ""
   },
   "adminTokens": []
 }
