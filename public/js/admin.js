@@ -71,6 +71,7 @@ const formModelVideos = document.getElementById('formModelVideos');
 const formModelRating = document.getElementById('formModelRating');
 const formModelFile = document.getElementById('formModelFile');
 const formModelImageUrl = document.getElementById('formModelImageUrl');
+const formModelPreviewImg = document.getElementById('formModelPreviewImg');
 const formModelTelegramEmbed = document.getElementById('formModelTelegramEmbed');
 const formModelBio = document.getElementById('formModelBio');
 const formModelVideoLink = document.getElementById('formModelVideoLink');
@@ -124,6 +125,90 @@ function showToast(message, type = 'success') {
     toast.classList.add('opacity-0', 'translate-x-4');
     setTimeout(() => toast.remove(), 300);
   }, 4000);
+}
+
+// Client-Side Canvas Image Compressor (Converts any phone/camera photo into high quality ~50KB Data URL)
+function compressImage(file, maxDimension = 800, quality = 0.82) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxDimension) {
+            height = Math.round((height * maxDimension) / width);
+            width = maxDimension;
+          }
+        } else {
+          if (height > maxDimension) {
+            width = Math.round((width * maxDimension) / height);
+            height = maxDimension;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        resolve(dataUrl);
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// Model Photo Input Listeners
+if (formModelFile) {
+  formModelFile.addEventListener('change', async () => {
+    if (formModelFile.files.length === 0) return;
+    try {
+      const dataUrl = await compressImage(formModelFile.files[0]);
+      formModelImageUrl.value = dataUrl;
+      if (formModelPreviewImg) formModelPreviewImg.src = dataUrl;
+      showToast('Model photo optimized and ready!', 'success');
+    } catch (e) {
+      showToast('Error processing model photo!', 'error');
+    }
+  });
+}
+
+if (formModelImageUrl) {
+  formModelImageUrl.addEventListener('input', (e) => {
+    if (formModelPreviewImg && e.target.value.trim()) {
+      formModelPreviewImg.src = e.target.value.trim();
+    }
+  });
+}
+
+// Social Share File Input Listeners
+if (settingShareFile) {
+  settingShareFile.addEventListener('change', async () => {
+    if (settingShareFile.files.length === 0) return;
+    try {
+      const dataUrl = await compressImage(settingShareFile.files[0], 1200, 0.85);
+      settingShareImage.value = dataUrl;
+      if (sharePreviewImg) sharePreviewImg.src = dataUrl;
+      showToast('Social preview photo optimized! Click "Save Site Settings" to save.', 'success');
+    } catch (e) {
+      showToast('Error processing social photo!', 'error');
+    }
+  });
+}
+
+if (settingShareImage) {
+  settingShareImage.addEventListener('input', (e) => {
+    if (sharePreviewImg && e.target.value.trim()) {
+      sharePreviewImg.src = e.target.value.trim();
+    }
+  });
 }
 
 // Auth Check
@@ -515,41 +600,6 @@ async function loadAdminSettings() {
   }
 }
 
-// Social Share Image File Upload
-if (settingShareFile) {
-  settingShareFile.addEventListener('change', async () => {
-    if (settingShareFile.files.length === 0) return;
-    const file = settingShareFile.files[0];
-    const formData = new FormData();
-    formData.append('image', file);
-
-    try {
-      showToast('Uploading social share photo...', 'success');
-      const res = await fetch('/api/admin/upload', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${adminToken}` },
-        body: formData
-      });
-      const data = await res.json();
-      if (data.success && data.url) {
-        settingShareImage.value = data.url;
-        if (sharePreviewImg) sharePreviewImg.src = data.url;
-        showToast('Social preview photo uploaded! Click "Save Site Settings" to save.', 'success');
-      }
-    } catch (e) {
-      showToast('Error uploading image!', 'error');
-    }
-  });
-}
-
-if (settingShareImage) {
-  settingShareImage.addEventListener('input', (e) => {
-    if (sharePreviewImg && e.target.value.trim()) {
-      sharePreviewImg.src = e.target.value.trim();
-    }
-  });
-}
-
 // Save Adsterra Settings
 adSettingsForm.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -632,6 +682,9 @@ btnOpenAddModel.addEventListener('click', () => {
   formModelVideos.value = 45;
   formModelFeatured.checked = false;
   formModelActive.checked = true;
+  if (formModelPreviewImg) {
+    formModelPreviewImg.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
+  }
   modelFormModal.classList.add('show');
 });
 
@@ -656,6 +709,9 @@ window.editModel = function(id) {
   formModelVideos.value = model.videoCount || 45;
   formModelRating.value = model.rating || '5.0';
   formModelImageUrl.value = model.image || '';
+  if (formModelPreviewImg) {
+    formModelPreviewImg.src = model.image || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
+  }
   formModelTelegramEmbed.value = model.telegramEmbed || '';
   formModelBio.value = model.bio || '';
   formModelVideoLink.value = model.premiumVideoLink || '';
@@ -686,31 +742,38 @@ window.deleteModel = async function(id) {
   }
 };
 
-// Model Upsert Submit
+// Model Upsert Submit (High speed JSON + base64 data URL)
 modelUpsertForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const id = modelFormId.value;
-  const formData = new FormData();
 
-  formData.append('name', formModelName.value.trim());
-  formData.append('age', formModelAge.value);
-  formData.append('location', formModelLocation.value.trim());
-  formData.append('badge', formModelBadge.value.trim());
-  formData.append('status', formModelStatus.value);
-  formData.append('videoCount', formModelVideos.value);
-  formData.append('rating', formModelRating.value);
-  formData.append('telegramEmbed', formModelTelegramEmbed.value.trim());
-  formData.append('bio', formModelBio.value.trim());
-  formData.append('premiumVideoLink', formModelVideoLink.value.trim());
-  formData.append('tags', formModelTags.value.trim());
-  formData.append('featured', formModelFeatured.checked);
-  formData.append('active', formModelActive.checked);
-
+  let modelImage = formModelImageUrl.value.trim();
   if (formModelFile.files.length > 0) {
-    formData.append('imageFile', formModelFile.files[0]);
-  } else if (formModelImageUrl.value.trim()) {
-    formData.append('image', formModelImageUrl.value.trim());
+    try {
+      modelImage = await compressImage(formModelFile.files[0]);
+    } catch (err) {}
   }
+
+  if (!modelImage) {
+    modelImage = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=85';
+  }
+
+  const payload = {
+    name: formModelName.value.trim(),
+    age: formModelAge.value,
+    location: formModelLocation.value.trim(),
+    badge: formModelBadge.value.trim(),
+    status: formModelStatus.value,
+    videoCount: formModelVideos.value,
+    rating: formModelRating.value,
+    image: modelImage,
+    telegramEmbed: formModelTelegramEmbed.value.trim(),
+    bio: formModelBio.value.trim(),
+    premiumVideoLink: formModelVideoLink.value.trim(),
+    tags: formModelTags.value.trim(),
+    featured: formModelFeatured.checked,
+    active: formModelActive.checked
+  };
 
   const url = id ? `/api/admin/models/${id}` : '/api/admin/models';
   const method = id ? 'PUT' : 'POST';
@@ -718,8 +781,11 @@ modelUpsertForm.addEventListener('submit', async (e) => {
   try {
     const res = await fetch(url, {
       method: method,
-      headers: { 'Authorization': `Bearer ${adminToken}` },
-      body: formData
+      headers: { 
+        'Authorization': `Bearer ${adminToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
     });
     const data = await res.json();
 
