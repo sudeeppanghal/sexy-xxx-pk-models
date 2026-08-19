@@ -234,21 +234,25 @@
         "29efac8d96345071",
         "8deb4bdb7e86143e",
         "f296af0308a4b426",
-        "330ff8955c98cc5b"
+        "330ff8955c98cc5b",
+        "d60dc4d6997845a1",
+        "3fb90091eb46a2c1",
+        "03ea4fa2b2d457fe"
       ]
     },
-    "pageviews": 6,
+    "pageviews": 12,
     "clicks": 0,
     "devices": {
       "mobile": 0,
-      "desktop": 6
+      "desktop": 12
     },
     "countries": {
-      "IN": 3,
-      "US": 3
+      "IN": 8,
+      "US": 4
     },
     "hourlyViews": {
-      "17": 6
+      "17": 6,
+      "18": 6
     },
     "recentEvents": []
   }
