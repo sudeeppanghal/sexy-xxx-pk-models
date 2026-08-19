@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>एडमिन डैशबोर्ड | VIP मॉडल्स, विज्ञापन एवं सेटिंग्स</title>
+  <title>VIP Admin Portal | Real Metrics & Adsterra Earnings</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
@@ -17,20 +17,20 @@
   <!-- Toast Notification Container -->
   <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
-  <!-- Admin Login Overlay -->
+  <!-- Admin Login Modal (100% English & Secure) -->
   <div id="loginModal" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
     <div class="glass-panel max-w-md w-full p-8 border border-pink-500/30 shadow-2xl shadow-pink-950/60 rounded-3xl text-center">
       <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-pink-600 to-amber-500 flex items-center justify-center mx-auto mb-5 shadow-lg shadow-pink-600/40">
         <i data-lucide="lock" class="w-8 h-8 text-white"></i>
       </div>
-      <h2 class="font-serif font-black text-2xl text-white mb-2">VIP एडमिन पोर्टल</h2>
-      <p class="text-gray-400 text-xs mb-6">मॉडल्स, विज्ञापन और साइट सेटिंग्स प्रबंधित करने के लिए अपना सुरक्षित मास्टर पासवर्ड दर्ज करें।</p>
+      <h2 class="font-serif font-black text-2xl text-white mb-2">VIP Admin Portal</h2>
+      <p class="text-gray-400 text-xs mb-6">Enter your master security PIN to access the dashboard, traffic metrics, and ad controls.</p>
 
       <form id="loginForm" class="space-y-4">
         <div class="text-left">
-          <label class="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-2">मास्टर पासवर्ड / पिन दर्ज करें</label>
+          <label class="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-2">Master Security PIN</label>
           <div class="relative">
-            <input type="password" id="adminPasswordInput" placeholder="पासवर्ड दर्ज करें (Enter Password)" required
+            <input type="password" id="adminPasswordInput" placeholder="Enter Password / PIN" required
               class="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500">
             <button type="button" id="togglePasswordBtn" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white">
               <i data-lucide="eye" class="w-4 h-4"></i>
@@ -39,7 +39,7 @@
         </div>
 
         <button type="submit" id="loginSubmitBtn" class="btn-vip-glow w-full py-3.5 text-sm font-bold">
-          एडमिन डैशबोर्ड अनलॉक करें
+          Unlock Admin Dashboard
         </button>
       </form>
     </div>
@@ -56,8 +56,8 @@
             <i data-lucide="sparkles" class="w-5 h-5 text-white fill-white"></i>
           </div>
           <div>
-            <span class="font-serif font-black text-lg text-white">VIP मॉडल मास्टर</span>
-            <span class="block text-[10px] text-emerald-400 font-bold uppercase tracking-wider">● एडमिन मोड एक्टिव</span>
+            <span class="font-serif font-black text-lg text-white">VIP Control Master</span>
+            <span class="block text-[10px] text-emerald-400 font-bold uppercase tracking-wider">● System Live & Active</span>
           </div>
         </a>
       </div>
@@ -66,33 +66,33 @@
       <div class="flex items-center gap-3">
         <a href="/" target="_blank" class="inline-flex items-center gap-1.5 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-semibold text-gray-300 hover:text-white transition">
           <i data-lucide="external-link" class="w-3.5 h-3.5 text-pink-400"></i>
-          <span class="hidden sm:inline">पब्लिक वेबसाइट देखें</span>
+          <span class="hidden sm:inline">View Public Website</span>
         </a>
         <button id="logoutBtn" class="inline-flex items-center gap-1.5 px-4 py-2 bg-red-950/40 hover:bg-red-900/60 border border-red-500/30 rounded-xl text-xs font-bold text-red-400 hover:text-white transition">
           <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
-          <span>लॉगआउट</span>
+          <span>Logout</span>
         </button>
       </div>
     </header>
 
-    <!-- Sub Navigation Tabs -->
+    <!-- Sub Navigation Tabs (100% English) -->
     <div class="bg-black/40 border-b border-white/5 px-4 sm:px-8 py-3">
       <div class="max-w-7xl mx-auto flex items-center gap-2.5 overflow-x-auto">
-        <button class="admin-tab active px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-pink-600 text-white" data-tab="models">
-          <i data-lucide="users" class="w-4 h-4"></i>
-          <span>मॉडल्स प्रबंधन (<span id="tabCountModels">0</span>)</span>
+        <button class="admin-tab active px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-pink-600 text-white" data-tab="analytics">
+          <i data-lucide="activity" class="w-4 h-4 text-emerald-400"></i>
+          <span>Real Traffic & Adsterra Earnings</span>
+        </button>
+        <button class="admin-tab px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-gray-400 hover:text-white hover:bg-white/5" data-tab="models">
+          <i data-lucide="users" class="w-4 h-4 text-pink-400"></i>
+          <span>Models Management (<span id="tabCountModels">0</span>)</span>
         </button>
         <button class="admin-tab px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-gray-400 hover:text-white hover:bg-white/5" data-tab="ads">
           <i data-lucide="dollar-sign" class="w-4 h-4 text-amber-400"></i>
-          <span>Adsterra विज्ञापन व मोनेटाइजेशन</span>
-        </button>
-        <button class="admin-tab px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-gray-400 hover:text-white hover:bg-white/5" data-tab="analytics">
-          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
-          <span>क्लिक एनालिटिक्स</span>
+          <span>Adsterra Ads & Monetization</span>
         </button>
         <button class="admin-tab px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-gray-400 hover:text-white hover:bg-white/5" data-tab="settings">
           <i data-lucide="settings" class="w-4 h-4"></i>
-          <span>साइट सेटिंग्स</span>
+          <span>Site Settings & PIN</span>
         </button>
       </div>
     </div>
@@ -101,56 +101,187 @@
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-8">
 
       <!-- ============================================================ -->
-      <!-- TAB 1: MODELS MANAGEMENT -->
+      <!-- TAB 1: REAL-TIME TRAFFIC & ADSTERRA EARNINGS -->
       <!-- ============================================================ -->
-      <section id="tabModelsSection" class="space-y-6">
+      <section id="tabAnalyticsSection" class="space-y-6">
 
-        <!-- Stat Highlights -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div class="glass-panel p-5 border border-white/10 rounded-2xl">
-            <p class="text-xs font-bold uppercase text-gray-400 mb-1">कुल मॉडल्स</p>
-            <h3 id="statTotalModels" class="font-serif font-black text-2xl sm:text-3xl text-white">0</h3>
+        <!-- Top Live Real Matrix Bar -->
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-4">
+          <!-- Active Online Now -->
+          <div class="glass-panel p-5 border border-emerald-500/30 rounded-2xl relative overflow-hidden">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-[11px] font-bold uppercase text-emerald-400 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> Live Online
+              </span>
+              <i data-lucide="radio" class="w-4 h-4 text-emerald-400"></i>
+            </div>
+            <h3 id="statLiveOnline" class="font-serif font-black text-3xl text-emerald-300">1</h3>
+            <p class="text-[10px] text-gray-400 mt-1">Real-time active visitors</p>
           </div>
+
+          <!-- Unique Human Visitors Today -->
           <div class="glass-panel p-5 border border-white/10 rounded-2xl">
-            <p class="text-xs font-bold uppercase text-emerald-400 mb-1">सक्रिय / लाइव मॉडल्स</p>
-            <h3 id="statActiveModels" class="font-serif font-black text-2xl sm:text-3xl text-emerald-400">0</h3>
+            <p class="text-[11px] font-bold uppercase text-gray-400 mb-1">Unique Visitors (Today)</p>
+            <h3 id="statTodayUniques" class="font-serif font-black text-3xl text-white">0</h3>
+            <p class="text-[10px] text-gray-400 mt-1">Verified unique IPs</p>
           </div>
+
+          <!-- Total Real Pageviews -->
           <div class="glass-panel p-5 border border-white/10 rounded-2xl">
-            <p class="text-xs font-bold uppercase text-pink-400 mb-1">🔥 कुल वीडियो क्लिक्स</p>
-            <h3 id="statTotalClicks" class="font-serif font-black text-2xl sm:text-3xl text-pink-400">0</h3>
+            <p class="text-[11px] font-bold uppercase text-gray-400 mb-1">Total Pageviews</p>
+            <h3 id="statTotalPageviews" class="font-serif font-black text-3xl text-white">0</h3>
+            <p class="text-[10px] text-gray-400 mt-1">Non-bot page impressions</p>
           </div>
-          <div class="glass-panel p-5 border border-white/10 rounded-2xl">
-            <p class="text-xs font-bold uppercase text-amber-400 mb-1">फीचर्ड स्पॉटलाइट</p>
-            <h3 id="statFeaturedModels" class="font-serif font-black text-2xl sm:text-3xl text-amber-400">0</h3>
+
+          <!-- Total Video Clicks -->
+          <div class="glass-panel p-5 border border-pink-500/30 rounded-2xl">
+            <p class="text-[11px] font-bold uppercase text-pink-400 mb-1">🔥 Video Clicks</p>
+            <h3 id="statTotalClicks" class="font-serif font-black text-3xl text-pink-400">0</h3>
+            <p class="text-[10px] text-gray-400 mt-1">SmartLink + CTA actions</p>
+          </div>
+
+          <!-- Click Through Rate (CTR) -->
+          <div class="glass-panel p-5 border border-amber-500/30 rounded-2xl">
+            <p class="text-[11px] font-bold uppercase text-amber-400 mb-1">Click Rate (CTR)</p>
+            <h3 id="statCtr" class="font-serif font-black text-3xl text-amber-300">0%</h3>
+            <p class="text-[10px] text-gray-400 mt-1">Conversion efficiency</p>
           </div>
         </div>
 
+        <!-- ADSTERRA REAL-TIME EARNINGS & CPM MATRIX CARD -->
+        <div class="glass-panel p-6 sm:p-8 border border-amber-500/40 rounded-3xl relative overflow-hidden bg-gradient-to-r from-amber-950/20 via-pink-950/20 to-black/60 shadow-2xl">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-white/10">
+            <div>
+              <span class="px-3 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded-full text-xs font-extrabold uppercase tracking-wider">
+                💰 Live Adsterra Revenue Matrix
+              </span>
+              <h3 class="font-serif font-black text-2xl text-white mt-2">
+                Real-Time Ad Earnings, Impressions & CPM
+              </h3>
+            </div>
+            <button id="btnRefreshAdStats" class="btn-vip-glow px-5 py-2.5 text-xs font-bold flex items-center gap-2">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+              <span>Sync Live Stats</span>
+            </button>
+          </div>
+
+          <!-- Adsterra Metrics Row -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 my-6">
+            <div class="p-4 bg-black/50 rounded-2xl border border-white/10 text-center">
+              <p class="text-xs text-gray-400 font-bold uppercase mb-1">Today's Revenue</p>
+              <h4 id="adTodayRevenue" class="font-serif font-black text-2xl sm:text-3xl text-emerald-400">$0.00</h4>
+              <p class="text-[10px] text-gray-500 mt-1">SmartLink + Banners</p>
+            </div>
+            <div class="p-4 bg-black/50 rounded-2xl border border-white/10 text-center">
+              <p class="text-xs text-gray-400 font-bold uppercase mb-1">Total Ad Impressions</p>
+              <h4 id="adTodayImpressions" class="font-serif font-black text-2xl sm:text-3xl text-white">0</h4>
+              <p class="text-[10px] text-gray-500 mt-1">Banner & Social Bar hits</p>
+            </div>
+            <div class="p-4 bg-black/50 rounded-2xl border border-white/10 text-center">
+              <p class="text-xs text-gray-400 font-bold uppercase mb-1">Average CPM</p>
+              <h4 id="adAverageCpm" class="font-serif font-black text-2xl sm:text-3xl text-amber-400">$3.40</h4>
+              <p class="text-[10px] text-gray-500 mt-1">Per 1,000 Impressions</p>
+            </div>
+            <div class="p-4 bg-black/50 rounded-2xl border border-white/10 text-center">
+              <p class="text-xs text-gray-400 font-bold uppercase mb-1">Ad Clicks</p>
+              <h4 id="adTodayClicks" class="font-serif font-black text-2xl sm:text-3xl text-pink-400">0</h4>
+              <p class="text-[10px] text-gray-500 mt-1">High-value conversions</p>
+            </div>
+          </div>
+
+          <!-- Official Adsterra API Token Link Setup -->
+          <div class="p-4 bg-black/60 rounded-2xl border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+              <i data-lucide="key" class="w-5 h-5 text-amber-400 flex-shrink-0"></i>
+              <div class="text-xs">
+                <span class="font-bold text-white block">Connect Official Adsterra API (Optional)</span>
+                <span class="text-gray-400 text-[11px]">Get your API token from Adsterra Dashboard ➔ API ➔ Generate Token for 100% exact live numbers.</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+              <input type="password" id="inputAdsterraApiToken" placeholder="Paste Adsterra API Key"
+                class="bg-black/80 border border-white/20 rounded-xl px-3 py-2 text-xs text-white placeholder-gray-500 focus:border-amber-400 w-full sm:w-64">
+              <button id="btnSaveAdsterraApiKey" class="px-4 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded-xl text-xs font-bold whitespace-nowrap transition">
+                Save & Link
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Audience Devices & Locations Breakdown -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Device Breakdown -->
+          <div class="glass-panel p-6 border border-white/10 rounded-2xl">
+            <h4 class="font-serif font-bold text-base text-white mb-4 flex items-center gap-2">
+              <i data-lucide="smartphone" class="w-4 h-4 text-pink-400"></i>
+              <span>Traffic by Device Type</span>
+            </h4>
+            <div class="space-y-4">
+              <div>
+                <div class="flex justify-between text-xs font-bold mb-1.5">
+                  <span class="text-pink-300 flex items-center gap-1.5"><i data-lucide="smartphone" class="w-3.5 h-3.5"></i> Mobile App & Smartphone</span>
+                  <span id="statMobilePercent" class="text-white">85%</span>
+                </div>
+                <div class="w-full bg-black/60 h-2.5 rounded-full overflow-hidden border border-white/10">
+                  <div id="barMobile" class="bg-gradient-to-r from-pink-500 to-rose-400 h-full rounded-full transition-all duration-500" style="width: 85%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-xs font-bold mb-1.5">
+                  <span class="text-purple-300 flex items-center gap-1.5"><i data-lucide="laptop" class="w-3.5 h-3.5"></i> Desktop / Laptop</span>
+                  <span id="statDesktopPercent" class="text-white">15%</span>
+                </div>
+                <div class="w-full bg-black/60 h-2.5 rounded-full overflow-hidden border border-white/10">
+                  <div id="barDesktop" class="bg-gradient-to-r from-purple-500 to-indigo-400 h-full rounded-full transition-all duration-500" style="width: 15%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Top Performing Models Leaderboard -->
+          <div class="glass-panel p-6 border border-white/10 rounded-2xl">
+            <h4 class="font-serif font-bold text-base text-white mb-4 flex items-center gap-2">
+              <i data-lucide="trophy" class="w-4 h-4 text-amber-400"></i>
+              <span>Top Models Leaderboard (Most Clicks)</span>
+            </h4>
+            <div id="topModelsLeaderboard" class="space-y-2.5">
+              <!-- Dynamic Leaderboard -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- TAB 2: MODELS MANAGEMENT (100% ENGLISH) -->
+      <!-- ============================================================ -->
+      <section id="tabModelsSection" class="hidden space-y-6">
         <!-- Controls Bar -->
         <div class="glass-panel p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div class="relative w-full sm:w-80">
             <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
-            <input type="text" id="adminModelSearch" placeholder="मॉडल का नाम या बैज खोजें..."
+            <input type="text" id="adminModelSearch" placeholder="Search model name, badge or city..."
               class="w-full bg-black/50 border border-white/15 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-pink-500">
           </div>
 
           <button id="btnOpenAddModel" class="btn-vip-glow px-6 py-2.5 text-xs font-extrabold flex items-center gap-2 w-full sm:w-auto">
             <i data-lucide="plus-circle" class="w-4 h-4"></i>
-            <span>+ नया मॉडल प्रोफाइल जोड़ें</span>
+            <span>+ Add New VIP Model Profile</span>
           </button>
         </div>
 
-        <!-- Models Table / List -->
+        <!-- Models Table -->
         <div class="glass-panel overflow-hidden border border-white/10 rounded-2xl">
           <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
               <thead class="bg-black/60 text-gray-400 uppercase font-bold border-b border-white/10 tracking-wider">
                 <tr>
-                  <th class="py-4 px-4">मॉडल फोटो और जानकारी</th>
-                  <th class="py-4 px-4">स्थिति और बैज</th>
-                  <th class="py-4 px-4">आंकड़े (क्लिक्स / व्यूज)</th>
-                  <th class="py-4 px-4">टेलीग्राम वीडियो एम्बेड / लिंक</th>
-                  <th class="py-4 px-4">विजिबिलिटी</th>
-                  <th class="py-4 px-4 text-right">कार्रवाई (Edit / Delete)</th>
+                  <th class="py-4 px-4">Model Photo & Details</th>
+                  <th class="py-4 px-4">Status & Badge</th>
+                  <th class="py-4 px-4">Performance (Clicks/Views)</th>
+                  <th class="py-4 px-4">Telegram Video Link</th>
+                  <th class="py-4 px-4">Visibility</th>
+                  <th class="py-4 px-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody id="adminModelsTableBody" class="divide-y divide-white/5">
@@ -162,7 +293,7 @@
       </section>
 
       <!-- ============================================================ -->
-      <!-- TAB 2: ADSTERRA ADS & MONETIZATION MANAGER -->
+      <!-- TAB 3: ADSTERRA ADS & MONETIZATION CONTROLS -->
       <!-- ============================================================ -->
       <section id="tabAdsSection" class="hidden space-y-6">
         <form id="adSettingsForm" class="glass-panel p-6 sm:p-8 border border-white/10 rounded-2xl space-y-6">
@@ -170,12 +301,12 @@
             <div>
               <h3 class="font-serif font-black text-xl text-white flex items-center gap-2">
                 <i data-lucide="dollar-sign" class="w-5 h-5 text-amber-400"></i>
-                <span>Adsterra विज्ञापन व मोनेटाइजेशन सेटिंग्स</span>
+                <span>Adsterra Ad Codes & Monetization Manager</span>
               </h3>
-              <p class="text-xs text-gray-400 mt-1">अपने SmartLink, Banner, Native Ads और Social Bar को लाइव कंट्रोल करें।</p>
+              <p class="text-xs text-gray-400 mt-1">Configure SmartLinks, Banners, Native Ads, and Social Bars with 1-click live toggle.</p>
             </div>
-            <span class="px-3 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-full text-xs font-bold">
-              🔥 High CPM Active
+            <span class="px-3 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-full text-xs font-bold">
+              ● Adsterra Live
             </span>
           </div>
 
@@ -185,16 +316,16 @@
               <div class="flex items-center justify-between">
                 <label class="text-xs font-extrabold uppercase text-pink-400 flex items-center gap-2">
                   <i data-lucide="zap" class="w-4 h-4"></i>
-                  <span>1. Adsterra SmartLink (हर क्लिक पर कमाई)</span>
+                  <span>1. Adsterra SmartLink (Revenue on Every Click)</span>
                 </label>
                 <label class="flex items-center gap-2 text-xs text-emerald-400 font-bold cursor-pointer">
                   <input type="checkbox" id="settingEnableSmartLink" checked class="w-4 h-4 rounded text-pink-600">
-                  <span>सक्रिय (Active)</span>
+                  <span>Enabled (Active)</span>
                 </label>
               </div>
               <input type="url" id="settingSmartLinkUrl" placeholder="https://www.effectivecpmnetwork.com/..." 
                 class="w-full bg-black/60 border border-pink-500/40 rounded-xl px-4 py-2.5 text-xs text-white focus:border-pink-500">
-              <p class="text-[11px] text-gray-400">जब भी कोई यूजर किसी मॉडल या 'प्रीमियम वीडियो देखें' बटन पर क्लिक करेगा, तो यह SmartLink नए टैब में खुलकर आपको हाई CPM रेवेन्यू देगा।</p>
+              <p class="text-[11px] text-gray-400">Opens the high CPM SmartLink in a new tab whenever a user clicks any model or confirmation button.</p>
             </div>
 
             <!-- 2. Adsterra Social Bar Script -->
@@ -202,16 +333,15 @@
               <div class="flex items-center justify-between">
                 <label class="text-xs font-extrabold uppercase text-blue-400 flex items-center gap-2">
                   <i data-lucide="bell" class="w-4 h-4"></i>
-                  <span>2. Adsterra Social Bar (फ्लोटिंग पुश बार)</span>
+                  <span>2. Adsterra Social Bar (Floating Push Notifications)</span>
                 </label>
                 <label class="flex items-center gap-2 text-xs text-emerald-400 font-bold cursor-pointer">
                   <input type="checkbox" id="settingEnableSocialBar" checked class="w-4 h-4 rounded text-pink-600">
-                  <span>सक्रिय (Active)</span>
+                  <span>Enabled (Active)</span>
                 </label>
               </div>
               <input type="url" id="settingSocialBarScript" placeholder="https://pl30926092.effectivecpmnetwork.com/..." 
                 class="w-full bg-black/60 border border-blue-500/40 rounded-xl px-4 py-2.5 text-xs text-white focus:border-blue-500">
-              <p class="text-[11px] text-gray-400">यह पूरी वेबसाइट पर हाई-एंगेजिंग इंटरएक्टिव सोशल बार विज्ञापन दिखाता है।</p>
             </div>
 
             <!-- 3. Adsterra Native Banner Widget -->
@@ -219,17 +349,17 @@
               <div class="flex items-center justify-between">
                 <label class="text-xs font-extrabold uppercase text-purple-400 flex items-center gap-2">
                   <i data-lucide="grid" class="w-4 h-4"></i>
-                  <span>3. Adsterra Native Banner Widget (4-Grid Ads)</span>
+                  <span>3. Adsterra Native Banner Widget (4-Grid)</span>
                 </label>
                 <label class="flex items-center gap-2 text-xs text-emerald-400 font-bold cursor-pointer">
                   <input type="checkbox" id="settingEnableNativeBanner" checked class="w-4 h-4 rounded text-pink-600">
-                  <span>सक्रिय (Active)</span>
+                  <span>Enabled (Active)</span>
                 </label>
               </div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <input type="url" id="settingNativeBannerScript" placeholder="Native Script URL" 
                   class="bg-black/60 border border-purple-500/40 rounded-xl px-4 py-2.5 text-xs text-white focus:border-purple-500">
-                <input type="text" id="settingNativeBannerContainerId" placeholder="Container ID (e.g. container-e57d2a5991c2d320d1835502c0693cb4)" 
+                <input type="text" id="settingNativeBannerContainerId" placeholder="Container ID" 
                   class="bg-black/60 border border-purple-500/40 rounded-xl px-4 py-2.5 text-xs text-white focus:border-purple-500">
               </div>
             </div>
@@ -239,11 +369,11 @@
               <div class="flex items-center justify-between">
                 <label class="text-xs font-extrabold uppercase text-amber-400 flex items-center gap-2">
                   <i data-lucide="layout" class="w-4 h-4"></i>
-                  <span>4. Adsterra 728x90 Leaderboard Banner</span>
+                  <span>4. Adsterra 728x90 Top Leaderboard Banner</span>
                 </label>
                 <label class="flex items-center gap-2 text-xs text-emerald-400 font-bold cursor-pointer">
                   <input type="checkbox" id="settingEnableBanner728x90" checked class="w-4 h-4 rounded text-pink-600">
-                  <span>सक्रिय (Active)</span>
+                  <span>Enabled (Active)</span>
                 </label>
               </div>
               <input type="text" id="settingBanner728Key" placeholder="Banner Key (e.g. 109bfc08902b9073c69aa9a8e3dda390)" 
@@ -254,92 +384,68 @@
           <div class="pt-4 border-t border-white/10 flex justify-end">
             <button type="submit" class="btn-vip-glow px-8 py-3 text-xs font-bold flex items-center gap-2">
               <i data-lucide="save" class="w-4 h-4"></i>
-              <span>विज्ञापन सेटिंग्स सेव करें</span>
+              <span>Save Adsterra Settings</span>
             </button>
           </div>
         </form>
       </section>
 
       <!-- ============================================================ -->
-      <!-- TAB 3: ANALYTICS & POPULARITY -->
-      <!-- ============================================================ -->
-      <section id="tabAnalyticsSection" class="hidden space-y-6">
-        <div class="glass-panel p-6 sm:p-8 border border-white/10 rounded-2xl">
-          <h3 class="font-serif font-black text-xl text-white mb-2 flex items-center gap-2">
-            <i data-lucide="flame" class="w-5 h-5 text-pink-500"></i>
-            <span>सर्वश्रेष्ठ प्रदर्शन करने वाले मॉडल्स (Most Clicked Premium Video Links)</span>
-          </h3>
-          <p class="text-xs text-gray-400 mb-6">
-            यूजर एंगेजमेंट ट्रैक करें और देखें कि कौन से मॉडल्स 'मेरे सभी प्रीमियम वीडियो देखें' बटन पर सबसे ज्यादा क्लिक प्राप्त कर रहे हैं।
-          </p>
-
-          <div id="topModelsLeaderboard" class="space-y-3">
-            <!-- Dynamic Leaderboard -->
-          </div>
-        </div>
-      </section>
-
-      <!-- ============================================================ -->
-      <!-- TAB 4: SITE SETTINGS -->
+      <!-- TAB 4: SITE SETTINGS & PASSWORD -->
       <!-- ============================================================ -->
       <section id="tabSettingsSection" class="hidden space-y-6">
         <form id="siteSettingsForm" class="glass-panel p-6 sm:p-8 border border-white/10 rounded-2xl space-y-6">
           <h3 class="font-serif font-black text-xl text-white pb-4 border-b border-white/10 flex items-center gap-2">
             <i data-lucide="sliders" class="w-5 h-5 text-pink-500"></i>
-            <span>साइट कंटेंट, हेडलाइन्स और ग्लोबल लिंक्स</span>
+            <span>Global Site Settings, Headlines & Password</span>
           </h3>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label class="block text-xs font-bold uppercase text-gray-300 mb-2">साइट ब्रांड नाम (Brand Name)</label>
+              <label class="block text-xs font-bold uppercase text-gray-300 mb-2">Site Brand Name</label>
               <input type="text" id="settingSiteName" class="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-xs text-white focus:border-pink-500">
             </div>
 
             <div>
-              <label class="block text-xs font-bold uppercase text-gray-300 mb-2">साइट टैगलाइन (Tagline)</label>
+              <label class="block text-xs font-bold uppercase text-gray-300 mb-2">Site Tagline</label>
               <input type="text" id="settingSiteTagline" class="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-xs text-white focus:border-pink-500">
             </div>
 
             <div class="md:col-span-2">
-              <label class="block text-xs font-bold uppercase text-gray-300 mb-2">टॉप मार्की घोषणा टेक्स्ट (Announcement Ticker)</label>
+              <label class="block text-xs font-bold uppercase text-gray-300 mb-2">Top Marquee Ticker Announcement</label>
               <input type="text" id="settingAnnouncement" class="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-xs text-white focus:border-pink-500">
             </div>
 
             <div class="md:col-span-2">
-              <label class="block text-xs font-bold uppercase text-gray-300 mb-2">हीरो मुख्य हेडलाइन टाइटल (Hero Title)</label>
+              <label class="block text-xs font-bold uppercase text-gray-300 mb-2">Hero Headline Title</label>
               <input type="text" id="settingHeroTitle" class="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-xs text-white focus:border-pink-500">
             </div>
 
             <div class="md:col-span-2">
-              <label class="block text-xs font-bold uppercase text-gray-300 mb-2">हीरो सबटाइटल विवरण (Hero Subtitle)</label>
+              <label class="block text-xs font-bold uppercase text-gray-300 mb-2">Hero Subtitle</label>
               <textarea id="settingHeroSubtitle" rows="3" class="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-xs text-white focus:border-pink-500"></textarea>
             </div>
 
             <div>
-              <label class="block text-xs font-bold uppercase text-pink-400 mb-2">🔥 मॉडल कार्ड एक्शन बटन टेक्स्ट</label>
+              <label class="block text-xs font-bold uppercase text-pink-400 mb-2">🔥 Model Card Action Button Text</label>
               <input type="text" id="settingCtaButtonText" class="w-full bg-black/50 border border-pink-500/40 rounded-xl px-4 py-2.5 text-xs text-white font-bold focus:border-pink-500">
             </div>
 
             <div>
-              <label class="block text-xs font-bold uppercase text-gray-300 mb-2">ग्लोबल डिफॉल्ट VIP लिंक (Fallback URL)</label>
-              <input type="url" id="settingGlobalCtaLink" placeholder="https://t.me/..." class="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-xs text-white focus:border-pink-500">
+              <label class="block text-xs font-bold uppercase text-blue-400 mb-2">Official VIP Telegram Channel Link</label>
+              <input type="url" id="settingTelegramLink" placeholder="https://t.me/riyakumarix7" class="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-xs text-white focus:border-pink-500">
             </div>
 
-            <div>
-              <label class="block text-xs font-bold uppercase text-blue-400 mb-2">VIP टेलीग्राम चैनल लिंक</label>
-              <input type="url" id="settingTelegramLink" placeholder="https://t.me/..." class="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-xs text-white focus:border-pink-500">
-            </div>
-
-            <div>
-              <label class="block text-xs font-bold uppercase text-amber-400 mb-2">मास्टर एडमिन पासवर्ड / पिन अपडेट करें</label>
-              <input type="password" id="settingAdminPassword" placeholder="वर्तमान पिन बनाए रखने के लिए खाली छोड़ें" class="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-xs text-white focus:border-pink-500">
+            <div class="md:col-span-2">
+              <label class="block text-xs font-bold uppercase text-amber-400 mb-2">Update Master Admin Password / PIN</label>
+              <input type="password" id="settingAdminPassword" placeholder="Leave blank to keep current PIN unchanged" class="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-xs text-white focus:border-pink-500">
             </div>
           </div>
 
           <div class="pt-4 border-t border-white/10 flex justify-end">
             <button type="submit" class="btn-vip-glow px-8 py-3 text-xs font-bold flex items-center gap-2">
               <i data-lucide="save" class="w-4 h-4"></i>
-              <span>साइट सेटिंग्स सेव करें</span>
+              <span>Save Site Settings</span>
             </button>
           </div>
         </form>
@@ -347,11 +453,11 @@
     </main>
   </div>
 
-  <!-- ADD / EDIT MODEL MODAL FORM -->
+  <!-- ADD / EDIT MODEL MODAL FORM (100% ENGLISH) -->
   <div id="modelFormModal" class="modal-backdrop">
     <div class="modal-card-popup p-6 sm:p-8 max-w-2xl">
       <div class="flex items-center justify-between pb-4 mb-6 border-b border-white/10">
-        <h3 id="formModalTitle" class="font-serif font-bold text-xl text-white">मॉडल प्रोफाइल संपादित करें</h3>
+        <h3 id="formModalTitle" class="font-serif font-bold text-xl text-white">Edit Model Profile</h3>
         <button id="btnCloseModelForm" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-gray-300 hover:text-white flex items-center justify-center transition">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
@@ -362,103 +468,101 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-bold uppercase text-gray-300 mb-1.5">मॉडल नाम (Model Name) *</label>
-            <input type="text" id="formModelName" required placeholder="उदा. रिया शर्मा" 
+            <label class="block text-xs font-bold uppercase text-gray-300 mb-1.5">Model Name *</label>
+            <input type="text" id="formModelName" required placeholder="e.g. Riya Sharma" 
               class="w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-pink-500">
           </div>
 
           <div>
-            <label class="block text-xs font-bold uppercase text-gray-300 mb-1.5">उम्र (Age)</label>
+            <label class="block text-xs font-bold uppercase text-gray-300 mb-1.5">Age</label>
             <input type="number" id="formModelAge" value="22" min="18" max="99" 
               class="w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-pink-500">
           </div>
 
           <div>
-            <label class="block text-xs font-bold uppercase text-gray-300 mb-1.5">स्थान / शहर (Location)</label>
-            <input type="text" id="formModelLocation" placeholder="उदा. मुंबई, भारत" 
+            <label class="block text-xs font-bold uppercase text-gray-300 mb-1.5">Location / City</label>
+            <input type="text" id="formModelLocation" placeholder="e.g. Mumbai, India" 
               class="w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-pink-500">
           </div>
 
           <div>
-            <label class="block text-xs font-bold uppercase text-gray-300 mb-1.5">हाइलाइट बैज</label>
-            <input type="text" id="formModelBadge" placeholder="उदा. 🔥 टॉप ट्रेंडिंग, 💎 VIP एक्सक्लूसिव" 
+            <label class="block text-xs font-bold uppercase text-gray-300 mb-1.5">Badge Title</label>
+            <input type="text" id="formModelBadge" placeholder="e.g. 🔥 Trending, 💎 VIP Exclusive" 
               class="w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-pink-500">
           </div>
 
           <div>
-            <label class="block text-xs font-bold uppercase text-gray-300 mb-1.5">स्थिति (Status)</label>
+            <label class="block text-xs font-bold uppercase text-gray-300 mb-1.5">Online Status</label>
             <select id="formModelStatus" class="w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-pink-500">
-              <option value="online">🟢 ऑनलाइन (Online Now)</option>
-              <option value="live">🔴 लाइव स्ट्रीमिंग (Live)</option>
-              <option value="offline">⚪ ऑफलाइन (Offline)</option>
+              <option value="online">🟢 Online Now</option>
+              <option value="live">🔴 Live Streaming</option>
+              <option value="offline">⚪ Offline</option>
             </select>
           </div>
 
           <div>
-            <label class="block text-xs font-bold uppercase text-gray-300 mb-1.5">वीडियो संख्या और रेटिंग</label>
+            <label class="block text-xs font-bold uppercase text-gray-300 mb-1.5">Video Count & Rating</label>
             <div class="grid grid-cols-2 gap-2">
-              <input type="number" id="formModelVideos" placeholder="वीडियो (उदा. 50)" value="45"
+              <input type="number" id="formModelVideos" placeholder="Videos (e.g. 50)" value="45"
                 class="bg-black/50 border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:border-pink-500">
-              <input type="number" step="0.1" id="formModelRating" placeholder="रेटिंग (उदा. 5.0)" value="5.0"
+              <input type="number" step="0.1" id="formModelRating" placeholder="Rating (e.g. 5.0)" value="5.0"
                 class="bg-black/50 border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:border-pink-500">
             </div>
           </div>
         </div>
 
         <div class="pt-2">
-          <label class="block text-xs font-bold uppercase text-pink-400 mb-1.5">मॉडल फोटो (फाइल अपलोड करें या इमेज URL पेस्ट करें) *</label>
+          <label class="block text-xs font-bold uppercase text-pink-400 mb-1.5">Model Photo (Upload Image File OR Paste Direct Image URL) *</label>
           <div class="space-y-2">
             <input type="file" id="formModelFile" accept="image/*" class="w-full text-xs text-gray-400 file:mr-3 file:py-1.5 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-pink-600 file:text-white hover:file:bg-pink-700 cursor-pointer">
-            <input type="url" id="formModelImageUrl" placeholder="या डायरेक्ट इमेज लिंक पेस्ट करें (https://images.unsplash.com/...)"
+            <input type="url" id="formModelImageUrl" placeholder="Or paste direct image URL (https://...)"
               class="w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:border-pink-500">
           </div>
         </div>
 
         <div class="pt-1">
           <label class="block text-xs font-bold uppercase text-blue-400 mb-1.5">
-            🎬 टेलीग्राम वीडियो एम्बेड लिंक (Telegram Post Video Embed URL)
+            🎬 Telegram Video Embed Post Link (Optional)
           </label>
-          <input type="text" id="formModelTelegramEmbed" placeholder="उदा. https://t.me/channel_name/123 या direct video URL"
+          <input type="text" id="formModelTelegramEmbed" placeholder="e.g. https://t.me/riyakumarix7/123"
             class="w-full bg-black/50 border border-blue-500/40 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-gray-500 focus:border-blue-400">
-          <p class="text-[11px] text-gray-400 mt-1">यहाँ किसी भी टेलीग्राम पोस्ट का लिंक डालें। यह वीडियो सीधे मॉडल के प्लेयर में एम्बेड होकर चलेगा।</p>
         </div>
 
         <div>
-          <label class="block text-xs font-bold uppercase text-gray-300 mb-1.5">ग्लैमरस बायो / विवरण</label>
-          <textarea id="formModelBio" rows="2" placeholder="इंटरनेशनल फैशन मॉडल व इन्फ्लुएंसर। एक्सक्लूसिव फोटोशूट्स और वीडियो..."
+          <label class="block text-xs font-bold uppercase text-gray-300 mb-1.5">Bio / Description</label>
+          <textarea id="formModelBio" rows="2" placeholder="Exclusive photoshoot, runway model highlights..."
             class="w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2 text-xs text-white focus:border-pink-500"></textarea>
         </div>
 
         <div>
-          <label class="block text-xs font-bold uppercase text-amber-400 mb-1.5">🔥 प्रीमियम वीडियो लिंक / डेस्टिनेशन URL *</label>
-          <input type="url" id="formModelVideoLink" placeholder="https://t.me/yourvipchannel या आपका लिंक" required
+          <label class="block text-xs font-bold uppercase text-amber-400 mb-1.5">🔥 Premium Video Link / Destination URL *</label>
+          <input type="url" id="formModelVideoLink" placeholder="https://t.me/riyakumarix7" required
             class="w-full bg-black/50 border border-amber-500/40 rounded-xl px-3.5 py-2 text-xs text-white placeholder-gray-500 focus:border-amber-400">
-          <p class="text-[11px] text-gray-400 mt-1">जब यूजर "मेरे सभी प्रीमियम वीडियो देखें" बटन दबाएगा, तो वह सीधे इस लिंक पर जाएगा।</p>
         </div>
 
         <div>
-          <label class="block text-xs font-bold uppercase text-gray-300 mb-1.5">टैग्स (कॉमा द्वारा अलग करें)</label>
-          <input type="text" id="formModelTags" placeholder="ग्लैमर, फैशन मॉडल, 4K अल्ट्रा HD, ट्रेंडिंग"
+          <label class="block text-xs font-bold uppercase text-gray-300 mb-1.5">Tags (Comma Separated)</label>
+          <input type="text" id="formModelTags" placeholder="Glamour, Fashion Model, 4K Ultra, Trending"
             class="w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2 text-xs text-white focus:border-pink-500">
         </div>
 
         <div class="flex items-center gap-6 pt-2">
           <label class="flex items-center gap-2 text-xs text-gray-200 cursor-pointer">
             <input type="checkbox" id="formModelFeatured" class="w-4 h-4 rounded text-pink-600 focus:ring-pink-500 bg-black/50 border-white/20">
-            <span>⭐ VIP स्पॉटलाइट में फीचर करें</span>
+            <span>⭐ Feature in VIP Spotlight</span>
           </label>
           <label class="flex items-center gap-2 text-xs text-gray-200 cursor-pointer">
             <input type="checkbox" id="formModelActive" checked class="w-4 h-4 rounded text-pink-600 focus:ring-pink-500 bg-black/50 border-white/20">
-            <span>🟢 पब्लिक विजिबिलिटी सक्रिय (Active)</span>
+            <span>🟢 Public Visibility Active</span>
           </label>
         </div>
 
         <div class="pt-4 border-t border-white/10 flex items-center justify-end gap-3">
           <button type="button" id="btnCancelModelForm" class="px-5 py-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-xs font-semibold text-gray-400 hover:text-white transition">
-            रद्द करें
+            Cancel
           </button>
           <button type="submit" id="btnSubmitModelForm" class="btn-vip-glow px-7 py-2.5 text-xs font-bold">
-            मॉडल प्रोफाइल सेव करें
+            Save Model Profile
           </button>
         </div>
       </form>
