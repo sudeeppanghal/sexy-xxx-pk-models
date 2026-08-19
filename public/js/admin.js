@@ -101,6 +101,12 @@ const settingCtaButtonText = document.getElementById('settingCtaButtonText');
 const settingTelegramLink = document.getElementById('settingTelegramLink');
 const settingAdminPassword = document.getElementById('settingAdminPassword');
 
+// Social Share Preview Elements
+const settingShareFile = document.getElementById('settingShareFile');
+const settingShareImage = document.getElementById('settingShareImage');
+const settingShareTitle = document.getElementById('settingShareTitle');
+const sharePreviewImg = document.getElementById('sharePreviewImg');
+
 // Toast Notification
 function showToast(message, type = 'success') {
   const toast = document.createElement('div');
@@ -489,6 +495,13 @@ async function loadAdminSettings() {
         inputAdsterraApiToken.value = siteSettings.adsterraApiToken || '3897aae75b2bfa4492f9bf4145aac236';
       }
 
+      // Social Share Settings
+      settingShareImage.value = siteSettings.shareImage || '';
+      settingShareTitle.value = siteSettings.shareTitle || '';
+      if (sharePreviewImg) {
+        sharePreviewImg.src = siteSettings.shareImage || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80';
+      }
+
       settingSiteName.value = siteSettings.siteName || '';
       settingSiteTagline.value = siteSettings.siteTagline || '';
       settingAnnouncement.value = siteSettings.announcement || '';
@@ -500,6 +513,41 @@ async function loadAdminSettings() {
   } catch (err) {
     console.error('Error loading settings:', err);
   }
+}
+
+// Social Share Image File Upload
+if (settingShareFile) {
+  settingShareFile.addEventListener('change', async () => {
+    if (settingShareFile.files.length === 0) return;
+    const file = settingShareFile.files[0];
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      showToast('Uploading social share photo...', 'success');
+      const res = await fetch('/api/admin/upload', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${adminToken}` },
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success && data.url) {
+        settingShareImage.value = data.url;
+        if (sharePreviewImg) sharePreviewImg.src = data.url;
+        showToast('Social preview photo uploaded! Click "Save Site Settings" to save.', 'success');
+      }
+    } catch (e) {
+      showToast('Error uploading image!', 'error');
+    }
+  });
+}
+
+if (settingShareImage) {
+  settingShareImage.addEventListener('input', (e) => {
+    if (sharePreviewImg && e.target.value.trim()) {
+      sharePreviewImg.src = e.target.value.trim();
+    }
+  });
 }
 
 // Save Adsterra Settings
@@ -546,7 +594,9 @@ siteSettingsForm.addEventListener('submit', async (e) => {
     heroSubtitle: settingHeroSubtitle.value.trim(),
     ctaButtonText: settingCtaButtonText.value.trim(),
     telegramLink: settingTelegramLink.value.trim(),
-    globalCtaLink: settingTelegramLink.value.trim()
+    globalCtaLink: settingTelegramLink.value.trim(),
+    shareImage: settingShareImage.value.trim(),
+    shareTitle: settingShareTitle.value.trim()
   };
 
   if (settingAdminPassword.value.trim()) {
@@ -564,7 +614,7 @@ siteSettingsForm.addEventListener('submit', async (e) => {
     });
     const data = await res.json();
     if (data.success) {
-      showToast('Site settings updated successfully!', 'success');
+      showToast('Site & Social Share Preview settings saved!', 'success');
       settingAdminPassword.value = '';
     }
   } catch (err) {
