@@ -193,6 +193,9 @@
     "adminPasswordHash": "7f1c2b591217369ea9030a2039fe1a4ceeafdf961f4d616e2096fe440cf395bd",
     "enableAgeGate": false,
     "themeColor": "ruby-glow",
+    "shareTitle": "GLAMOUR VIP | Official Fashion Models & Video Portfolio",
+    "shareDescription": "Discover verified fashion models, exclusive runway shoots, and official video portfolios.",
+    "shareImage": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1200&q=85",
     "adsterraSmartLink": "https://www.effectivecpmnetwork.com/rm9cqers?key=53f807fa771a60ba28a6dbc43af423a1",
     "enableSmartLinkOnClicks": true,
     "socialBarScript": "https://pl30926092.effectivecpmnetwork.com/7c/d7/31/7cd7318b8d42d394a693054855bc9ae9.js",
@@ -205,17 +208,40 @@
     "adsterraApiToken": "3897aae75b2bfa4492f9bf4145aac236",
     "onlyfansLink": ""
   },
-  "adminTokens": [],
+  "adminTokens": [
+    {
+      "token": "sec_c34319530f7a8c704cfd6fb80291ae98cb234bd5945de2a8f06044ff77d728ba",
+      "clientIp": "2409:40c1:18:2177:c4bf:2383:57e5:c3f2",
+      "createdAt": 1787162212120,
+      "expiresAt": 1787248612120
+    },
+    {
+      "token": "sec_1497ee827a223007bd7dbda62f003a6ef1c99b57a0e803bfe3262aa496bb9d9a",
+      "clientIp": "2409:40c1:18:2177:c4bf:2383:57e5:c3f2",
+      "createdAt": 1787162212127,
+      "expiresAt": 1787248612127
+    }
+  ],
   "analytics": {
-    "uniqueVisitors": {},
-    "pageviews": 0,
+    "uniqueVisitors": {
+      "2026-08-19": [
+        "29efac8d96345071",
+        "8deb4bdb7e86143e"
+      ]
+    },
+    "pageviews": 2,
     "clicks": 0,
     "devices": {
       "mobile": 0,
-      "desktop": 0
+      "desktop": 2
     },
-    "countries": {},
-    "hourlyViews": {},
+    "countries": {
+      "IN": 1,
+      "US": 1
+    },
+    "hourlyViews": {
+      "17": 2
+    },
     "recentEvents": []
   }
 }
