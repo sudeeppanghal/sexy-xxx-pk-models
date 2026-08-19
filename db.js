@@ -6,7 +6,6 @@ const DATA_DIR = path.join(__dirname, 'data');
 const DB_FILE = path.join(DATA_DIR, 'database.json');
 const UPLOADS_DIR = path.join(__dirname, 'uploads');
 
-// Ensure directories exist
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 }
@@ -26,165 +25,18 @@ function timingSafeCompare(a, b) {
   return crypto.timingSafeEqual(bufA, bufB);
 }
 
-const SEED_MODELS = [
-  {
-    id: "model-1",
-    name: "रिया शर्मा (Riya Sharma)",
-    age: 22,
-    location: "मुंबई, भारत",
-    badge: "🔥 टॉप ट्रेंडिंग",
-    status: "online",
-    image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=85",
-    gallery: [
-      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=85"
-    ],
-    bio: "इंटरनेशनल फैशन मॉडल व इन्फ्लुएंसर। एक्सक्लूसिव फोटोशूट्स, बिहाइंड-द-सीन्स और स्पेशल प्रीमियम वीडियो यहाँ देखें।",
-    premiumVideoLink: "https://t.me/yourvipchannel",
-    telegramEmbed: "https://t.me/telegram/83",
-    premiumPrice: "VIP वीडियो पास",
-    rating: 5.0,
-    videoCount: 64,
-    tags: ["ग्लैमर", "फैशन मॉडल", "4K अल्ट्रा HD", "ट्रेंडिंग"],
-    featured: true,
-    active: true,
-    clicks: 245,
-    views: 3120,
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: "model-2",
-    name: "अनाहिता रॉय (Anahita Roy)",
-    age: 24,
-    location: "गोवा, भारत",
-    badge: "💎 VIP एक्सक्लूसिव",
-    status: "live",
-    image: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=800&q=85",
-    gallery: [
-      "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=800&q=85"
-    ],
-    bio: "शानदार स्टाइल, बोल्ड लुक्स और एक्सक्लूसिव वीडियो का प्रीमियम कलेक्शन केवल मेरे खास फैंस के लिए।",
-    premiumVideoLink: "https://t.me/yourvipchannel",
-    telegramEmbed: "",
-    premiumPrice: "एक्सक्लूसिव वॉल्ट",
-    rating: 4.9,
-    videoCount: 92,
-    tags: ["बीच वाइब्स", "स्टाइलिश", "स्पेशल शूट", "VIP एक्सेस"],
-    featured: true,
-    active: true,
-    clicks: 318,
-    views: 4210,
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: "model-3",
-    name: "तान्या कपूर (Tanya Kapoor)",
-    age: 21,
-    location: "दिल्ली, भारत",
-    badge: "✨ नई सेंसेशन",
-    status: "online",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=85",
-    gallery: [
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=85"
-    ],
-    bio: "क्यूट स्माइल और दिलकश अंदाज़। मेरे नए डांस रील्स और प्राइवेट व्लॉग वीडियो अभी अनलॉक करें।",
-    premiumVideoLink: "https://t.me/yourvipchannel",
-    telegramEmbed: "",
-    premiumPrice: "प्रीमियम क्लिप्स",
-    rating: 4.9,
-    videoCount: 45,
-    tags: ["क्यूट", "ग्लैमरस", "डांस वीडियो", "HD क्लिप्स"],
-    featured: true,
-    active: true,
-    clicks: 180,
-    views: 2450,
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: "model-4",
-    name: "नताशा डिसूजा (Natasha D'Souza)",
-    age: 23,
-    location: "बेंगलुरु, भारत",
-    badge: "👑 टॉप रेटेड",
-    status: "online",
-    image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=85",
-    gallery: [
-      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&q=85"
-    ],
-    bio: "हाई-फैशन रनवे मॉडल। नए सिनेमैटिक एपिसोड्स और एक्सक्लूसिव वीडियो सीरीज तुरंत देखें।",
-    premiumVideoLink: "https://t.me/yourvipchannel",
-    telegramEmbed: "",
-    premiumPrice: "फुल एचडी पास",
-    rating: 5.0,
-    videoCount: 110,
-    tags: ["फैशन शो", "ग्लैम शूट", "VIP 4K", "सिनेमैटिक"],
-    featured: true,
-    active: true,
-    clicks: 420,
-    views: 5300,
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: "model-5",
-    name: "सिमरन कौर (Simran Kaur)",
-    age: 22,
-    location: "चंडीगढ़, भारत",
-    badge: "⭐ मोस्ट पॉपुलर",
-    status: "offline",
-    image: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=85",
-    gallery: [
-      "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=85"
-    ],
-    bio: "शाही खूबसूरती और लाजवाब स्टाइल। मेरे सभी नए वीडियो और फोटो सेट्स का तुरंत एक्सेस पाएं।",
-    premiumVideoLink: "https://t.me/yourvipchannel",
-    telegramEmbed: "",
-    premiumPrice: "तुरंत एक्सेस",
-    rating: 4.8,
-    videoCount: 38,
-    tags: ["देसी ग्लैम", "क्लासिक", "टीज़र", "स्पेशल"],
-    featured: false,
-    active: true,
-    clicks: 130,
-    views: 1650,
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: "model-6",
-    name: "ज़ोया खान (Zoya Khan)",
-    age: 25,
-    location: "दुबई / मुंबई",
-    badge: "🔥 सुपर हॉट",
-    status: "live",
-    image: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=800&q=85",
-    gallery: [
-      "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=800&q=85"
-    ],
-    bio: "लक्ज़री लाइफस्टाइल और इंटरनेशनल मॉडलिंग शूट्स। मेरी एक्सक्लूसिव 4K वीडियो सीरीज़ अभी देखें।",
-    premiumVideoLink: "https://t.me/yourvipchannel",
-    telegramEmbed: "",
-    premiumPrice: "VIP स्पेशल",
-    rating: 4.9,
-    videoCount: 84,
-    tags: ["लक्ज़री", "दुबई शूट", "4K अल्ट्रा", "मेंबर ओनली"],
-    featured: false,
-    active: true,
-    clicks: 290,
-    views: 3400,
-    createdAt: new Date().toISOString()
-  }
-];
-
 const DEFAULT_SETTINGS = {
   siteName: "GLAMOUR VIP MODELS",
-  siteTagline: "एक्सक्लूसिव ग्लैमर मॉडल्स और प्रीमियम 4K वीडियो हब",
+  siteTagline: "Exclusive Glamour Models & 4K Video Hub",
   heroTitle: "टॉप ग्लैमर मॉडल्स के एक्सक्लूसिव और ट्रेंडिंग वीडियो देखें",
   heroSubtitle: "हाई-फैशन शूट्स, लाइव सेशन्स और एक्सक्लूसिव 4K वीडियो गैलरी। अपनी पसंदीदा मॉडल चुनें और पूरा वीडियो तुरंत देखें।",
-  announcement: "⭐ आज का स्पेशल अपडेट: नए एक्सक्लूसिव ग्लैमर वीडियो और लाइव सेशन्स लाइव हैं! ⭐",
+  announcement: "⭐ आज का स्पेशल अपडेट: नए एक्सक्लूसिव फैशन वीडियो और फोटोशूट्स लाइव हैं! • 💎 100% वेरिफाइड प्रोफाइल्स • 🔥 टॉप ट्रेंडिंग मॉडल्स • ⭐",
   ctaButtonText: "🔥 मेरे सभी प्रीमियम वीडियो देखें - यहाँ क्लिक करें",
-  globalCtaLink: "https://t.me/yourvipchannel",
-  telegramLink: "https://t.me/yourvipchannel",
+  globalCtaLink: "https://t.me/riyakumarix7",
+  telegramLink: "https://t.me/riyakumarix7",
   adminPin: "Luxe@9211#Admin",
   adminPasswordHash: hashPassword("Luxe@9211#Admin"),
-  enableAgeGate: false,
+  enableAgeGate: true,
   themeColor: "ruby-glow",
   
   // Adsterra Monetization Settings
@@ -196,7 +48,10 @@ const DEFAULT_SETTINGS = {
   nativeBannerContainerId: "container-e57d2a5991c2d320d1835502c0693cb4",
   enableNativeBanner: true,
   banner728x90Key: "109bfc08902b9073c69aa9a8e3dda390",
-  enableBanner728x90: true
+  enableBanner728x90: true,
+  
+  // Adsterra Official API Token for Live Stats
+  adsterraApiToken: ""
 };
 
 class Database {
@@ -204,8 +59,18 @@ class Database {
     this.data = {
       models: [],
       settings: {},
-      adminTokens: []
+      adminTokens: [],
+      analytics: {
+        uniqueVisitors: {}, // date_string -> Set/Array of hashed IPs
+        pageviews: 0,
+        clicks: 0,
+        devices: { mobile: 0, desktop: 0 },
+        countries: {},
+        hourlyViews: {},
+        recentEvents: []
+      }
     };
+    this.activeVisitors = new Map(); // ipHash -> lastSeenTimestamp
     this.failedAttempts = new Map();
     this.load();
   }
@@ -214,35 +79,27 @@ class Database {
     try {
       if (fs.existsSync(DB_FILE)) {
         const raw = fs.readFileSync(DB_FILE, 'utf-8');
-        this.data = JSON.parse(raw);
-        if (!this.data.models || this.data.models.length === 0) {
-          this.data.models = SEED_MODELS;
-        }
-        if (!this.data.settings || Object.keys(this.data.settings).length === 0) {
-          this.data.settings = DEFAULT_SETTINGS;
-        } else {
-          // Merge any missing ad settings
-          this.data.settings = { ...DEFAULT_SETTINGS, ...this.data.settings };
-        }
-        if (!this.data.adminTokens) {
-          this.data.adminTokens = [];
-        }
-      } else {
+        const parsed = JSON.parse(raw);
         this.data = {
-          models: SEED_MODELS,
-          settings: DEFAULT_SETTINGS,
-          adminTokens: []
+          models: parsed.models || [],
+          settings: { ...DEFAULT_SETTINGS, ...(parsed.settings || {}) },
+          adminTokens: parsed.adminTokens || [],
+          analytics: {
+            uniqueVisitors: parsed.analytics?.uniqueVisitors || {},
+            pageviews: parsed.analytics?.pageviews || 0,
+            clicks: parsed.analytics?.clicks || 0,
+            devices: parsed.analytics?.devices || { mobile: 0, desktop: 0 },
+            countries: parsed.analytics?.countries || {},
+            hourlyViews: parsed.analytics?.hourlyViews || {},
+            recentEvents: parsed.analytics?.recentEvents || []
+          }
         };
+      } else {
+        this.data.settings = DEFAULT_SETTINGS;
         this.save();
       }
     } catch (err) {
-      console.error("Error loading database, resetting to seed defaults:", err);
-      this.data = {
-        models: SEED_MODELS,
-        settings: DEFAULT_SETTINGS,
-        adminTokens: []
-      };
-      this.save();
+      console.error("Error loading database:", err);
     }
   }
 
@@ -252,6 +109,115 @@ class Database {
     } catch (err) {
       console.error("Error saving database:", err);
     }
+  }
+
+  // Real visitor tracking (Excludes bots and admin requests)
+  recordRealVisitor(ip, userAgent = '', country = 'IN') {
+    if (!ip) return;
+    
+    // Ignore common search engine bots / crawlers
+    const isBot = /bot|googlebot|crawler|spider|robot|crawling|lighthouse|headless/i.test(userAgent);
+    if (isBot) return;
+
+    const today = new Date().toISOString().split('T')[0];
+    const hour = new Date().getHours();
+    const isMobile = /mobile|iphone|android|ipad|tablet/i.test(userAgent);
+    const ipHash = crypto.createHash('sha256').update(ip + today).digest('hex').slice(0, 16);
+
+    // Update active online visitor heartbeat
+    const now = Date.now();
+    this.activeVisitors.set(ipHash, now);
+
+    // Initialize analytics structure if needed
+    if (!this.data.analytics) {
+      this.data.analytics = { uniqueVisitors: {}, pageviews: 0, clicks: 0, devices: { mobile: 0, desktop: 0 }, countries: {}, hourlyViews: {}, recentEvents: [] };
+    }
+    if (!this.data.analytics.uniqueVisitors[today]) {
+      this.data.analytics.uniqueVisitors[today] = [];
+    }
+
+    // Record Unique Visitor
+    if (!this.data.analytics.uniqueVisitors[today].includes(ipHash)) {
+      this.data.analytics.uniqueVisitors[today].push(ipHash);
+    }
+
+    // Record Pageview
+    this.data.analytics.pageviews = (this.data.analytics.pageviews || 0) + 1;
+
+    // Record Device
+    if (isMobile) {
+      this.data.analytics.devices.mobile = (this.data.analytics.devices.mobile || 0) + 1;
+    } else {
+      this.data.analytics.devices.desktop = (this.data.analytics.devices.desktop || 0) + 1;
+    }
+
+    // Record Country
+    const safeCountry = (country || 'IN').toUpperCase().slice(0, 3);
+    this.data.analytics.countries[safeCountry] = (this.data.analytics.countries[safeCountry] || 0) + 1;
+
+    // Record Hourly
+    this.data.analytics.hourlyViews[hour] = (this.data.analytics.hourlyViews[hour] || 0) + 1;
+
+    // Save every 5th hit to save disk I/O
+    if (this.data.analytics.pageviews % 5 === 0) {
+      this.save();
+    }
+  }
+
+  // Record Real Click
+  recordRealClick(modelId) {
+    if (!this.data.analytics) {
+      this.data.analytics = { uniqueVisitors: {}, pageviews: 0, clicks: 0, devices: { mobile: 0, desktop: 0 }, countries: {}, hourlyViews: {}, recentEvents: [] };
+    }
+    this.data.analytics.clicks = (this.data.analytics.clicks || 0) + 1;
+    
+    if (modelId) {
+      const model = this.data.models.find(m => m.id === modelId);
+      if (model) {
+        model.clicks = (model.clicks || 0) + 1;
+      }
+    }
+    this.save();
+    return this.data.analytics.clicks;
+  }
+
+  getRealMetrics() {
+    const today = new Date().toISOString().split('T')[0];
+    const todayUniques = this.data.analytics?.uniqueVisitors?.[today]?.length || 0;
+    
+    let totalAllTimeUniques = 0;
+    if (this.data.analytics?.uniqueVisitors) {
+      for (const day in this.data.analytics.uniqueVisitors) {
+        totalAllTimeUniques += this.data.analytics.uniqueVisitors[day].length;
+      }
+    }
+
+    // Active online in the last 5 minutes
+    const now = Date.now();
+    let onlineActiveNow = 0;
+    for (const [hash, lastSeen] of this.activeVisitors.entries()) {
+      if (now - lastSeen < 5 * 60 * 1000) {
+        onlineActiveNow++;
+      } else {
+        this.activeVisitors.delete(hash);
+      }
+    }
+    if (onlineActiveNow === 0) onlineActiveNow = 1; // at least admin or current visitor
+
+    const totalPageviews = this.data.analytics?.pageviews || 0;
+    const totalClicks = this.data.analytics?.clicks || 0;
+    const ctr = totalPageviews > 0 ? ((totalClicks / totalPageviews) * 100).toFixed(1) : "0.0";
+
+    return {
+      onlineActiveNow,
+      todayUniques,
+      totalUniqueVisitors: totalAllTimeUniques || todayUniques,
+      totalPageviews,
+      totalClicks,
+      ctr: ctr + "%",
+      devices: this.data.analytics?.devices || { mobile: 0, desktop: 0 },
+      countries: this.data.analytics?.countries || { "IN": 1 }
+    };
   }
 
   getModels(onlyActive = true) {
@@ -270,19 +236,19 @@ class Database {
     const newModel = {
       id,
       name: String(modelData.name || "VIP Model").slice(0, 100),
-      age: Math.min(Math.max(parseInt(modelData.age) || 21, 18), 99),
-      location: String(modelData.location || "मुंबई, भारत").slice(0, 100),
-      badge: String(modelData.badge || "🔥 हॉट").slice(0, 50),
+      age: Math.min(Math.max(parseInt(modelData.age) || 22, 18), 99),
+      location: String(modelData.location || "Mumbai, India").slice(0, 100),
+      badge: String(modelData.badge || "🔥 Trending").slice(0, 50),
       status: ["online", "live", "offline"].includes(modelData.status) ? modelData.status : "online",
       image: String(modelData.image || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=85"),
       gallery: Array.isArray(modelData.gallery) ? modelData.gallery : [modelData.image || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=85"],
-      bio: String(modelData.bio || "एक्सक्लूसिव ग्लैमर शूट्स और वीडियो।").slice(0, 500),
-      premiumVideoLink: String(modelData.premiumVideoLink || this.data.settings.globalCtaLink || "https://t.me/yourvipchannel"),
+      bio: String(modelData.bio || "Exclusive glamour model portfolio and video gallery.").slice(0, 500),
+      premiumVideoLink: String(modelData.premiumVideoLink || this.data.settings.globalCtaLink || "https://t.me/riyakumarix7"),
       telegramEmbed: String(modelData.telegramEmbed || ""),
-      premiumPrice: String(modelData.premiumPrice || "VIP वीडियो पास").slice(0, 50),
+      premiumPrice: String(modelData.premiumPrice || "VIP Pass").slice(0, 50),
       rating: parseFloat(Math.min(Math.max(parseFloat(modelData.rating) || 5.0, 1.0), 5.0).toFixed(1)),
       videoCount: Math.max(parseInt(modelData.videoCount) || 30, 0),
-      tags: Array.isArray(modelData.tags) ? modelData.tags.map(t => String(t).slice(0, 30)) : (modelData.tags ? modelData.tags.split(',').map(t => t.trim().slice(0, 30)) : ["ग्लैमर", "VIP", "4K"]),
+      tags: Array.isArray(modelData.tags) ? modelData.tags.map(t => String(t).slice(0, 30)) : (modelData.tags ? modelData.tags.split(',').map(t => t.trim().slice(0, 30)) : ["Glamour", "VIP", "4K"]),
       featured: Boolean(modelData.featured),
       active: modelData.active !== undefined ? Boolean(modelData.active) : true,
       clicks: 0,
@@ -305,7 +271,7 @@ class Database {
       ...updateData,
       id: existing.id,
       name: updateData.name ? String(updateData.name).slice(0, 100) : existing.name,
-      age: updateData.age !== undefined ? Math.min(Math.max(parseInt(updateData.age) || 21, 18), 99) : existing.age,
+      age: updateData.age !== undefined ? Math.min(Math.max(parseInt(updateData.age) || 22, 18), 99) : existing.age,
       location: updateData.location ? String(updateData.location).slice(0, 100) : existing.location,
       bio: updateData.bio ? String(updateData.bio).slice(0, 500) : existing.bio,
       rating: updateData.rating !== undefined ? parseFloat(Math.min(Math.max(parseFloat(updateData.rating) || 5.0, 1.0), 5.0).toFixed(1)) : existing.rating,
@@ -330,13 +296,7 @@ class Database {
   }
 
   recordClick(id) {
-    const model = this.data.models.find(m => m.id === id);
-    if (model) {
-      model.clicks = (model.clicks || 0) + 1;
-      this.save();
-      return model.clicks;
-    }
-    return 0;
+    return this.recordRealClick(id);
   }
 
   recordView(id) {
@@ -379,7 +339,7 @@ class Database {
       const waitMinutes = Math.ceil((ipData.lockedUntil - now) / 60000);
       return {
         success: false,
-        message: `सुरक्षा लॉक: बहुत अधिक गलत प्रयास। कृपया ${waitMinutes} मिनट बाद पुनः प्रयास करें।`
+        message: `Security Lock: Too many failed attempts. Try again in ${waitMinutes} minutes.`
       };
     }
 
@@ -406,14 +366,14 @@ class Database {
         this.failedAttempts.set(clientIp, ipData);
         return {
           success: false,
-          message: "सुरक्षा लॉक: लगातार 5 गलत पासवर्ड दर्ज किए गए। 15 मिनट के लिए लॉक कर दिया गया है।"
+          message: "Security Lock: 5 consecutive failed passwords. Locked for 15 minutes."
         };
       } else {
         this.failedAttempts.set(clientIp, ipData);
         const remaining = 5 - ipData.count;
         return {
           success: false,
-          message: `गलत पासवर्ड! आपके पास ${remaining} प्रयास शेष हैं।`
+          message: `Incorrect password! ${remaining} attempt(s) remaining.`
         };
       }
     }
@@ -435,23 +395,17 @@ class Database {
   getStats() {
     const totalModels = this.data.models.length;
     const activeModels = this.data.models.filter(m => m.active).length;
-    const totalClicks = this.data.models.reduce((acc, m) => acc + (m.clicks || 0), 0);
-    const totalViews = this.data.models.reduce((acc, m) => acc + (m.views || 0), 0);
-    const featuredCount = this.data.models.filter(m => m.featured).length;
+    const metrics = this.getRealMetrics();
 
     return {
       totalModels,
       activeModels,
-      totalClicks,
-      totalViews,
-      featuredCount,
+      ...metrics,
+      featuredCount: this.data.models.filter(m => m.featured).length,
       topModels: [...this.data.models].sort((a, b) => (b.clicks || 0) - (a.clicks || 0)).slice(0, 5)
     };
   }
 }
 
 const db = new Database();
-db.data.settings = { ...DEFAULT_SETTINGS, ...db.data.settings };
-db.save();
-
 module.exports = { db, hashPassword };
