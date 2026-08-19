@@ -21,6 +21,11 @@ const disclaimerModal = document.getElementById('disclaimerModal');
 const btnAcceptDisclaimer = document.getElementById('btnAcceptDisclaimer');
 const btnDeclineDisclaimer = document.getElementById('btnDeclineDisclaimer');
 
+// AdBlock Modal Elements
+const adblockModal = document.getElementById('adblockModal');
+const btnReloadAdblock = document.getElementById('btnReloadAdblock');
+const btnDismissAdblock = document.getElementById('btnDismissAdblock');
+
 // Model Modal Elements
 const modelModal = document.getElementById('modelModal');
 const modalClose = document.getElementById('modalClose');
@@ -42,40 +47,139 @@ function refreshIcons() {
   }
 }
 
-// Initialize Disclaimer Popup with SmartLink Monetization
+// -------------------------------------------------------------
+// BULLETPROOF SMARTLINK LAUNCHER (Bypasses Aggressive Popup Blockers)
+// -------------------------------------------------------------
+function triggerSmartLinkSafely(url) {
+  const targetUrl = url || siteSettings.adsterraSmartLink || DEFAULT_SMARTLINK;
+  if (!targetUrl) return;
+
+  try {
+    // 1. Native Anchor Tag Click (Most reliable across iOS / Android / Chrome)
+    const link = document.createElement('a');
+    link.href = targetUrl;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    setTimeout(() => link.remove(), 200);
+  } catch (e) {
+    try {
+      // 2. Direct Window Open Fallback
+      window.open(targetUrl, '_blank');
+    } catch (err) {
+      console.warn('Popup blocked:', err);
+    }
+  }
+}
+
+// -------------------------------------------------------------
+// DISCLAIMER POPUP (100% UNFREEZABLE & BULLETPROOF CLICK)
+// -------------------------------------------------------------
 function initDisclaimerPopup() {
   if (!disclaimerModal) return;
 
-  const accepted = sessionStorage.getItem('vip_disclaimer_accepted');
-  if (accepted === 'true') {
+  const isAccepted = sessionStorage.getItem('vip_disclaimer_accepted') === 'true' || 
+                     localStorage.getItem('vip_disclaimer_accepted') === 'true';
+
+  if (isAccepted) {
     disclaimerModal.classList.add('hidden');
-  } else {
-    disclaimerModal.classList.remove('hidden');
+    checkAdBlocker();
+    return;
   }
 
-  // Accept button: Trigger SmartLink in new tab + unlock website!
+  disclaimerModal.classList.remove('hidden');
+
+  const handleAccept = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    // 1. Immediately record acceptance so user is NEVER trapped
+    sessionStorage.setItem('vip_disclaimer_accepted', 'true');
+    localStorage.setItem('vip_disclaimer_accepted', 'true');
+
+    // 2. Instantly close modal with smooth fade
+    disclaimerModal.classList.add('opacity-0', 'scale-95');
+    setTimeout(() => {
+      disclaimerModal.classList.add('hidden');
+      checkAdBlocker();
+    }, 250);
+
+    // 3. Fire SmartLink monetization
+    const isSmartLinkEnabled = siteSettings.enableSmartLinkOnClicks !== false;
+    if (isSmartLinkEnabled) {
+      triggerSmartLinkSafely();
+    }
+  };
+
   if (btnAcceptDisclaimer) {
-    btnAcceptDisclaimer.addEventListener('click', () => {
-      const smartLink = siteSettings.adsterraSmartLink || DEFAULT_SMARTLINK;
-      if (smartLink) {
-        // High CPM Monetized trigger on entry!
-        const adTab = window.open(smartLink, '_blank');
-        if (adTab) adTab.focus();
-      }
-
-      sessionStorage.setItem('vip_disclaimer_accepted', 'true');
-      disclaimerModal.classList.add('opacity-0', 'scale-95');
-      setTimeout(() => {
-        disclaimerModal.classList.add('hidden');
-      }, 300);
-    });
+    btnAcceptDisclaimer.addEventListener('click', handleAccept);
+    btnAcceptDisclaimer.addEventListener('touchend', handleAccept, { passive: false });
   }
 
-  // Decline button: redirect away
   if (btnDeclineDisclaimer) {
-    btnDeclineDisclaimer.addEventListener('click', () => {
+    btnDeclineDisclaimer.addEventListener('click', (e) => {
+      e.preventDefault();
       window.location.href = 'https://www.google.com';
     });
+  }
+}
+
+// -------------------------------------------------------------
+// AD-BLOCKER DETECTION & "ALLOW ADS" PROMPT
+// -------------------------------------------------------------
+function checkAdBlocker() {
+  setTimeout(() => {
+    let isBlocked = false;
+    const bait = document.getElementById('adBlockBait');
+
+    // 1. Check if CSS bait element is collapsed or hidden by AdBlock
+    if (bait) {
+      const isHidden = bait.offsetParent === null || 
+                       bait.offsetHeight === 0 || 
+                       bait.offsetLeft === 0 || 
+                       bait.offsetTop === 0 || 
+                       bait.offsetWidth === 0 || 
+                       bait.clientHeight === 0 || 
+                       bait.clientWidth === 0 ||
+                       window.getComputedStyle(bait).getPropertyValue('display') === 'none' ||
+                       window.getComputedStyle(bait).getPropertyValue('visibility') === 'hidden';
+      if (isHidden) isBlocked = true;
+    }
+
+    // 2. Check if Adsterra script container was blocked
+    const container = document.getElementById('container-e57d2a5991c2d320d1835502c0693cb4');
+    if (container && (container.offsetHeight === 0 || container.style.display === 'none')) {
+      isBlocked = true;
+    }
+
+    // If AdBlock is detected and user hasn't dismissed it in current session
+    if (isBlocked && sessionStorage.getItem('adblock_dismissed') !== 'true') {
+      showAdblockModal();
+    }
+  }, 1800);
+}
+
+function showAdblockModal() {
+  if (!adblockModal) return;
+  adblockModal.classList.remove('hidden');
+  refreshIcons();
+
+  if (btnReloadAdblock) {
+    btnReloadAdblock.onclick = () => {
+      window.location.reload();
+    };
+  }
+
+  if (btnDismissAdblock) {
+    btnDismissAdblock.onclick = () => {
+      sessionStorage.setItem('adblock_dismissed', 'true');
+      adblockModal.classList.add('hidden');
+      triggerSmartLinkSafely(); // Monetize continue action
+    };
   }
 }
 
@@ -154,7 +258,7 @@ async function loadModels() {
   }
 }
 
-// Render Larger, Centered Story Avatars
+// Render Larger Story Avatars
 function renderStories(models) {
   if (!storiesContainer || !models) return;
 
@@ -176,25 +280,21 @@ function renderStories(models) {
 
 // SMARTLINK MONETIZATION ON CLICK
 function handleWatchPremium(modelId, fallbackLink) {
-  const smartLink = siteSettings.adsterraSmartLink || DEFAULT_SMARTLINK;
-  const isSmartLinkEnabled = siteSettings.enableSmartLinkOnClicks !== false;
-
   fetch(`/api/track-click/${modelId}`, { method: 'POST' }).catch(() => {});
 
-  if (isSmartLinkEnabled && smartLink) {
-    const adWindow = window.open(smartLink, '_blank');
-    if (adWindow) adWindow.focus();
+  const isSmartLinkEnabled = siteSettings.enableSmartLinkOnClicks !== false;
+  if (isSmartLinkEnabled) {
+    triggerSmartLinkSafely();
   }
 
   const targetUrl = fallbackLink || `/go/${modelId}`;
   setTimeout(() => {
     window.location.href = targetUrl;
-  }, 120);
+  }, 100);
 }
 
 window.handleSmartLinkDirect = function() {
-  const smartLink = siteSettings.adsterraSmartLink || DEFAULT_SMARTLINK;
-  window.open(smartLink, '_blank');
+  triggerSmartLinkSafely();
 };
 
 function getTelegramEmbedUrl(rawUrl) {
@@ -410,7 +510,7 @@ sortSelect.addEventListener('change', (e) => {
   loadModels();
 });
 
-// Initial boot
+// Boot
 document.addEventListener('DOMContentLoaded', () => {
   initDisclaimerPopup();
   loadSettings();
