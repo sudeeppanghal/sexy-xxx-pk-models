@@ -66,7 +66,7 @@ app.use(express.json({ limit: '15mb' }));
 app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
 function requireAdmin(req, res, next) {
   const authHeader = req.headers['authorization'] || req.headers['x-admin-token'];
@@ -87,7 +87,6 @@ function requireAdmin(req, res, next) {
 
 // -------------------------------------------------------------
 // 101% UNBLOCKABLE ANTI-ADBLOCK GATEWAY ROUTES
-// (These route through your own domain so AdBlockers CANNOT block them)
 // -------------------------------------------------------------
 
 app.get(['/out/smartlink', '/vip/watch', '/stream/play', '/access/unlock'], (req, res) => {
@@ -120,7 +119,7 @@ app.get('/go/:id', (req, res) => {
 });
 
 // -------------------------------------------------------------
-// PUBLIC API ROUTES
+// PUBLIC API & DYNAMIC META INJECTION (FOR WHATSAPP / FB PREVIEWS)
 // -------------------------------------------------------------
 
 app.get('/health', (req, res) => {
@@ -235,7 +234,6 @@ app.post('/api/admin/logout', requireAdmin, (req, res) => {
   res.json({ success: true, message: 'Logged out successfully' });
 });
 
-// Real-time Traffic Analytics & Stats
 app.get('/api/admin/stats', requireAdmin, (req, res) => {
   try {
     const stats = db.getStats();
@@ -245,7 +243,6 @@ app.get('/api/admin/stats', requireAdmin, (req, res) => {
   }
 });
 
-// Fetch Real-Time Adsterra Publisher API Statistics
 app.get('/api/admin/adsterra-stats', requireAdmin, async (req, res) => {
   try {
     const settings = db.getSettings();
@@ -340,7 +337,6 @@ app.get('/api/admin/models', requireAdmin, (req, res) => {
   }
 });
 
-// Admin: Upload image (Persistent Base64)
 app.post('/api/admin/upload', requireAdmin, upload.single('image'), (req, res) => {
   try {
     if (!req.file) {
@@ -353,7 +349,6 @@ app.post('/api/admin/upload', requireAdmin, upload.single('image'), (req, res) =
   }
 });
 
-// Admin: Create model (with persistent base64 image)
 app.post('/api/admin/models', requireAdmin, upload.single('imageFile'), (req, res) => {
   try {
     const modelData = { ...req.body };
@@ -380,7 +375,6 @@ app.post('/api/admin/models', requireAdmin, upload.single('imageFile'), (req, re
   }
 });
 
-// Admin: Update model (with persistent base64 image)
 app.put('/api/admin/models/:id', requireAdmin, upload.single('imageFile'), (req, res) => {
   try {
     const updateData = { ...req.body };
@@ -446,6 +440,27 @@ app.put('/api/admin/settings', requireAdmin, (req, res) => {
 
 app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+// Dynamic HTML renderer that injects custom Social Share Photo (og:image) for WhatsApp / FB
+app.get(['/', '/index.html'], (req, res) => {
+  try {
+    const indexPath = path.join(__dirname, 'public', 'index.html');
+    let html = fs.readFileSync(indexPath, 'utf-8');
+    const settings = db.getSettings();
+
+    const shareImg = settings.shareImage || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1200&q=85";
+    const shareTitle = settings.shareTitle || settings.siteName || "GLAMOUR VIP | Official Fashion Models & Video Portfolio";
+    const shareDesc = settings.shareDescription || settings.siteTagline || "Discover verified fashion models, exclusive runway shoots, and official video portfolios.";
+
+    html = html.replace(/<meta property="og:image" content="[^"]*">/i, `<meta property="og:image" content="${shareImg}">`);
+    html = html.replace(/<meta property="og:title" content="[^"]*">/i, `<meta property="og:title" content="${shareTitle}">`);
+    html = html.replace(/<meta property="og:description" content="[^"]*">/i, `<meta property="og:description" content="${shareDesc}">`);
+
+    res.send(html);
+  } catch (err) {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  }
 });
 
 app.get('*', (req, res) => {
