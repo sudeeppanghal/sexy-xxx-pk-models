@@ -68,7 +68,7 @@ async function loadSettings() {
 function applySettings(settings) {
   if (settings.siteName) {
     document.getElementById('navSiteName').innerText = settings.siteName;
-    document.title = `${settings.siteName} | एक्सक्लूसिव फैशन व ग्लैमर मॉडल्स और 4K प्रीमियम वीडियो`;
+    document.title = `${settings.siteName} | टॉप फैशन मॉडल्स और एक्सक्लूसिव वीडियो पोर्टफोलियो`;
   }
   if (settings.announcement) {
     document.getElementById('announcementText').innerText = settings.announcement;
@@ -113,19 +113,19 @@ async function loadModels() {
   }
 }
 
-// Render Top Stories / Reels Carousel
+// Render Larger, Centered Story Avatars
 function renderStories(models) {
   if (!storiesContainer || !models) return;
 
   storiesContainer.innerHTML = models.map(model => {
     return `
-      <div onclick="openModelModal('${model.id}')" class="flex flex-col items-center gap-1.5 flex-shrink-0 cursor-pointer group select-none">
+      <div onclick="openModelModal('${model.id}')" class="flex flex-col items-center gap-2 flex-shrink-0 cursor-pointer group select-none transition-transform">
         <div class="story-avatar-ring">
-          <div class="w-16 h-16 sm:w-18 sm:h-18 rounded-full overflow-hidden border-2 border-black bg-black">
-            <img src="${model.image}" alt="${model.name}" class="w-full h-full object-cover group-hover:scale-110 transition duration-300" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'">
+          <div class="w-18 h-18 sm:w-22 sm:h-22 rounded-full overflow-hidden border-2 border-black bg-black">
+            <img src="${model.image}" alt="${model.name}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80'">
           </div>
         </div>
-        <span class="text-[11px] font-bold text-gray-200 truncate max-w-[72px] text-center group-hover:text-pink-400 transition">
+        <span class="text-xs sm:text-sm font-bold text-gray-200 truncate max-w-[85px] text-center group-hover:text-pink-400 transition">
           ${model.name.split(' ')[0]}
         </span>
       </div>
@@ -156,7 +156,7 @@ function getTelegramEmbedUrl(rawUrl) {
   return url;
 }
 
-// Render Model Cards (Photo + Button ON TOP)
+// Render Model Cards (Large Photo + Button ON TOP)
 function renderModels(models) {
   if (!models || models.length === 0) {
     modelsGrid.innerHTML = '';
@@ -175,13 +175,13 @@ function renderModels(models) {
     return `
       <div class="model-card group reveal-on-scroll ${delayClass}" data-id="${model.id}">
         
-        <!-- 1. MODEL PHOTO ON TOP -->
+        <!-- 1. LARGE HIGH-RESOLUTION PHOTO ON TOP -->
         <div class="model-image-wrap">
           <img src="${model.image}" alt="${model.name}" loading="lazy" class="model-image" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=85'">
           <div class="model-image-overlay"></div>
 
           <!-- Badges Overlay -->
-          <div class="absolute top-3.5 left-3.5 right-3.5 flex items-center justify-between z-10">
+          <div class="absolute top-4 left-4 right-4 flex items-center justify-between z-10">
             <span class="${model.badge && (model.badge.includes('VIP') || model.badge.includes('एक्सक्लूसिव')) ? 'badge-vip' : 'badge-hot'}">
               ${model.badge || '🔥 VIP मॉडल'}
             </span>
@@ -192,31 +192,31 @@ function renderModels(models) {
 
           <!-- Quick Preview Overlay Button -->
           <button onclick="openModelModal('${model.id}')" 
-            class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-2 bg-black/80 hover:bg-pink-600 text-white text-xs font-bold rounded-full backdrop-blur-md opacity-0 group-hover:opacity-100 transition duration-300 shadow-2xl border border-white/20 flex items-center gap-1.5 z-20">
-            <i data-lucide="${model.telegramEmbed ? 'play' : 'eye'}" class="w-3.5 h-3.5"></i>
+            class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-5 py-2.5 bg-black/85 hover:bg-pink-600 text-white text-xs font-bold rounded-full backdrop-blur-md opacity-0 group-hover:opacity-100 transition duration-300 shadow-2xl border border-white/20 flex items-center gap-2 z-20">
+            <i data-lucide="${model.telegramEmbed ? 'play' : 'eye'}" class="w-4 h-4"></i>
             <span>${model.telegramEmbed ? 'टेलीग्राम वीडियो' : 'झलक (Preview)'}</span>
           </button>
 
           <!-- Bottom Floating Info on Photo -->
-          <div class="absolute bottom-3 left-3.5 right-3.5 z-10 flex items-end justify-between">
+          <div class="absolute bottom-4 left-4 right-4 z-10 flex items-end justify-between">
             <div>
-              <h3 class="font-serif font-extrabold text-xl text-white drop-shadow-md">
-                ${model.name}, <span class="text-pink-300 text-base font-sans font-bold">${model.age || 22}</span>
+              <h3 class="font-serif font-extrabold text-xl sm:text-2xl text-white drop-shadow-md">
+                ${model.name}, <span class="text-pink-300 text-lg font-sans font-bold">${model.age || 22}</span>
               </h3>
-              <p class="text-gray-300 text-[11px] flex items-center gap-1 mt-0.5 drop-shadow">
-                <i data-lucide="map-pin" class="w-3 h-3 text-pink-400"></i>
+              <p class="text-gray-300 text-xs flex items-center gap-1.5 mt-0.5 drop-shadow font-medium">
+                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-pink-400"></i>
                 <span>${model.location || 'मुंबई, भारत'}</span>
               </p>
             </div>
-            <div class="flex items-center gap-1 text-amber-400 text-xs font-bold bg-black/70 backdrop-blur-sm px-2.5 py-1 rounded-lg border border-amber-400/30">
-              <i data-lucide="star" class="w-3 h-3 fill-amber-400"></i>
+            <div class="flex items-center gap-1 text-amber-400 text-xs font-bold bg-black/75 backdrop-blur-sm px-3 py-1 rounded-xl border border-amber-400/30 shadow-lg">
+              <i data-lucide="star" class="w-3.5 h-3.5 fill-amber-400"></i>
               <span>${model.rating || '5.0'}</span>
             </div>
           </div>
         </div>
 
-        <!-- 2. HIGH CONVERTING ACTION BUTTON DIRECTLY ON TOP OF CARD BODY -->
-        <div class="p-3.5 sm:p-4 bg-black/20 border-b border-white/5">
+        <!-- 2. PROMINENT ACTION BUTTON ON TOP OF CARD BODY -->
+        <div class="p-4 bg-black/30 border-b border-white/5">
           <button onclick="handleWatchPremium('${model.id}', '${videoDest}')" 
             class="btn-vip-glow w-full text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 shadow-lg shadow-pink-900/30">
             <i data-lucide="play-circle" class="w-4 h-4 text-white fill-white/20 animate-pulse"></i>
@@ -225,24 +225,24 @@ function renderModels(models) {
         </div>
 
         <!-- 3. MODEL DETAILS & TAGS UNDER BUTTON -->
-        <div class="p-3.5 sm:p-4 flex-1 flex flex-col justify-between">
-          <p class="text-gray-300 text-xs leading-relaxed line-clamp-2 mb-3">
+        <div class="p-4 sm:p-5 flex-1 flex flex-col justify-between">
+          <p class="text-gray-300 text-xs sm:text-sm leading-relaxed line-clamp-2 mb-3.5">
             "${model.bio || 'एक्सक्लूसिव ग्लैमर शूट्स, बिहाइंड-द-सीन्स और स्पेशल प्रीमियम वीडियो।'}"
           </p>
 
-          <div class="flex items-center justify-between pt-2 border-t border-white/5">
+          <div class="flex items-center justify-between pt-2.5 border-t border-white/5">
             <!-- Tags -->
-            <div class="flex flex-wrap gap-1">
+            <div class="flex flex-wrap gap-1.5">
               ${(model.tags || ['ग्लैमर', '4K']).slice(0, 2).map(tag => `
-                <span class="px-2 py-0.5 bg-white/5 border border-white/10 rounded-full text-[10px] font-semibold text-gray-400">
+                <span class="px-2.5 py-0.5 bg-white/5 border border-white/10 rounded-full text-[11px] font-semibold text-gray-400">
                   #${tag}
                 </span>
               `).join('')}
             </div>
 
             <!-- Video Count Badge -->
-            <div class="text-[11px] font-bold text-pink-400 flex items-center gap-1">
-              <i data-lucide="film" class="w-3 h-3 text-purple-400"></i>
+            <div class="text-xs font-bold text-pink-400 flex items-center gap-1">
+              <i data-lucide="film" class="w-3.5 h-3.5 text-purple-400"></i>
               <span>${model.videoCount || 30}+ वीडियो</span>
             </div>
           </div>
@@ -281,15 +281,15 @@ window.openModelModal = async function(id) {
     `;
   } else {
     modalMediaContainer.innerHTML = `
-      <div class="relative w-full h-64 sm:h-80 rounded-2xl overflow-hidden bg-black">
+      <div class="relative w-full h-72 sm:h-96 rounded-2xl overflow-hidden bg-black">
         <img src="${model.image}" alt="${model.name}" class="w-full h-full object-cover">
         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
-        <div class="absolute bottom-3 left-3 right-3 flex items-center justify-between text-xs text-white">
-          <div class="flex items-center gap-1.5 bg-black/60 backdrop-blur-md px-3 py-1 rounded-lg border border-white/10">
-            <i data-lucide="video" class="w-3.5 h-3.5 text-pink-400"></i>
+        <div class="absolute bottom-4 left-4 right-4 flex items-center justify-between text-xs text-white">
+          <div class="flex items-center gap-2 bg-black/60 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-white/10">
+            <i data-lucide="video" class="w-4 h-4 text-pink-400"></i>
             <span>${model.videoCount || 35}+ 4K वीडियो</span>
           </div>
-          <div class="flex items-center gap-1 bg-amber-500/20 backdrop-blur-md px-3 py-1 rounded-lg border border-amber-500/30 text-amber-300 font-bold">
+          <div class="flex items-center gap-1 bg-amber-500/20 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-amber-500/30 text-amber-300 font-bold">
             <i data-lucide="star" class="w-3.5 h-3.5 fill-amber-400 text-amber-400"></i>
             <span>${model.rating || '5.0'}</span>
           </div>
@@ -299,7 +299,7 @@ window.openModelModal = async function(id) {
   }
   
   modalTags.innerHTML = (model.tags || []).map(tag => `
-    <span class="px-2.5 py-0.5 bg-pink-950/40 border border-pink-500/30 text-pink-300 text-[11px] font-semibold rounded-full">
+    <span class="px-3 py-1 bg-pink-950/40 border border-pink-500/30 text-pink-300 text-xs font-semibold rounded-full">
       #${tag}
     </span>
   `).join('');
