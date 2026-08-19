@@ -57,7 +57,7 @@ function syncDatabaseToGitHub(databaseContent) {
           const contentBase64 = Buffer.from(databaseContent).toString('base64');
 
           const payload = {
-            message: 'Auto-sync live admin changes & model photos to GitHub',
+            message: 'Auto-sync live admin changes & settings to GitHub',
             content: contentBase64,
             branch: 'main'
           };
@@ -104,6 +104,9 @@ const DEFAULT_SETTINGS = {
   adminPasswordHash: hashPassword("Luxe@9211#Admin"),
   enableAgeGate: true,
   themeColor: "ruby-glow",
+  shareTitle: "GLAMOUR VIP | Official Fashion Models & Video Portfolio",
+  shareDescription: "Discover verified fashion models, exclusive runway shoots, and official video portfolios.",
+  shareImage: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1200&q=85",
   adsterraSmartLink: "https://www.effectivecpmnetwork.com/rm9cqers?key=53f807fa771a60ba28a6dbc43af423a1",
   enableSmartLinkOnClicks: true,
   socialBarScript: "https://pl30926092.effectivecpmnetwork.com/7c/d7/31/7cd7318b8d42d394a693054855bc9ae9.js",
