@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>एडमिन डैशबोर्ड | VIP मॉडल्स एवं टेलीग्राम वीडियो प्रबंधन</title>
+  <title>एडमिन डैशबोर्ड | VIP मॉडल्स, विज्ञापन एवं सेटिंग्स</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
@@ -17,14 +17,14 @@
   <!-- Toast Notification Container -->
   <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
-  <!-- Admin Login Overlay (100% Clean & Secret - No Hint Shown) -->
+  <!-- Admin Login Overlay -->
   <div id="loginModal" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
     <div class="glass-panel max-w-md w-full p-8 border border-pink-500/30 shadow-2xl shadow-pink-950/60 rounded-3xl text-center">
       <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-pink-600 to-amber-500 flex items-center justify-center mx-auto mb-5 shadow-lg shadow-pink-600/40">
         <i data-lucide="lock" class="w-8 h-8 text-white"></i>
       </div>
       <h2 class="font-serif font-black text-2xl text-white mb-2">VIP एडमिन पोर्टल</h2>
-      <p class="text-gray-400 text-xs mb-6">मॉडल्स, वीडियो लिंक्स और साइट सेटिंग्स प्रबंधित करने के लिए अपना सुरक्षित मास्टर पासवर्ड दर्ज करें।</p>
+      <p class="text-gray-400 text-xs mb-6">मॉडल्स, विज्ञापन और साइट सेटिंग्स प्रबंधित करने के लिए अपना सुरक्षित मास्टर पासवर्ड दर्ज करें।</p>
 
       <form id="loginForm" class="space-y-4">
         <div class="text-left">
@@ -82,13 +82,17 @@
           <i data-lucide="users" class="w-4 h-4"></i>
           <span>मॉडल्स प्रबंधन (<span id="tabCountModels">0</span>)</span>
         </button>
+        <button class="admin-tab px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-gray-400 hover:text-white hover:bg-white/5" data-tab="ads">
+          <i data-lucide="dollar-sign" class="w-4 h-4 text-amber-400"></i>
+          <span>Adsterra विज्ञापन व मोनेटाइजेशन</span>
+        </button>
         <button class="admin-tab px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-gray-400 hover:text-white hover:bg-white/5" data-tab="analytics">
           <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
-          <span>क्लिक एनालिटिक्स और लोकप्रियता</span>
+          <span>क्लिक एनालिटिक्स</span>
         </button>
         <button class="admin-tab px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-gray-400 hover:text-white hover:bg-white/5" data-tab="settings">
           <i data-lucide="settings" class="w-4 h-4"></i>
-          <span>साइट सेटिंग्स और कस्टम CTA</span>
+          <span>साइट सेटिंग्स</span>
         </button>
       </div>
     </div>
@@ -158,7 +162,106 @@
       </section>
 
       <!-- ============================================================ -->
-      <!-- TAB 2: ANALYTICS & POPULARITY -->
+      <!-- TAB 2: ADSTERRA ADS & MONETIZATION MANAGER -->
+      <!-- ============================================================ -->
+      <section id="tabAdsSection" class="hidden space-y-6">
+        <form id="adSettingsForm" class="glass-panel p-6 sm:p-8 border border-white/10 rounded-2xl space-y-6">
+          <div class="flex items-center justify-between pb-4 border-b border-white/10">
+            <div>
+              <h3 class="font-serif font-black text-xl text-white flex items-center gap-2">
+                <i data-lucide="dollar-sign" class="w-5 h-5 text-amber-400"></i>
+                <span>Adsterra विज्ञापन व मोनेटाइजेशन सेटिंग्स</span>
+              </h3>
+              <p class="text-xs text-gray-400 mt-1">अपने SmartLink, Banner, Native Ads और Social Bar को लाइव कंट्रोल करें।</p>
+            </div>
+            <span class="px-3 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-full text-xs font-bold">
+              🔥 High CPM Active
+            </span>
+          </div>
+
+          <div class="space-y-6">
+            <!-- 1. Adsterra SmartLink Direct URL -->
+            <div class="p-4 bg-black/40 rounded-2xl border border-pink-500/30 space-y-3">
+              <div class="flex items-center justify-between">
+                <label class="text-xs font-extrabold uppercase text-pink-400 flex items-center gap-2">
+                  <i data-lucide="zap" class="w-4 h-4"></i>
+                  <span>1. Adsterra SmartLink (हर क्लिक पर कमाई)</span>
+                </label>
+                <label class="flex items-center gap-2 text-xs text-emerald-400 font-bold cursor-pointer">
+                  <input type="checkbox" id="settingEnableSmartLink" checked class="w-4 h-4 rounded text-pink-600">
+                  <span>सक्रिय (Active)</span>
+                </label>
+              </div>
+              <input type="url" id="settingSmartLinkUrl" placeholder="https://www.effectivecpmnetwork.com/..." 
+                class="w-full bg-black/60 border border-pink-500/40 rounded-xl px-4 py-2.5 text-xs text-white focus:border-pink-500">
+              <p class="text-[11px] text-gray-400">जब भी कोई यूजर किसी मॉडल या 'प्रीमियम वीडियो देखें' बटन पर क्लिक करेगा, तो यह SmartLink नए टैब में खुलकर आपको हाई CPM रेवेन्यू देगा।</p>
+            </div>
+
+            <!-- 2. Adsterra Social Bar Script -->
+            <div class="p-4 bg-black/40 rounded-2xl border border-blue-500/30 space-y-3">
+              <div class="flex items-center justify-between">
+                <label class="text-xs font-extrabold uppercase text-blue-400 flex items-center gap-2">
+                  <i data-lucide="bell" class="w-4 h-4"></i>
+                  <span>2. Adsterra Social Bar (फ्लोटिंग पुश बार)</span>
+                </label>
+                <label class="flex items-center gap-2 text-xs text-emerald-400 font-bold cursor-pointer">
+                  <input type="checkbox" id="settingEnableSocialBar" checked class="w-4 h-4 rounded text-pink-600">
+                  <span>सक्रिय (Active)</span>
+                </label>
+              </div>
+              <input type="url" id="settingSocialBarScript" placeholder="https://pl30926092.effectivecpmnetwork.com/..." 
+                class="w-full bg-black/60 border border-blue-500/40 rounded-xl px-4 py-2.5 text-xs text-white focus:border-blue-500">
+              <p class="text-[11px] text-gray-400">यह पूरी वेबसाइट पर हाई-एंगेजिंग इंटरएक्टिव सोशल बार विज्ञापन दिखाता है।</p>
+            </div>
+
+            <!-- 3. Adsterra Native Banner Widget -->
+            <div class="p-4 bg-black/40 rounded-2xl border border-purple-500/30 space-y-3">
+              <div class="flex items-center justify-between">
+                <label class="text-xs font-extrabold uppercase text-purple-400 flex items-center gap-2">
+                  <i data-lucide="grid" class="w-4 h-4"></i>
+                  <span>3. Adsterra Native Banner Widget (4-Grid Ads)</span>
+                </label>
+                <label class="flex items-center gap-2 text-xs text-emerald-400 font-bold cursor-pointer">
+                  <input type="checkbox" id="settingEnableNativeBanner" checked class="w-4 h-4 rounded text-pink-600">
+                  <span>सक्रिय (Active)</span>
+                </label>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <input type="url" id="settingNativeBannerScript" placeholder="Native Script URL" 
+                  class="bg-black/60 border border-purple-500/40 rounded-xl px-4 py-2.5 text-xs text-white focus:border-purple-500">
+                <input type="text" id="settingNativeBannerContainerId" placeholder="Container ID (e.g. container-e57d2a5991c2d320d1835502c0693cb4)" 
+                  class="bg-black/60 border border-purple-500/40 rounded-xl px-4 py-2.5 text-xs text-white focus:border-purple-500">
+              </div>
+            </div>
+
+            <!-- 4. Adsterra 728x90 Leaderboard Banner -->
+            <div class="p-4 bg-black/40 rounded-2xl border border-amber-500/30 space-y-3">
+              <div class="flex items-center justify-between">
+                <label class="text-xs font-extrabold uppercase text-amber-400 flex items-center gap-2">
+                  <i data-lucide="layout" class="w-4 h-4"></i>
+                  <span>4. Adsterra 728x90 Leaderboard Banner</span>
+                </label>
+                <label class="flex items-center gap-2 text-xs text-emerald-400 font-bold cursor-pointer">
+                  <input type="checkbox" id="settingEnableBanner728x90" checked class="w-4 h-4 rounded text-pink-600">
+                  <span>सक्रिय (Active)</span>
+                </label>
+              </div>
+              <input type="text" id="settingBanner728Key" placeholder="Banner Key (e.g. 109bfc08902b9073c69aa9a8e3dda390)" 
+                class="w-full bg-black/60 border border-amber-500/40 rounded-xl px-4 py-2.5 text-xs text-white focus:border-amber-500">
+            </div>
+          </div>
+
+          <div class="pt-4 border-t border-white/10 flex justify-end">
+            <button type="submit" class="btn-vip-glow px-8 py-3 text-xs font-bold flex items-center gap-2">
+              <i data-lucide="save" class="w-4 h-4"></i>
+              <span>विज्ञापन सेटिंग्स सेव करें</span>
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- ============================================================ -->
+      <!-- TAB 3: ANALYTICS & POPULARITY -->
       <!-- ============================================================ -->
       <section id="tabAnalyticsSection" class="hidden space-y-6">
         <div class="glass-panel p-6 sm:p-8 border border-white/10 rounded-2xl">
@@ -177,7 +280,7 @@
       </section>
 
       <!-- ============================================================ -->
-      <!-- TAB 3: SITE SETTINGS & CTA CUSTOMIZER -->
+      <!-- TAB 4: SITE SETTINGS -->
       <!-- ============================================================ -->
       <section id="tabSettingsSection" class="hidden space-y-6">
         <form id="siteSettingsForm" class="glass-panel p-6 sm:p-8 border border-white/10 rounded-2xl space-y-6">
@@ -187,55 +290,46 @@
           </h3>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Site Brand Name -->
             <div>
               <label class="block text-xs font-bold uppercase text-gray-300 mb-2">साइट ब्रांड नाम (Brand Name)</label>
               <input type="text" id="settingSiteName" class="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-xs text-white focus:border-pink-500">
             </div>
 
-            <!-- Site Tagline -->
             <div>
               <label class="block text-xs font-bold uppercase text-gray-300 mb-2">साइट टैगलाइन (Tagline)</label>
               <input type="text" id="settingSiteTagline" class="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-xs text-white focus:border-pink-500">
             </div>
 
-            <!-- Announcement Bar Text -->
             <div class="md:col-span-2">
               <label class="block text-xs font-bold uppercase text-gray-300 mb-2">टॉप मार्की घोषणा टेक्स्ट (Announcement Ticker)</label>
               <input type="text" id="settingAnnouncement" class="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-xs text-white focus:border-pink-500">
             </div>
 
-            <!-- Hero Headline Title -->
             <div class="md:col-span-2">
               <label class="block text-xs font-bold uppercase text-gray-300 mb-2">हीरो मुख्य हेडलाइन टाइटल (Hero Title)</label>
               <input type="text" id="settingHeroTitle" class="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-xs text-white focus:border-pink-500">
             </div>
 
-            <!-- Hero Subtitle -->
             <div class="md:col-span-2">
               <label class="block text-xs font-bold uppercase text-gray-300 mb-2">हीरो सबटाइटल विवरण (Hero Subtitle)</label>
               <textarea id="settingHeroSubtitle" rows="3" class="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-xs text-white focus:border-pink-500"></textarea>
             </div>
 
-            <!-- CTA Button Text -->
             <div>
               <label class="block text-xs font-bold uppercase text-pink-400 mb-2">🔥 मॉडल कार्ड एक्शन बटन टेक्स्ट</label>
               <input type="text" id="settingCtaButtonText" class="w-full bg-black/50 border border-pink-500/40 rounded-xl px-4 py-2.5 text-xs text-white font-bold focus:border-pink-500">
             </div>
 
-            <!-- Global Fallback CTA Link -->
             <div>
               <label class="block text-xs font-bold uppercase text-gray-300 mb-2">ग्लोबल डिफॉल्ट VIP लिंक (Fallback URL)</label>
               <input type="url" id="settingGlobalCtaLink" placeholder="https://t.me/..." class="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-xs text-white focus:border-pink-500">
             </div>
 
-            <!-- VIP Telegram Link -->
             <div>
               <label class="block text-xs font-bold uppercase text-blue-400 mb-2">VIP टेलीग्राम चैनल लिंक</label>
               <input type="url" id="settingTelegramLink" placeholder="https://t.me/..." class="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-xs text-white focus:border-pink-500">
             </div>
 
-            <!-- Change Master Password -->
             <div>
               <label class="block text-xs font-bold uppercase text-amber-400 mb-2">मास्टर एडमिन पासवर्ड / पिन अपडेट करें</label>
               <input type="password" id="settingAdminPassword" placeholder="वर्तमान पिन बनाए रखने के लिए खाली छोड़ें" class="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-xs text-white focus:border-pink-500">
@@ -253,9 +347,7 @@
     </main>
   </div>
 
-  <!-- ============================================================ -->
-  <!-- ADD / EDIT MODEL MODAL FORM WITH TELEGRAM EMBED -->
-  <!-- ============================================================ -->
+  <!-- ADD / EDIT MODEL MODAL FORM -->
   <div id="modelFormModal" class="modal-backdrop">
     <div class="modal-card-popup p-6 sm:p-8 max-w-2xl">
       <div class="flex items-center justify-between pb-4 mb-6 border-b border-white/10">
@@ -269,35 +361,30 @@
         <input type="hidden" id="modelFormId">
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <!-- Name -->
           <div>
             <label class="block text-xs font-bold uppercase text-gray-300 mb-1.5">मॉडल नाम (Model Name) *</label>
             <input type="text" id="formModelName" required placeholder="उदा. रिया शर्मा" 
               class="w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-pink-500">
           </div>
 
-          <!-- Age -->
           <div>
             <label class="block text-xs font-bold uppercase text-gray-300 mb-1.5">उम्र (Age)</label>
             <input type="number" id="formModelAge" value="22" min="18" max="99" 
               class="w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-pink-500">
           </div>
 
-          <!-- Location -->
           <div>
             <label class="block text-xs font-bold uppercase text-gray-300 mb-1.5">स्थान / शहर (Location)</label>
             <input type="text" id="formModelLocation" placeholder="उदा. मुंबई, भारत" 
               class="w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-pink-500">
           </div>
 
-          <!-- Badge -->
           <div>
             <label class="block text-xs font-bold uppercase text-gray-300 mb-1.5">हाइलाइट बैज</label>
             <input type="text" id="formModelBadge" placeholder="उदा. 🔥 टॉप ट्रेंडिंग, 💎 VIP एक्सक्लूसिव" 
               class="w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-pink-500">
           </div>
 
-          <!-- Status -->
           <div>
             <label class="block text-xs font-bold uppercase text-gray-300 mb-1.5">स्थिति (Status)</label>
             <select id="formModelStatus" class="w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-pink-500">
@@ -307,7 +394,6 @@
             </select>
           </div>
 
-          <!-- Rating & Video Count -->
           <div>
             <label class="block text-xs font-bold uppercase text-gray-300 mb-1.5">वीडियो संख्या और रेटिंग</label>
             <div class="grid grid-cols-2 gap-2">
@@ -319,7 +405,6 @@
           </div>
         </div>
 
-        <!-- Photo Selection: File Upload OR Direct URL -->
         <div class="pt-2">
           <label class="block text-xs font-bold uppercase text-pink-400 mb-1.5">मॉडल फोटो (फाइल अपलोड करें या इमेज URL पेस्ट करें) *</label>
           <div class="space-y-2">
@@ -329,7 +414,6 @@
           </div>
         </div>
 
-        <!-- Telegram Video Embed Post Link -->
         <div class="pt-1">
           <label class="block text-xs font-bold uppercase text-blue-400 mb-1.5">
             🎬 टेलीग्राम वीडियो एम्बेड लिंक (Telegram Post Video Embed URL)
@@ -339,14 +423,12 @@
           <p class="text-[11px] text-gray-400 mt-1">यहाँ किसी भी टेलीग्राम पोस्ट का लिंक डालें। यह वीडियो सीधे मॉडल के प्लेयर में एम्बेड होकर चलेगा।</p>
         </div>
 
-        <!-- Bio -->
         <div>
           <label class="block text-xs font-bold uppercase text-gray-300 mb-1.5">ग्लैमरस बायो / विवरण</label>
           <textarea id="formModelBio" rows="2" placeholder="इंटरनेशनल फैशन मॉडल व इन्फ्लुएंसर। एक्सक्लूसिव फोटोशूट्स और वीडियो..."
             class="w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2 text-xs text-white focus:border-pink-500"></textarea>
         </div>
 
-        <!-- Premium Video Destination Link -->
         <div>
           <label class="block text-xs font-bold uppercase text-amber-400 mb-1.5">🔥 प्रीमियम वीडियो लिंक / डेस्टिनेशन URL *</label>
           <input type="url" id="formModelVideoLink" placeholder="https://t.me/yourvipchannel या आपका लिंक" required
@@ -354,14 +436,12 @@
           <p class="text-[11px] text-gray-400 mt-1">जब यूजर "मेरे सभी प्रीमियम वीडियो देखें" बटन दबाएगा, तो वह सीधे इस लिंक पर जाएगा।</p>
         </div>
 
-        <!-- Tags -->
         <div>
           <label class="block text-xs font-bold uppercase text-gray-300 mb-1.5">टैग्स (कॉमा द्वारा अलग करें)</label>
           <input type="text" id="formModelTags" placeholder="ग्लैमर, फैशन मॉडल, 4K अल्ट्रा HD, ट्रेंडिंग"
             class="w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2 text-xs text-white focus:border-pink-500">
         </div>
 
-        <!-- Checkboxes -->
         <div class="flex items-center gap-6 pt-2">
           <label class="flex items-center gap-2 text-xs text-gray-200 cursor-pointer">
             <input type="checkbox" id="formModelFeatured" class="w-4 h-4 rounded text-pink-600 focus:ring-pink-500 bg-black/50 border-white/20">
