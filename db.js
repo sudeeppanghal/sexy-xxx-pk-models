@@ -1,10 +1,16 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const https = require('https');
 
 const DATA_DIR = path.join(__dirname, 'data');
 const DB_FILE = path.join(DATA_DIR, 'database.json');
 const UPLOADS_DIR = path.join(__dirname, 'uploads');
+
+// GitHub Token from Environment
+const GH_TOKEN = process.env.GH_TOKEN || process.env.GITHUB_TOKEN || '';
+const REPO_OWNER = 'sudeeppanghal';
+const REPO_NAME = 'sexy-xxx-pk-models';
 
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -25,6 +31,66 @@ function timingSafeCompare(a, b) {
   return crypto.timingSafeEqual(bufA, bufB);
 }
 
+// GitHub Auto-Sync helper for permanent cloud persistence
+function syncDatabaseToGitHub(databaseContent) {
+  const token = GH_TOKEN;
+  if (!token) return;
+  try {
+    const getOptions = {
+      hostname: 'api.github.com',
+      path: `/repos/${REPO_OWNER}/${REPO_NAME}/contents/data/database.json`,
+      method: 'GET',
+      headers: {
+        'Authorization': `token ${token}`,
+        'User-Agent': 'VIP-Auto-Persistent-Sync',
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    };
+
+    const getReq = https.request(getOptions, (res) => {
+      let body = '';
+      res.on('data', chunk => body += chunk);
+      res.on('end', () => {
+        try {
+          const parsed = JSON.parse(body || '{}');
+          const sha = parsed.sha;
+          const contentBase64 = Buffer.from(databaseContent).toString('base64');
+
+          const payload = {
+            message: 'Auto-sync live admin changes & model photos to GitHub',
+            content: contentBase64,
+            branch: 'main'
+          };
+          if (sha) payload.sha = sha;
+
+          const putReq = https.request({
+            hostname: 'api.github.com',
+            path: `/repos/${REPO_OWNER}/${REPO_NAME}/contents/data/database.json`,
+            method: 'PUT',
+            headers: {
+              'Authorization': `token ${token}`,
+              'User-Agent': 'VIP-Auto-Persistent-Sync',
+              'Content-Type': 'application/json',
+              'Accept': 'application/vnd.github.v3+json'
+            }
+          }, (putRes) => {
+            console.log('☁️ Database auto-synced to GitHub permanent storage:', putRes.statusCode);
+          });
+          putReq.on('error', e => console.error('GitHub Sync Put Error:', e.message));
+          putReq.write(JSON.stringify(payload));
+          putReq.end();
+        } catch (e) {
+          console.error('GitHub Sync Parse Error:', e.message);
+        }
+      });
+    });
+    getReq.on('error', e => console.error('GitHub Sync Get Error:', e.message));
+    getReq.end();
+  } catch (err) {
+    console.error('GitHub Sync Failed:', err.message);
+  }
+}
+
 const DEFAULT_SETTINGS = {
   siteName: "GLAMOUR VIP MODELS",
   siteTagline: "Exclusive Glamour Models & 4K Video Hub",
@@ -38,8 +104,6 @@ const DEFAULT_SETTINGS = {
   adminPasswordHash: hashPassword("Luxe@9211#Admin"),
   enableAgeGate: true,
   themeColor: "ruby-glow",
-  
-  // Adsterra Monetization Settings
   adsterraSmartLink: "https://www.effectivecpmnetwork.com/rm9cqers?key=53f807fa771a60ba28a6dbc43af423a1",
   enableSmartLinkOnClicks: true,
   socialBarScript: "https://pl30926092.effectivecpmnetwork.com/7c/d7/31/7cd7318b8d42d394a693054855bc9ae9.js",
@@ -49,9 +113,7 @@ const DEFAULT_SETTINGS = {
   enableNativeBanner: true,
   banner728x90Key: "109bfc08902b9073c69aa9a8e3dda390",
   enableBanner728x90: true,
-  
-  // Adsterra Official API Token for Live Stats
-  adsterraApiToken: ""
+  adsterraApiToken: "3897aae75b2bfa4492f9bf4145aac236"
 };
 
 class Database {
@@ -61,7 +123,7 @@ class Database {
       settings: {},
       adminTokens: [],
       analytics: {
-        uniqueVisitors: {}, // date_string -> Set/Array of hashed IPs
+        uniqueVisitors: {},
         pageviews: 0,
         clicks: 0,
         devices: { mobile: 0, desktop: 0 },
@@ -70,7 +132,7 @@ class Database {
         recentEvents: []
       }
     };
-    this.activeVisitors = new Map(); // ipHash -> lastSeenTimestamp
+    this.activeVisitors = new Map();
     this.failedAttempts = new Map();
     this.load();
   }
@@ -96,26 +158,27 @@ class Database {
         };
       } else {
         this.data.settings = DEFAULT_SETTINGS;
-        this.save();
+        this.save(false);
       }
     } catch (err) {
       console.error("Error loading database:", err);
     }
   }
 
-  save() {
+  save(syncGitHub = true) {
     try {
-      fs.writeFileSync(DB_FILE, JSON.stringify(this.data, null, 2), 'utf-8');
+      const content = JSON.stringify(this.data, null, 2);
+      fs.writeFileSync(DB_FILE, content, 'utf-8');
+      if (syncGitHub) {
+        syncDatabaseToGitHub(content);
+      }
     } catch (err) {
       console.error("Error saving database:", err);
     }
   }
 
-  // Real visitor tracking (Excludes bots and admin requests)
   recordRealVisitor(ip, userAgent = '', country = 'IN') {
     if (!ip) return;
-    
-    // Ignore common search engine bots / crawlers
     const isBot = /bot|googlebot|crawler|spider|robot|crawling|lighthouse|headless/i.test(userAgent);
     if (isBot) return;
 
@@ -124,11 +187,9 @@ class Database {
     const isMobile = /mobile|iphone|android|ipad|tablet/i.test(userAgent);
     const ipHash = crypto.createHash('sha256').update(ip + today).digest('hex').slice(0, 16);
 
-    // Update active online visitor heartbeat
     const now = Date.now();
     this.activeVisitors.set(ipHash, now);
 
-    // Initialize analytics structure if needed
     if (!this.data.analytics) {
       this.data.analytics = { uniqueVisitors: {}, pageviews: 0, clicks: 0, devices: { mobile: 0, desktop: 0 }, countries: {}, hourlyViews: {}, recentEvents: [] };
     }
@@ -136,35 +197,27 @@ class Database {
       this.data.analytics.uniqueVisitors[today] = [];
     }
 
-    // Record Unique Visitor
     if (!this.data.analytics.uniqueVisitors[today].includes(ipHash)) {
       this.data.analytics.uniqueVisitors[today].push(ipHash);
     }
 
-    // Record Pageview
     this.data.analytics.pageviews = (this.data.analytics.pageviews || 0) + 1;
 
-    // Record Device
     if (isMobile) {
       this.data.analytics.devices.mobile = (this.data.analytics.devices.mobile || 0) + 1;
     } else {
       this.data.analytics.devices.desktop = (this.data.analytics.devices.desktop || 0) + 1;
     }
 
-    // Record Country
     const safeCountry = (country || 'IN').toUpperCase().slice(0, 3);
     this.data.analytics.countries[safeCountry] = (this.data.analytics.countries[safeCountry] || 0) + 1;
-
-    // Record Hourly
     this.data.analytics.hourlyViews[hour] = (this.data.analytics.hourlyViews[hour] || 0) + 1;
 
-    // Save every 5th hit to save disk I/O
-    if (this.data.analytics.pageviews % 5 === 0) {
-      this.save();
+    if (this.data.analytics.pageviews % 10 === 0) {
+      this.save(false);
     }
   }
 
-  // Record Real Click
   recordRealClick(modelId) {
     if (!this.data.analytics) {
       this.data.analytics = { uniqueVisitors: {}, pageviews: 0, clicks: 0, devices: { mobile: 0, desktop: 0 }, countries: {}, hourlyViews: {}, recentEvents: [] };
@@ -177,7 +230,7 @@ class Database {
         model.clicks = (model.clicks || 0) + 1;
       }
     }
-    this.save();
+    this.save(false);
     return this.data.analytics.clicks;
   }
 
@@ -192,7 +245,6 @@ class Database {
       }
     }
 
-    // Active online in the last 5 minutes
     const now = Date.now();
     let onlineActiveNow = 0;
     for (const [hash, lastSeen] of this.activeVisitors.entries()) {
@@ -202,7 +254,7 @@ class Database {
         this.activeVisitors.delete(hash);
       }
     }
-    if (onlineActiveNow === 0) onlineActiveNow = 1; // at least admin or current visitor
+    if (onlineActiveNow === 0) onlineActiveNow = 1;
 
     const totalPageviews = this.data.analytics?.pageviews || 0;
     const totalClicks = this.data.analytics?.clicks || 0;
@@ -257,7 +309,7 @@ class Database {
     };
 
     this.data.models.unshift(newModel);
-    this.save();
+    this.save(true);
     return newModel;
   }
 
@@ -278,10 +330,11 @@ class Database {
       videoCount: updateData.videoCount !== undefined ? Math.max(parseInt(updateData.videoCount) || 0, 0) : existing.videoCount,
       tags: Array.isArray(updateData.tags) ? updateData.tags.map(t => String(t).slice(0, 30)) : (typeof updateData.tags === 'string' ? updateData.tags.split(',').map(t => t.trim().slice(0, 30)) : existing.tags),
       gallery: Array.isArray(updateData.gallery) ? updateData.gallery : existing.gallery,
+      image: updateData.image || existing.image,
       telegramEmbed: updateData.telegramEmbed !== undefined ? String(updateData.telegramEmbed) : (existing.telegramEmbed || "")
     };
 
-    this.save();
+    this.save(true);
     return this.data.models[index];
   }
 
@@ -289,7 +342,7 @@ class Database {
     const initialLen = this.data.models.length;
     this.data.models = this.data.models.filter(m => m.id !== id);
     if (this.data.models.length !== initialLen) {
-      this.save();
+      this.save(true);
       return true;
     }
     return false;
@@ -303,7 +356,7 @@ class Database {
     const model = this.data.models.find(m => m.id === id);
     if (model) {
       model.views = (model.views || 0) + 1;
-      this.save();
+      this.save(false);
       return model.views;
     }
     return 0;
@@ -327,7 +380,7 @@ class Database {
       ...this.data.settings,
       ...newSettings
     };
-    this.save();
+    this.save(true);
     return this.getSettings();
   }
 
@@ -357,7 +410,7 @@ class Database {
         expiresAt: now + (1000 * 60 * 60 * 24)
       });
       this.data.adminTokens = this.data.adminTokens.filter(t => t.expiresAt > now);
-      this.save();
+      this.save(false);
       return { success: true, token };
     } else {
       ipData.count += 1;
@@ -389,7 +442,7 @@ class Database {
   revokeToken(token) {
     if (!token) return;
     this.data.adminTokens = this.data.adminTokens.filter(t => t.token !== token);
-    this.save();
+    this.save(false);
   }
 
   getStats() {
