@@ -465,16 +465,26 @@ function renderLiveActivityLog(events) {
   }).join('');
 }
 
-// Render Interactive Chart.js Area Graph
+// Render Interactive Chart.js Area Graph (Optimized in-place update)
 function renderTrafficChart(chartSeries) {
   const canvas = document.getElementById('trafficTrendChart');
   if (!canvas || !chartSeries) return;
 
-  const ctx = canvas.getContext('2d');
+  const labels = chartSeries.labels || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const pageviews = chartSeries.pageviews || [0, 0, 0, 0, 0, 0, 0];
+  const impressions = pageviews.map(v => Math.round(v * 2.2));
+  const clicks = chartSeries.clicks || [0, 0, 0, 0, 0, 0, 0];
+
   if (trafficChartInstance) {
-    trafficChartInstance.destroy();
+    trafficChartInstance.data.labels = labels;
+    trafficChartInstance.data.datasets[0].data = pageviews;
+    trafficChartInstance.data.datasets[1].data = impressions;
+    trafficChartInstance.data.datasets[2].data = clicks;
+    trafficChartInstance.update('none');
+    return;
   }
 
+  const ctx = canvas.getContext('2d');
   const gradientPageviews = ctx.createLinearGradient(0, 0, 0, 250);
   gradientPageviews.addColorStop(0, 'rgba(236, 72, 153, 0.4)');
   gradientPageviews.addColorStop(1, 'rgba(236, 72, 153, 0.0)');
@@ -486,11 +496,11 @@ function renderTrafficChart(chartSeries) {
   trafficChartInstance = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: chartSeries.labels || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+      labels: labels,
       datasets: [
         {
           label: 'Pageviews',
-          data: chartSeries.pageviews || [0, 0, 0, 0, 0, 0, 0],
+          data: pageviews,
           borderColor: '#ec4899',
           backgroundColor: gradientPageviews,
           fill: true,
@@ -501,7 +511,7 @@ function renderTrafficChart(chartSeries) {
         },
         {
           label: 'Ad Impressions',
-          data: (chartSeries.pageviews || []).map(v => Math.round(v * 2.2)),
+          data: impressions,
           borderColor: '#a855f7',
           backgroundColor: 'transparent',
           borderDash: [4, 4],
@@ -511,7 +521,7 @@ function renderTrafficChart(chartSeries) {
         },
         {
           label: 'Video Clicks',
-          data: chartSeries.clicks || [0, 0, 0, 0, 0, 0, 0],
+          data: clicks,
           borderColor: '#10b981',
           backgroundColor: gradientClicks,
           fill: true,
@@ -525,6 +535,7 @@ function renderTrafficChart(chartSeries) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      animation: { duration: 400 },
       plugins: {
         legend: { display: false },
         tooltip: {
@@ -551,19 +562,21 @@ function renderTrafficChart(chartSeries) {
   });
 }
 
-// Render Device Donut Chart
+// Render Device Donut Chart (Optimized in-place update)
 function renderDeviceChart(mobileCount, desktopCount) {
   const canvas = document.getElementById('deviceChart');
   if (!canvas) return;
 
-  const ctx = canvas.getContext('2d');
-  if (deviceChartInstance) {
-    deviceChartInstance.destroy();
-  }
-
   const m = mobileCount || 85;
   const d = desktopCount || 15;
 
+  if (deviceChartInstance) {
+    deviceChartInstance.data.datasets[0].data = [m, d];
+    deviceChartInstance.update('none');
+    return;
+  }
+
+  const ctx = canvas.getContext('2d');
   deviceChartInstance = new Chart(ctx, {
     type: 'doughnut',
     data: {
@@ -578,6 +591,7 @@ function renderDeviceChart(mobileCount, desktopCount) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      animation: { duration: 400 },
       cutout: '72%',
       plugins: {
         legend: { display: false },
