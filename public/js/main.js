@@ -323,7 +323,7 @@ function renderStories(models) {
     return `
       <div onclick="openModelModal('${model.id}')" class="flex flex-col items-center gap-2 flex-shrink-0 cursor-pointer group select-none transition-transform">
         <div class="story-avatar-ring">
-          <div class="w-18 h-18 sm:w-22 sm:h-22 rounded-full overflow-hidden border-2 border-black bg-black">
+          <div class="avatar-inner">
             <img src="${model.image}" alt="${model.name}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500" onerror="this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80'">
           </div>
         </div>
