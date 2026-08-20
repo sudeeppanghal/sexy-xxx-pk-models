@@ -68,31 +68,19 @@ function triggerSmartLinkSafely() {
 }
 
 // -------------------------------------------------------------
-// DISCLAIMER POPUP (100% UNFREEZABLE & BULLETPROOF CLICK)
+// DISCLAIMER POPUP (ALWAYS SHOWS EVERY TIME FOR 100% SMARTLINK CONVERSIONS)
 // -------------------------------------------------------------
 function initDisclaimerPopup() {
   if (!disclaimerModal) return;
 
-  const isAccepted = sessionStorage.getItem('vip_disclaimer_accepted') === 'true' || 
-                     localStorage.getItem('vip_disclaimer_accepted') === 'true';
-
-  if (isAccepted) {
-    disclaimerModal.classList.add('hidden');
-    checkAdBlocker();
-    initSelfHealingBanners();
-    return;
-  }
-
-  disclaimerModal.classList.remove('hidden');
+  // Always show confirmation popup every time
+  disclaimerModal.classList.remove('hidden', 'opacity-0', 'scale-95');
 
   const handleAccept = (e) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
     }
-
-    sessionStorage.setItem('vip_disclaimer_accepted', 'true');
-    localStorage.setItem('vip_disclaimer_accepted', 'true');
 
     disclaimerModal.classList.add('opacity-0', 'scale-95');
     setTimeout(() => {
@@ -105,15 +93,14 @@ function initDisclaimerPopup() {
   };
 
   if (btnAcceptDisclaimer) {
-    btnAcceptDisclaimer.addEventListener('click', handleAccept);
-    btnAcceptDisclaimer.addEventListener('touchend', handleAccept, { passive: false });
+    btnAcceptDisclaimer.onclick = handleAccept;
   }
 
   if (btnDeclineDisclaimer) {
-    btnDeclineDisclaimer.addEventListener('click', (e) => {
+    btnDeclineDisclaimer.onclick = (e) => {
       e.preventDefault();
       window.location.href = 'https://www.google.com';
-    });
+    };
   }
 }
 
