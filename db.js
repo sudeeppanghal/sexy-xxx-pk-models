@@ -127,6 +127,7 @@ class Database {
       adminTokens: [],
       analytics: {
         uniqueVisitors: {},
+        dailyStats: {}, // { 'YYYY-MM-DD': { pageviews: 0, clicks: 0, uniques: 0, mobile: 0, desktop: 0 } }
         pageviews: 0,
         clicks: 0,
         devices: { mobile: 0, desktop: 0 },
@@ -151,6 +152,7 @@ class Database {
           adminTokens: parsed.adminTokens || [],
           analytics: {
             uniqueVisitors: parsed.analytics?.uniqueVisitors || {},
+            dailyStats: parsed.analytics?.dailyStats || {},
             pageviews: parsed.analytics?.pageviews || 0,
             clicks: parsed.analytics?.clicks || 0,
             devices: parsed.analytics?.devices || { mobile: 0, desktop: 0 },
@@ -180,7 +182,7 @@ class Database {
     }
   }
 
-  recordRealVisitor(ip, userAgent = '', country = 'IN') {
+  recordRealVisitor(ip, userAgent = '', country = 'IN', path = '/') {
     if (!ip) return;
     const isBot = /bot|googlebot|crawler|spider|robot|crawling|lighthouse|headless/i.test(userAgent);
     if (isBot) return;
@@ -194,53 +196,106 @@ class Database {
     this.activeVisitors.set(ipHash, now);
 
     if (!this.data.analytics) {
-      this.data.analytics = { uniqueVisitors: {}, pageviews: 0, clicks: 0, devices: { mobile: 0, desktop: 0 }, countries: {}, hourlyViews: {}, recentEvents: [] };
+      this.data.analytics = { uniqueVisitors: {}, dailyStats: {}, pageviews: 0, clicks: 0, devices: { mobile: 0, desktop: 0 }, countries: {}, hourlyViews: {}, recentEvents: [] };
     }
     if (!this.data.analytics.uniqueVisitors[today]) {
       this.data.analytics.uniqueVisitors[today] = [];
     }
 
+    let isNewUnique = false;
     if (!this.data.analytics.uniqueVisitors[today].includes(ipHash)) {
       this.data.analytics.uniqueVisitors[today].push(ipHash);
+      isNewUnique = true;
     }
 
     this.data.analytics.pageviews = (this.data.analytics.pageviews || 0) + 1;
 
+    if (!this.data.analytics.dailyStats) this.data.analytics.dailyStats = {};
+    if (!this.data.analytics.dailyStats[today]) {
+      this.data.analytics.dailyStats[today] = { pageviews: 0, clicks: 0, uniques: 0, mobile: 0, desktop: 0 };
+    }
+
+    this.data.analytics.dailyStats[today].pageviews += 1;
+    if (isNewUnique) this.data.analytics.dailyStats[today].uniques += 1;
+
     if (isMobile) {
       this.data.analytics.devices.mobile = (this.data.analytics.devices.mobile || 0) + 1;
+      this.data.analytics.dailyStats[today].mobile += 1;
     } else {
       this.data.analytics.devices.desktop = (this.data.analytics.devices.desktop || 0) + 1;
+      this.data.analytics.dailyStats[today].desktop += 1;
     }
 
     const safeCountry = (country || 'IN').toUpperCase().slice(0, 3);
     this.data.analytics.countries[safeCountry] = (this.data.analytics.countries[safeCountry] || 0) + 1;
     this.data.analytics.hourlyViews[hour] = (this.data.analytics.hourlyViews[hour] || 0) + 1;
 
+    // Log live activity stream event (keep last 60 events)
+    if (!this.data.analytics.recentEvents) this.data.analytics.recentEvents = [];
+    this.data.analytics.recentEvents.unshift({
+      id: 'ev-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 5),
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+      type: 'pageview',
+      country: safeCountry,
+      device: isMobile ? 'Mobile' : 'Desktop',
+      path: path || '/'
+    });
+    if (this.data.analytics.recentEvents.length > 60) {
+      this.data.analytics.recentEvents = this.data.analytics.recentEvents.slice(0, 60);
+    }
+
     if (this.data.analytics.pageviews % 10 === 0) {
       this.save(false);
     }
   }
 
-  recordRealClick(modelId) {
+  recordRealClick(modelId, country = 'IN', isMobile = true) {
     if (!this.data.analytics) {
-      this.data.analytics = { uniqueVisitors: {}, pageviews: 0, clicks: 0, devices: { mobile: 0, desktop: 0 }, countries: {}, hourlyViews: {}, recentEvents: [] };
+      this.data.analytics = { uniqueVisitors: {}, dailyStats: {}, pageviews: 0, clicks: 0, devices: { mobile: 0, desktop: 0 }, countries: {}, hourlyViews: {}, recentEvents: [] };
     }
     this.data.analytics.clicks = (this.data.analytics.clicks || 0) + 1;
-    
+
+    const today = new Date().toISOString().split('T')[0];
+    if (!this.data.analytics.dailyStats) this.data.analytics.dailyStats = {};
+    if (!this.data.analytics.dailyStats[today]) {
+      this.data.analytics.dailyStats[today] = { pageviews: 1, clicks: 0, uniques: 1, mobile: isMobile ? 1 : 0, desktop: isMobile ? 0 : 1 };
+    }
+    this.data.analytics.dailyStats[today].clicks += 1;
+
+    let modelName = 'SmartLink Gateway';
     if (modelId) {
       const model = this.data.models.find(m => m.id === modelId);
       if (model) {
         model.clicks = (model.clicks || 0) + 1;
+        modelName = model.name;
       }
     }
+
+    // Log live click event
+    if (!this.data.analytics.recentEvents) this.data.analytics.recentEvents = [];
+    this.data.analytics.recentEvents.unshift({
+      id: 'ev-clk-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 5),
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+      type: 'click',
+      country: (country || 'IN').toUpperCase().slice(0, 3),
+      device: isMobile ? 'Mobile' : 'Desktop',
+      target: modelName
+    });
+    if (this.data.analytics.recentEvents.length > 60) {
+      this.data.analytics.recentEvents = this.data.analytics.recentEvents.slice(0, 60);
+    }
+
     this.save(false);
     return this.data.analytics.clicks;
   }
 
-  getRealMetrics() {
+  getRealMetrics(range = 'all') {
     const today = new Date().toISOString().split('T')[0];
+    const yesterday = new Date(Date.now() - 24*60*60*1000).toISOString().split('T')[0];
+
     const todayUniques = this.data.analytics?.uniqueVisitors?.[today]?.length || 0;
-    
+    const yesterdayUniques = this.data.analytics?.uniqueVisitors?.[yesterday]?.length || 0;
+
     let totalAllTimeUniques = 0;
     if (this.data.analytics?.uniqueVisitors) {
       for (const day in this.data.analytics.uniqueVisitors) {
@@ -263,15 +318,43 @@ class Database {
     const totalClicks = this.data.analytics?.clicks || 0;
     const ctr = totalPageviews > 0 ? ((totalClicks / totalPageviews) * 100).toFixed(1) : "0.0";
 
+    // Build last 7 days chart series
+    const chartLabels = [];
+    const chartPageviews = [];
+    const chartClicks = [];
+    const chartUniques = [];
+
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+      const dateStr = d.toISOString().split('T')[0];
+      const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      chartLabels.push(label);
+
+      const dayData = this.data.analytics?.dailyStats?.[dateStr] || { pageviews: 0, clicks: 0, uniques: 0 };
+      const uCount = this.data.analytics?.uniqueVisitors?.[dateStr]?.length || dayData.uniques || 0;
+      
+      chartPageviews.push(dayData.pageviews || (dateStr === today ? totalPageviews : 0));
+      chartClicks.push(dayData.clicks || (dateStr === today ? totalClicks : 0));
+      chartUniques.push(uCount);
+    }
+
     return {
       onlineActiveNow,
-      todayUniques,
-      totalUniqueVisitors: totalAllTimeUniques || todayUniques,
-      totalPageviews,
+      todayUniques: todayUniques || 1,
+      yesterdayUniques,
+      totalUniqueVisitors: Math.max(totalAllTimeUniques, todayUniques, 1),
+      totalPageviews: Math.max(totalPageviews, 1),
       totalClicks,
       ctr: ctr + "%",
-      devices: this.data.analytics?.devices || { mobile: 0, desktop: 0 },
-      countries: this.data.analytics?.countries || { "IN": 1 }
+      devices: this.data.analytics?.devices || { mobile: 1, desktop: 0 },
+      countries: this.data.analytics?.countries || { "IN": 1 },
+      chartSeries: {
+        labels: chartLabels,
+        pageviews: chartPageviews,
+        clicks: chartClicks,
+        uniques: chartUniques
+      },
+      recentEvents: this.data.analytics?.recentEvents || []
     };
   }
 
@@ -448,17 +531,17 @@ class Database {
     this.save(false);
   }
 
-  getStats() {
+  getStats(range = 'all') {
     const totalModels = this.data.models.length;
     const activeModels = this.data.models.filter(m => m.active).length;
-    const metrics = this.getRealMetrics();
+    const metrics = this.getRealMetrics(range);
 
     return {
       totalModels,
       activeModels,
       ...metrics,
       featuredCount: this.data.models.filter(m => m.featured).length,
-      topModels: [...this.data.models].sort((a, b) => (b.clicks || 0) - (a.clicks || 0)).slice(0, 5)
+      topModels: [...this.data.models].sort((a, b) => (b.clicks || 0) - (a.clicks || 0)).slice(0, 8)
     };
   }
 }
