@@ -27,8 +27,8 @@
       ],
       "featured": true,
       "active": true,
-      "clicks": 245,
-      "views": 3120,
+      "clicks": 2,
+      "views": 28,
       "createdAt": "2026-08-19T14:01:11.153Z"
     },
     {
@@ -57,8 +57,8 @@
       ],
       "featured": true,
       "active": true,
-      "clicks": 318,
-      "views": 4210,
+      "clicks": 1,
+      "views": 16,
       "createdAt": "2026-08-19T14:01:11.154Z"
     },
     {
@@ -87,8 +87,8 @@
       ],
       "featured": true,
       "active": true,
-      "clicks": 180,
-      "views": 2450,
+      "clicks": 0,
+      "views": 11,
       "createdAt": "2026-08-19T14:01:11.154Z"
     },
     {
@@ -117,8 +117,8 @@
       ],
       "featured": true,
       "active": true,
-      "clicks": 420,
-      "views": 5300,
+      "clicks": 0,
+      "views": 8,
       "createdAt": "2026-08-19T14:01:11.154Z"
     },
     {
@@ -146,8 +146,8 @@
       ],
       "featured": false,
       "active": true,
-      "clicks": 130,
-      "views": 1650,
+      "clicks": 0,
+      "views": 4,
       "createdAt": "2026-08-19T14:01:11.154Z"
     },
     {
@@ -175,8 +175,8 @@
       ],
       "featured": false,
       "active": true,
-      "clicks": 290,
-      "views": 3400,
+      "clicks": 0,
+      "views": 3,
       "createdAt": "2026-08-19T14:01:11.154Z"
     }
   ],
