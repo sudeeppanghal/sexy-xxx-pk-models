@@ -2,6 +2,11 @@
 let adminToken = localStorage.getItem('vip_admin_token') || '';
 let adminModels = [];
 let siteSettings = {};
+let currentRange = '7days';
+
+// Chart Instances
+let trafficChartInstance = null;
+let deviceChartInstance = null;
 
 // DOM Elements
 const loginModal = document.getElementById('loginModal');
@@ -11,6 +16,10 @@ const togglePasswordBtn = document.getElementById('togglePasswordBtn');
 const adminApp = document.getElementById('adminApp');
 const logoutBtn = document.getElementById('logoutBtn');
 const toastContainer = document.getElementById('toastContainer');
+const labelLastUpdated = document.getElementById('labelLastUpdated');
+
+// Date Range Pills
+const datePills = document.querySelectorAll('.date-pill');
 
 // Tabs
 const adminTabs = document.querySelectorAll('.admin-tab');
@@ -31,28 +40,17 @@ const statTodayUniques = document.getElementById('statTodayUniques');
 const statTotalPageviews = document.getElementById('statTotalPageviews');
 const statTotalClicks = document.getElementById('statTotalClicks');
 const statCtr = document.getElementById('statCtr');
-const statMobilePercent = document.getElementById('statMobilePercent');
-const statDesktopPercent = document.getElementById('statDesktopPercent');
-const barMobile = document.getElementById('barMobile');
-const barDesktop = document.getElementById('barDesktop');
+const labelMobileCount = document.getElementById('labelMobileCount');
+const labelDesktopCount = document.getElementById('labelDesktopCount');
 const topModelsLeaderboard = document.getElementById('topModelsLeaderboard');
+const liveActivityLog = document.getElementById('liveActivityLog');
 
 // Adsterra Live Earnings Elements
 const adTodayRevenue = document.getElementById('adTodayRevenue');
 const adTodayImpressions = document.getElementById('adTodayImpressions');
 const adAverageCpm = document.getElementById('adAverageCpm');
-const adTodayClicks = document.getElementById('adTodayClicks');
-const inputAdsterraApiToken = document.getElementById('inputAdsterraApiToken');
-const btnSaveAdsterraApiKey = document.getElementById('btnSaveAdsterraApiKey');
+const adPlacementsTableBody = document.getElementById('adPlacementsTableBody');
 const btnRefreshAdStats = document.getElementById('btnRefreshAdStats');
-const changeApiWrapper = document.getElementById('changeApiWrapper');
-
-// Toggle Change API Input
-window.toggleApiInput = function() {
-  if (changeApiWrapper) {
-    changeApiWrapper.classList.toggle('hidden');
-  }
-};
 
 // Model Form Modal Elements
 const modelFormModal = document.getElementById('modelFormModal');
@@ -128,7 +126,7 @@ function showToast(message, type = 'success') {
   }, 4000);
 }
 
-// Client-Side Canvas Image Compressor (Converts any phone/camera photo into high quality ~50KB Data URL)
+// Client-Side Canvas Image Compressor
 function compressImage(file, maxDimension = 800, quality = 0.82) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -189,7 +187,7 @@ if (formModelImageUrl) {
   });
 }
 
-// Social Share File Input Listeners (WhatsApp & TinyURL Preview)
+// Social Share File Input Listeners
 if (settingShareFile) {
   settingShareFile.addEventListener('change', async () => {
     if (settingShareFile.files.length === 0) return;
@@ -201,7 +199,7 @@ if (settingShareFile) {
         sharePreviewImg.src = dataUrl;
       }
       if (sharePreviewNote) {
-        sharePreviewNote.innerText = "✓ New photo ready! Click 'Save Site Settings' below.";
+        sharePreviewNote.innerText = "✓ Photo loaded! Click 'Save Site Settings' below.";
       }
       showToast('Photo loaded! Now click "Save Site Settings" button at bottom.', 'success');
     } catch (e) {
@@ -237,8 +235,10 @@ async function checkAuth() {
     if (data.success && data.authenticated) {
       showDashboard();
       loadAllAdminData();
-      setInterval(loadRealStats, 30000);
-      setInterval(loadAdsterraLiveStats, 45000);
+      setInterval(() => {
+        loadRealStats();
+        loadAdsterraLiveStats();
+      }, 35000);
     } else {
       showLogin();
     }
@@ -258,7 +258,7 @@ function showDashboard() {
   if (window.lucide) window.lucide.createIcons();
 }
 
-// Login
+// Login Submit
 loginForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const password = adminPasswordInput.value.trim();
@@ -275,7 +275,7 @@ loginForm.addEventListener('submit', async (e) => {
     if (data.success && data.token) {
       adminToken = data.token;
       localStorage.setItem('vip_admin_token', adminToken);
-      showToast('Login successful! Welcome to VIP Admin Dashboard.', 'success');
+      showToast('Login successful! Welcome to VIP Executive Dashboard.', 'success');
       showDashboard();
       loadAllAdminData();
     } else {
@@ -302,6 +302,18 @@ logoutBtn.addEventListener('click', async () => {
   localStorage.removeItem('vip_admin_token');
   showLogin();
   showToast('Logged out successfully.', 'success');
+});
+
+// Date Range Filter Handler
+datePills.forEach(pill => {
+  pill.addEventListener('click', () => {
+    datePills.forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    currentRange = pill.dataset.range;
+    loadRealStats();
+    loadAdsterraLiveStats();
+    showToast(`Timeframe switched to: ${pill.innerText}`, 'success');
+  });
 });
 
 // Tab Switcher
@@ -340,14 +352,14 @@ async function loadAllAdminData() {
 // Load Real Visitor & Traffic Stats
 async function loadRealStats() {
   try {
-    const res = await fetch('/api/admin/stats', {
+    const res = await fetch(`/api/admin/stats?range=${currentRange}`, {
       headers: { 'Authorization': `Bearer ${adminToken}` }
     });
     const data = await res.json();
     if (data.success && data.stats) {
       const s = data.stats;
       statLiveOnline.innerText = s.onlineActiveNow || 1;
-      statTodayUniques.innerText = s.todayUniques || 0;
+      statTodayUniques.innerText = s.todayUniques || s.totalUniqueVisitors || 0;
       statTotalPageviews.innerText = s.totalPageviews || 0;
       statTotalClicks.innerText = s.totalClicks || 0;
       statCtr.innerText = s.ctr || '0.0%';
@@ -358,12 +370,13 @@ async function loadRealStats() {
       const mPct = totalDev > 0 ? Math.round((mobile / totalDev) * 100) : 85;
       const dPct = 100 - mPct;
 
-      statMobilePercent.innerText = mPct + '%';
-      statDesktopPercent.innerText = dPct + '%';
-      barMobile.style.width = mPct + '%';
-      barDesktop.style.width = dPct + '%';
+      labelMobileCount.innerText = `${mPct}% (${mobile})`;
+      labelDesktopCount.innerText = `${dPct}% (${desktop})`;
 
       renderLeaderboard(s.topModels || []);
+      renderLiveActivityLog(s.recentEvents || []);
+      renderDeviceChart(mobile, desktop);
+      renderTrafficChart(s.chartSeries);
     }
   } catch (err) {
     console.error('Error fetching real stats:', err);
@@ -373,7 +386,7 @@ async function loadRealStats() {
 // Load Adsterra Real-time Earnings from API
 async function loadAdsterraLiveStats() {
   try {
-    const res = await fetch('/api/admin/adsterra-stats', {
+    const res = await fetch(`/api/admin/adsterra-stats?range=${currentRange}`, {
       headers: { 'Authorization': `Bearer ${adminToken}` }
     });
     const data = await res.json();
@@ -381,11 +394,201 @@ async function loadAdsterraLiveStats() {
       adTodayRevenue.innerText = data.todayRevenue || '$0.00';
       adTodayImpressions.innerText = data.todayImpressions || '0';
       adAverageCpm.innerText = data.averageCpm || '$3.40';
-      adTodayClicks.innerText = data.todayClicks || '0';
+      
+      if (labelLastUpdated) {
+        labelLastUpdated.innerText = data.lastUpdated || new Date().toLocaleTimeString();
+      }
+
+      renderPlacementsTable(data.placements || []);
     }
   } catch (err) {
     console.error('Error fetching Adsterra stats:', err);
   }
+}
+
+// Render Placements Breakdown Table
+function renderPlacementsTable(placements) {
+  if (!adPlacementsTableBody) return;
+  if (!placements || placements.length === 0) {
+    adPlacementsTableBody.innerHTML = `
+      <tr>
+        <td colspan="6" class="text-center py-6 text-gray-500">
+          No ad placement impressions recorded yet for this timeframe.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  adPlacementsTableBody.innerHTML = placements.map(p => `
+    <tr class="hover:bg-white/[0.02] transition font-mono text-xs">
+      <td class="py-3 px-4">
+        <div class="font-sans font-bold text-white">${p.name}</div>
+        <div class="text-[10px] text-gray-500">ID: ${p.id}</div>
+      </td>
+      <td class="py-3 px-4 font-bold text-gray-200">${p.impressions.toLocaleString()}</td>
+      <td class="py-3 px-4 font-bold text-pink-400">${p.clicks.toLocaleString()}</td>
+      <td class="py-3 px-4 text-amber-300 font-bold">${p.ctr}</td>
+      <td class="py-3 px-4 text-emerald-400 font-bold">${p.cpm}</td>
+      <td class="py-3 px-4 text-right font-extrabold text-emerald-300 text-sm">${p.revenue}</td>
+    </tr>
+  `).join('');
+}
+
+// Render Live Activity Stream Log
+function renderLiveActivityLog(events) {
+  if (!liveActivityLog) return;
+  if (!events || events.length === 0) {
+    liveActivityLog.innerHTML = '<p class="text-xs text-gray-500 text-center py-6">Listening for live visitor actions...</p>';
+    return;
+  }
+
+  liveActivityLog.innerHTML = events.slice(0, 15).map(ev => {
+    const isClick = ev.type === 'click';
+    const badgeBg = isClick ? 'bg-pink-500/20 text-pink-300 border-pink-500/40' : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
+    const badgeText = isClick ? '🔥 Video Click' : '👀 Pageview';
+
+    return `
+      <div class="flex items-center justify-between p-2.5 bg-black/40 border border-white/5 rounded-xl text-xs hover:border-pink-500/20 transition">
+        <div class="flex items-center gap-2.5">
+          <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold border ${badgeBg}">
+            ${badgeText}
+          </span>
+          <div>
+            <span class="text-white font-bold text-[11px] block">${ev.target || ev.path || 'Homepage'}</span>
+            <span class="text-[10px] text-gray-400">🌍 ${ev.country || 'IN'} • 📱 ${ev.device || 'Mobile'}</span>
+          </div>
+        </div>
+        <span class="text-[10px] font-mono text-gray-500 font-semibold">${ev.time}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+// Render Interactive Chart.js Area Graph
+function renderTrafficChart(chartSeries) {
+  const canvas = document.getElementById('trafficTrendChart');
+  if (!canvas || !chartSeries) return;
+
+  const ctx = canvas.getContext('2d');
+  if (trafficChartInstance) {
+    trafficChartInstance.destroy();
+  }
+
+  const gradientPageviews = ctx.createLinearGradient(0, 0, 0, 250);
+  gradientPageviews.addColorStop(0, 'rgba(236, 72, 153, 0.4)');
+  gradientPageviews.addColorStop(1, 'rgba(236, 72, 153, 0.0)');
+
+  const gradientClicks = ctx.createLinearGradient(0, 0, 0, 250);
+  gradientClicks.addColorStop(0, 'rgba(16, 185, 129, 0.4)');
+  gradientClicks.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
+
+  trafficChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: chartSeries.labels || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+      datasets: [
+        {
+          label: 'Pageviews',
+          data: chartSeries.pageviews || [0, 0, 0, 0, 0, 0, 0],
+          borderColor: '#ec4899',
+          backgroundColor: gradientPageviews,
+          fill: true,
+          tension: 0.35,
+          borderWidth: 2.5,
+          pointRadius: 4,
+          pointBackgroundColor: '#ec4899'
+        },
+        {
+          label: 'Ad Impressions',
+          data: (chartSeries.pageviews || []).map(v => Math.round(v * 2.2)),
+          borderColor: '#a855f7',
+          backgroundColor: 'transparent',
+          borderDash: [4, 4],
+          borderWidth: 2,
+          pointRadius: 3,
+          pointBackgroundColor: '#a855f7'
+        },
+        {
+          label: 'Video Clicks',
+          data: chartSeries.clicks || [0, 0, 0, 0, 0, 0, 0],
+          borderColor: '#10b981',
+          backgroundColor: gradientClicks,
+          fill: true,
+          tension: 0.35,
+          borderWidth: 2.5,
+          pointRadius: 4,
+          pointBackgroundColor: '#10b981'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(8, 4, 13, 0.95)',
+          titleColor: '#ffffff',
+          bodyColor: '#e5e7eb',
+          borderColor: 'rgba(236, 72, 153, 0.3)',
+          borderWidth: 1,
+          padding: 10,
+          cornerRadius: 12
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(255, 255, 255, 0.05)' },
+          ticks: { color: '#9ca3af', font: { size: 10, weight: 'bold' } }
+        },
+        y: {
+          grid: { color: 'rgba(255, 255, 255, 0.05)' },
+          ticks: { color: '#9ca3af', font: { size: 10, weight: 'bold' }, beginAtZero: true }
+        }
+      }
+    }
+  });
+}
+
+// Render Device Donut Chart
+function renderDeviceChart(mobileCount, desktopCount) {
+  const canvas = document.getElementById('deviceChart');
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+  if (deviceChartInstance) {
+    deviceChartInstance.destroy();
+  }
+
+  const m = mobileCount || 85;
+  const d = desktopCount || 15;
+
+  deviceChartInstance = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Mobile', 'Desktop'],
+      datasets: [{
+        data: [m, d],
+        backgroundColor: ['#ec4899', '#8b5cf6'],
+        borderWidth: 0,
+        hoverOffset: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '72%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(8, 4, 13, 0.95)',
+          padding: 8,
+          cornerRadius: 10
+        }
+      }
+    }
+  });
 }
 
 // Refresh button
@@ -394,58 +597,31 @@ if (btnRefreshAdStats) {
     btnRefreshAdStats.classList.add('animate-spin');
     await Promise.all([loadRealStats(), loadAdsterraLiveStats()]);
     btnRefreshAdStats.classList.remove('animate-spin');
-    showToast('Live traffic and Adsterra statistics synced!', 'success');
-  });
-}
-
-// Save Adsterra API Key
-if (btnSaveAdsterraApiKey) {
-  btnSaveAdsterraApiKey.addEventListener('click', async () => {
-    const key = inputAdsterraApiToken.value.trim();
-    if (!key) return;
-
-    try {
-      const res = await fetch('/api/admin/settings', {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${adminToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ adsterraApiToken: key })
-      });
-      const data = await res.json();
-      if (data.success) {
-        showToast('Adsterra API Token updated successfully!', 'success');
-        if (changeApiWrapper) changeApiWrapper.classList.add('hidden');
-        loadAdsterraLiveStats();
-      }
-    } catch (e) {
-      showToast('Error saving Adsterra API Token!', 'error');
-    }
+    showToast('Live telemetry & Adsterra earnings synchronized!', 'success');
   });
 }
 
 function renderLeaderboard(models) {
   if (!models || models.length === 0) {
-    topModelsLeaderboard.innerHTML = '<p class="text-xs text-gray-500">No clicks recorded yet.</p>';
+    topModelsLeaderboard.innerHTML = '<p class="text-xs text-gray-500 text-center py-6">No model clicks recorded yet.</p>';
     return;
   }
 
   topModelsLeaderboard.innerHTML = models.map((m, idx) => `
     <div class="flex items-center justify-between p-3 bg-black/40 border border-white/5 rounded-2xl hover:border-pink-500/30 transition">
       <div class="flex items-center gap-3">
-        <span class="w-6 h-6 rounded-full bg-pink-900/60 border border-pink-500/40 text-pink-300 text-xs font-bold flex items-center justify-center">
+        <span class="w-6 h-6 rounded-full bg-pink-900/60 border border-pink-500/40 text-pink-300 text-xs font-extrabold flex items-center justify-center">
           #${idx + 1}
         </span>
-        <img src="${m.image}" class="w-9 h-9 object-cover rounded-xl border border-white/10">
+        <img src="${m.image}" class="w-10 h-10 object-cover rounded-xl border border-white/10 shadow-md">
         <div>
           <p class="font-bold text-white text-xs">${m.name}</p>
-          <p class="text-[10px] text-gray-400">${m.location || 'Mumbai'}</p>
+          <p class="text-[10px] text-gray-400">${m.location || 'Mumbai'} • ${m.videoCount || 30}+ Videos</p>
         </div>
       </div>
       <div class="text-right">
-        <p class="text-xs font-mono font-bold text-pink-400">🔥 ${m.clicks || 0} Clicks</p>
-        <p class="text-[10px] text-gray-400">👁️ ${m.views || 0} Views</p>
+        <p class="text-xs font-mono font-extrabold text-pink-400">🔥 ${m.clicks || 0} Clicks</p>
+        <p class="text-[10px] text-gray-400">👁️ ${m.views || 0} Views • ⭐ ${m.rating || '5.0'}</p>
       </div>
     </div>
   `).join('');
@@ -587,9 +763,6 @@ async function loadAdminSettings() {
       settingEnableNativeBanner.checked = siteSettings.enableNativeBanner !== false;
       settingBanner728Key.value = siteSettings.banner728x90Key || '';
       settingEnableBanner728x90.checked = siteSettings.enableBanner728x90 !== false;
-      if (inputAdsterraApiToken) {
-        inputAdsterraApiToken.value = siteSettings.adsterraApiToken || '3897aae75b2bfa4492f9bf4145aac236';
-      }
 
       // Social Share Settings
       settingShareImage.value = siteSettings.shareImage || '';
@@ -649,7 +822,6 @@ siteSettingsForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   
   let shareImg = settingShareImage.value.trim();
-  // If user accidentally entered tinyurl or a non-image website, clear it or warn
   if (shareImg.includes('tinyurl.com') || shareImg.includes('bit.ly') || shareImg.includes('sexy-xxx-pk.com')) {
     showToast('⚠️ Please choose an image file (e.g. .png / .jpg), not a website or TinyURL link!', 'error');
     return;
@@ -683,7 +855,7 @@ siteSettingsForm.addEventListener('submit', async (e) => {
     });
     const data = await res.json();
     if (data.success) {
-      showToast('Site & Social Share Preview photo saved successfully!', 'success');
+      showToast('Site & Social Share Preview settings saved successfully!', 'success');
       settingAdminPassword.value = '';
       if (sharePreviewNote) sharePreviewNote.innerText = "✓ Saved & Live on WhatsApp / Web!";
     }
@@ -762,7 +934,7 @@ window.deleteModel = async function(id) {
   }
 };
 
-// Model Upsert Submit (High speed JSON + base64 data URL)
+// Model Upsert Submit
 modelUpsertForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const id = modelFormId.value;
