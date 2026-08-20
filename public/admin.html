@@ -3,43 +3,76 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VIP Admin Portal | Real Metrics & Adsterra Earnings</title>
+  <title>VIP Executive Dashboard | Traffic Analytics & Adsterra Earnings</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js for High-End Interactive Charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Custom Stylesheet -->
   <link rel="stylesheet" href="/css/style.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%20%22100%22%20%22100%22><text y=%22.9em%22 font-size=%2290%22>👑</text></svg>">
+  <style>
+    .kpi-card {
+      background: rgba(18, 10, 26, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .kpi-card:hover {
+      border-color: rgba(236, 72, 153, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px -10px rgba(236, 72, 153, 0.2);
+    }
+    .date-pill.active {
+      background: linear-gradient(135deg, #db2777 0%, #9333ea 100%);
+      color: #ffffff;
+      border-color: transparent;
+      box-shadow: 0 4px 14px 0 rgba(219, 39, 119, 0.39);
+    }
+    .badge-live-pulse {
+      position: relative;
+    }
+    .badge-live-pulse::before {
+      content: '';
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: #10b981;
+      animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+  </style>
 </head>
-<body class="bg-[#08040d] text-gray-100 min-h-screen">
+<body class="bg-[#07030c] text-gray-100 min-h-screen font-sans selection:bg-pink-500 selection:text-white">
 
   <!-- Toast Notification Container -->
   <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
   <!-- Admin Login Modal -->
-  <div id="loginModal" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
-    <div class="glass-panel max-w-md w-full p-8 border border-pink-500/30 shadow-2xl shadow-pink-950/60 rounded-3xl text-center">
-      <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-pink-600 to-amber-500 flex items-center justify-center mx-auto mb-5 shadow-lg shadow-pink-600/40">
-        <i data-lucide="lock" class="w-8 h-8 text-white"></i>
+  <div id="loginModal" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-2xl flex items-center justify-center p-4">
+    <div class="kpi-card max-w-md w-full p-8 sm:p-10 border border-pink-500/30 shadow-2xl shadow-pink-950/80 rounded-3xl text-center">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-pink-600 via-rose-500 to-amber-500 flex items-center justify-center mx-auto mb-5 shadow-xl shadow-pink-600/40">
+        <i data-lucide="shield-check" class="w-8 h-8 text-white"></i>
       </div>
-      <h2 class="font-serif font-black text-2xl text-white mb-2">VIP Admin Portal</h2>
-      <p class="text-gray-400 text-xs mb-6">Enter your master security PIN to access the dashboard, traffic metrics, and ad controls.</p>
+      <h2 class="font-serif font-black text-2xl text-white mb-2 tracking-wide">VIP Executive Portal</h2>
+      <p class="text-gray-400 text-xs mb-6">Enter your master security PIN to access live traffic analytics, Adsterra revenue, and site controls.</p>
 
       <form id="loginForm" class="space-y-4">
         <div class="text-left">
-          <label class="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-2">Master Security PIN</label>
+          <label class="block text-[11px] font-extrabold text-gray-300 uppercase tracking-wider mb-2">Master Security PIN</label>
           <div class="relative">
             <input type="password" id="adminPasswordInput" placeholder="Enter Password / PIN" required
-              class="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500">
+              class="w-full bg-black/70 border border-white/15 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition">
             <button type="button" id="togglePasswordBtn" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white">
               <i data-lucide="eye" class="w-4 h-4"></i>
             </button>
           </div>
         </div>
 
-        <button type="submit" id="loginSubmitBtn" class="btn-vip-glow w-full py-3.5 text-sm font-bold">
-          Unlock Admin Dashboard
+        <button type="submit" id="loginSubmitBtn" class="btn-vip-glow w-full py-3.5 text-sm font-extrabold tracking-wide">
+          Unlock Executive Dashboard
         </button>
       </form>
     </div>
@@ -49,21 +82,26 @@
   <div id="adminApp" class="hidden min-h-screen flex flex-col">
 
     <!-- Top Admin Header -->
-    <header class="glass-nav sticky top-0 z-30 border-b border-white/10 px-4 sm:px-8 py-4 flex items-center justify-between">
+    <header class="glass-nav sticky top-0 z-30 border-b border-white/10 px-4 sm:px-8 py-3.5 flex items-center justify-between">
       <div class="flex items-center gap-4">
-        <a href="/" target="_blank" class="flex items-center gap-2 group">
-          <div class="w-10 h-10 rounded-xl bg-pink-600 flex items-center justify-center">
-            <i data-lucide="sparkles" class="w-5 h-5 text-white fill-white"></i>
+        <a href="/" target="_blank" class="flex items-center gap-3 group">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-pink-600 to-purple-600 flex items-center justify-center shadow-lg shadow-pink-600/30">
+            <i data-lucide="crown" class="w-5 h-5 text-white"></i>
           </div>
           <div>
-            <span class="font-serif font-black text-lg text-white">VIP Control Master</span>
-            <span class="block text-[10px] text-emerald-400 font-bold uppercase tracking-wider">● System Live & Active</span>
+            <div class="flex items-center gap-2">
+              <span class="font-serif font-black text-lg text-white">VIP Executive Master</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> Live v2.5
+              </span>
+            </div>
+            <span class="block text-[11px] text-gray-400">Official Adsterra & Real-Time Traffic Management</span>
           </div>
         </a>
       </div>
 
       <div class="flex items-center gap-3">
-        <a href="/" target="_blank" class="inline-flex items-center gap-1.5 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-semibold text-gray-300 hover:text-white transition">
+        <a href="/" target="_blank" class="inline-flex items-center gap-1.5 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-bold text-gray-300 hover:text-white transition">
           <i data-lucide="external-link" class="w-3.5 h-3.5 text-pink-400"></i>
           <span class="hidden sm:inline">View Public Website</span>
         </a>
@@ -74,183 +112,254 @@
       </div>
     </header>
 
-    <!-- Sub Navigation Tabs -->
-    <div class="bg-black/40 border-b border-white/5 px-4 sm:px-8 py-3">
-      <div class="max-w-7xl mx-auto flex items-center gap-2.5 overflow-x-auto">
-        <button class="admin-tab active px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-pink-600 text-white" data-tab="analytics">
-          <i data-lucide="activity" class="w-4 h-4 text-emerald-400"></i>
-          <span>Real Traffic & Adsterra Earnings</span>
-        </button>
-        <button class="admin-tab px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-gray-400 hover:text-white hover:bg-white/5" data-tab="models">
-          <i data-lucide="users" class="w-4 h-4 text-pink-400"></i>
-          <span>Models Management (<span id="tabCountModels">0</span>)</span>
-        </button>
-        <button class="admin-tab px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-gray-400 hover:text-white hover:bg-white/5" data-tab="ads">
-          <i data-lucide="dollar-sign" class="w-4 h-4 text-amber-400"></i>
-          <span>Adsterra Ads & Monetization</span>
-        </button>
-        <button class="admin-tab px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 text-gray-400 hover:text-white hover:bg-white/5" data-tab="settings">
-          <i data-lucide="settings" class="w-4 h-4"></i>
-          <span>Site Settings, Social Share & PIN</span>
-        </button>
+    <!-- Navigation & Timeframe Selector Bar -->
+    <div class="bg-black/50 border-b border-white/5 px-4 sm:px-8 py-3">
+      <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
+        
+        <!-- Main Navigation Tabs -->
+        <div class="flex items-center gap-2 overflow-x-auto w-full md:w-auto">
+          <button class="admin-tab active px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 bg-pink-600 text-white" data-tab="analytics">
+            <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+            <span>Executive Analytics & Adsterra</span>
+          </button>
+          <button class="admin-tab px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 text-gray-400 hover:text-white hover:bg-white/5" data-tab="models">
+            <i data-lucide="users" class="w-4 h-4 text-pink-400"></i>
+            <span>Models Management (<span id="tabCountModels">0</span>)</span>
+          </button>
+          <button class="admin-tab px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 text-gray-400 hover:text-white hover:bg-white/5" data-tab="ads">
+            <i data-lucide="dollar-sign" class="w-4 h-4 text-amber-400"></i>
+            <span>Adsterra Codes & Units</span>
+          </button>
+          <button class="admin-tab px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 text-gray-400 hover:text-white hover:bg-white/5" data-tab="settings">
+            <i data-lucide="sliders" class="w-4 h-4"></i>
+            <span>Site Settings & Social Share</span>
+          </button>
+        </div>
+
+        <!-- Date Range Filter Selector -->
+        <div class="flex items-center gap-1.5 bg-black/60 p-1 rounded-xl border border-white/10 text-xs w-full md:w-auto justify-center">
+          <button class="date-pill px-3 py-1.5 rounded-lg font-bold text-gray-400 hover:text-white transition" data-range="today">Today</button>
+          <button class="date-pill px-3 py-1.5 rounded-lg font-bold text-gray-400 hover:text-white transition" data-range="yesterday">Yesterday</button>
+          <button class="date-pill px-3 py-1.5 rounded-lg font-bold text-gray-400 hover:text-white transition active" data-range="7days">Last 7 Days</button>
+          <button class="date-pill px-3 py-1.5 rounded-lg font-bold text-gray-400 hover:text-white transition" data-range="30days">Last 30 Days</button>
+          <button class="date-pill px-3 py-1.5 rounded-lg font-bold text-gray-400 hover:text-white transition" data-range="all">All Time</button>
+        </div>
       </div>
     </div>
 
     <!-- Main Content Area -->
-    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-8">
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-8 space-y-8">
 
       <!-- ============================================================ -->
-      <!-- TAB 1: REAL-TIME TRAFFIC & ADSTERRA EARNINGS -->
+      <!-- TAB 1: EXECUTIVE ANALYTICS & ADSTERRA EARNINGS -->
       <!-- ============================================================ -->
       <section id="tabAnalyticsSection" class="space-y-6">
 
-        <div class="grid grid-cols-2 sm:grid-cols-5 gap-4">
-          <div class="glass-panel p-5 border border-emerald-500/30 rounded-2xl relative overflow-hidden">
-            <div class="flex items-center justify-between mb-1">
-              <span class="text-[11px] font-bold uppercase text-emerald-400 flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> Live Online
+        <!-- Top Header with Live Sync Status -->
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h2 class="font-serif font-black text-2xl text-white">Traffic & Adsterra Revenue Matrix</h2>
+            <p class="text-xs text-gray-400 mt-0.5">Real-time telemetry verified via official Adsterra Publisher API & server analytics.</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-xs text-gray-400">Last Synced: <span id="labelLastUpdated" class="text-pink-300 font-mono font-bold">Just now</span></span>
+            <button id="btnRefreshAdStats" class="btn-vip-glow px-4 py-2 text-xs font-bold flex items-center gap-2">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+              <span>Sync Live Data</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 8 CORE KPI CARDS GRID -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          
+          <!-- 1. Live Active Now -->
+          <div class="kpi-card p-5 rounded-2xl border border-emerald-500/40 relative overflow-hidden">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[11px] font-extrabold uppercase text-emerald-400 tracking-wider flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> Live Active
               </span>
               <i data-lucide="radio" class="w-4 h-4 text-emerald-400"></i>
             </div>
-            <h3 id="statLiveOnline" class="font-serif font-black text-3xl text-emerald-300">1</h3>
-            <p class="text-[10px] text-gray-400 mt-1">Real-time active visitors</p>
+            <h3 id="statLiveOnline" class="font-serif font-black text-3xl sm:text-4xl text-emerald-300">1</h3>
+            <p class="text-[11px] text-gray-400 mt-1">Visitors browsing right now</p>
           </div>
 
-          <div class="glass-panel p-5 border border-white/10 rounded-2xl">
-            <p class="text-[11px] font-bold uppercase text-gray-400 mb-1">Unique Visitors (Today)</p>
-            <h3 id="statTodayUniques" class="font-serif font-black text-3xl text-white">0</h3>
-            <p class="text-[10px] text-gray-400 mt-1">Verified unique IPs</p>
+          <!-- 2. Unique Human Visitors -->
+          <div class="kpi-card p-5 rounded-2xl">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[11px] font-extrabold uppercase text-gray-400 tracking-wider">Unique Visitors</span>
+              <i data-lucide="users" class="w-4 h-4 text-purple-400"></i>
+            </div>
+            <h3 id="statTodayUniques" class="font-serif font-black text-3xl sm:text-4xl text-white">0</h3>
+            <p class="text-[11px] text-gray-400 mt-1">Deduplicated human IPs</p>
           </div>
 
-          <div class="glass-panel p-5 border border-white/10 rounded-2xl">
-            <p class="text-[11px] font-bold uppercase text-gray-400 mb-1">Total Pageviews</p>
-            <h3 id="statTotalPageviews" class="font-serif font-black text-3xl text-white">0</h3>
-            <p class="text-[10px] text-gray-400 mt-1">Non-bot page impressions</p>
+          <!-- 3. Total Pageviews -->
+          <div class="kpi-card p-5 rounded-2xl">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[11px] font-extrabold uppercase text-gray-400 tracking-wider">Total Pageviews</span>
+              <i data-lucide="eye" class="w-4 h-4 text-blue-400"></i>
+            </div>
+            <h3 id="statTotalPageviews" class="font-serif font-black text-3xl sm:text-4xl text-white">0</h3>
+            <p class="text-[11px] text-gray-400 mt-1">Non-bot page impressions</p>
           </div>
 
-          <div class="glass-panel p-5 border border-pink-500/30 rounded-2xl">
-            <p class="text-[11px] font-bold uppercase text-pink-400 mb-1">🔥 Video Clicks</p>
-            <h3 id="statTotalClicks" class="font-serif font-black text-3xl text-pink-400">0</h3>
-            <p class="text-[10px] text-gray-400 mt-1">SmartLink + CTA actions</p>
+          <!-- 4. Video & SmartLink Clicks -->
+          <div class="kpi-card p-5 rounded-2xl border border-pink-500/30">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[11px] font-extrabold uppercase text-pink-400 tracking-wider">🔥 Video Actions</span>
+              <i data-lucide="mouse-pointer-click" class="w-4 h-4 text-pink-400"></i>
+            </div>
+            <h3 id="statTotalClicks" class="font-serif font-black text-3xl sm:text-4xl text-pink-400">0</h3>
+            <p class="text-[11px] text-gray-400 mt-1">SmartLink & Video clicks</p>
           </div>
 
-          <div class="glass-panel p-5 border border-amber-500/30 rounded-2xl">
-            <p class="text-[11px] font-bold uppercase text-amber-400 mb-1">Click Rate (CTR)</p>
-            <h3 id="statCtr" class="font-serif font-black text-3xl text-amber-300">0%</h3>
-            <p class="text-[10px] text-gray-400 mt-1">Conversion efficiency</p>
+          <!-- 5. Adsterra Total Revenue -->
+          <div class="kpi-card p-5 rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-950/20 to-black/40">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[11px] font-extrabold uppercase text-emerald-400 tracking-wider">Adsterra Revenue</span>
+              <i data-lucide="dollar-sign" class="w-4 h-4 text-emerald-400"></i>
+            </div>
+            <h3 id="adTodayRevenue" class="font-serif font-black text-3xl sm:text-4xl text-emerald-400">$0.00</h3>
+            <p class="text-[11px] text-gray-400 mt-1">Verified publisher earnings</p>
+          </div>
+
+          <!-- 6. Total Ad Impressions -->
+          <div class="kpi-card p-5 rounded-2xl">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[11px] font-extrabold uppercase text-gray-400 tracking-wider">Ad Impressions</span>
+              <i data-lucide="layers" class="w-4 h-4 text-amber-400"></i>
+            </div>
+            <h3 id="adTodayImpressions" class="font-serif font-black text-3xl sm:text-4xl text-white">0</h3>
+            <p class="text-[11px] text-gray-400 mt-1">Banners + Social Bar hits</p>
+          </div>
+
+          <!-- 7. Average CPM -->
+          <div class="kpi-card p-5 rounded-2xl border border-amber-500/30">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[11px] font-extrabold uppercase text-amber-400 tracking-wider">Average CPM</span>
+              <i data-lucide="trending-up" class="w-4 h-4 text-amber-400"></i>
+            </div>
+            <h3 id="adAverageCpm" class="font-serif font-black text-3xl sm:text-4xl text-amber-300">$3.40</h3>
+            <p class="text-[11px] text-gray-400 mt-1">Per 1,000 ad views</p>
+          </div>
+
+          <!-- 8. Conversion CTR -->
+          <div class="kpi-card p-5 rounded-2xl">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-[11px] font-extrabold uppercase text-gray-400 tracking-wider">Overall CTR</span>
+              <i data-lucide="pie-chart" class="w-4 h-4 text-rose-400"></i>
+            </div>
+            <h3 id="statCtr" class="font-serif font-black text-3xl sm:text-4xl text-rose-300">0.0%</h3>
+            <p class="text-[11px] text-gray-400 mt-1">Click conversion efficiency</p>
           </div>
         </div>
 
-        <!-- ADSTERRA REAL-TIME EARNINGS & CPM MATRIX CARD -->
-        <div class="glass-panel p-6 sm:p-8 border border-amber-500/40 rounded-3xl relative overflow-hidden bg-gradient-to-r from-amber-950/20 via-pink-950/20 to-black/60 shadow-2xl">
-          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-white/10">
+        <!-- CHARTS SECTION: TRAFFIC & EARNINGS OVER TIME -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          <!-- Large Area Chart: Traffic Trend -->
+          <div class="kpi-card lg:col-span-2 p-6 rounded-3xl border border-white/10 space-y-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="font-serif font-bold text-base text-white flex items-center gap-2">
+                  <i data-lucide="trending-up" class="w-4 h-4 text-pink-500"></i>
+                  <span>Traffic & Ad Impressions Telemetry</span>
+                </h3>
+                <p class="text-[11px] text-gray-400">Daily breakdown of Pageviews, Ad Impressions & Video Clicks</p>
+              </div>
+              <div class="flex items-center gap-3 text-xs">
+                <span class="flex items-center gap-1.5 text-pink-400 font-bold"><span class="w-2.5 h-2.5 rounded-full bg-pink-500"></span> Pageviews</span>
+                <span class="flex items-center gap-1.5 text-purple-400 font-bold"><span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span> Ad Impressions</span>
+                <span class="flex items-center gap-1.5 text-emerald-400 font-bold"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Clicks</span>
+              </div>
+            </div>
+            <div class="h-64 sm:h-72 w-full">
+              <canvas id="trafficTrendChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Device Breakdown Donut Chart -->
+          <div class="kpi-card p-6 rounded-3xl border border-white/10 space-y-4">
+            <h3 class="font-serif font-bold text-base text-white flex items-center gap-2">
+              <i data-lucide="smartphone" class="w-4 h-4 text-purple-400"></i>
+              <span>Device Distribution</span>
+            </h3>
+            <div class="h-48 w-full flex items-center justify-center">
+              <canvas id="deviceChart"></canvas>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-center pt-2 border-t border-white/5">
+              <div class="p-2 bg-black/40 rounded-xl">
+                <span class="text-[11px] text-pink-300 block font-bold">📱 Mobile</span>
+                <span id="labelMobileCount" class="font-serif font-extrabold text-base text-white">85%</span>
+              </div>
+              <div class="p-2 bg-black/40 rounded-xl">
+                <span class="text-[11px] text-purple-300 block font-bold">💻 Desktop</span>
+                <span id="labelDesktopCount" class="font-serif font-extrabold text-base text-white">15%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ADSTERRA PLACEMENT BREAKDOWN TABLE -->
+        <div class="kpi-card p-6 sm:p-8 rounded-3xl border border-amber-500/30 space-y-4">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pb-4 border-b border-white/10">
             <div>
-              <span class="px-3 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded-full text-xs font-extrabold uppercase tracking-wider">
-                💰 Live Adsterra Revenue Matrix
+              <span class="px-3 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500/20 text-amber-300 border border-amber-500/40 uppercase">
+                Official API Verification
               </span>
-              <h3 class="font-serif font-black text-2xl text-white mt-2">
-                Real-Time Ad Earnings, Impressions & CPM
+              <h3 class="font-serif font-black text-xl text-white mt-1">
+                Adsterra Placement Performance Breakdown
               </h3>
             </div>
-            <button id="btnRefreshAdStats" class="btn-vip-glow px-5 py-2.5 text-xs font-bold flex items-center gap-2">
-              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
-              <span>Sync Live Stats</span>
-            </button>
+            <span class="text-xs text-gray-400 font-mono">Token: 3897aae...236 (Connected)</span>
           </div>
 
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 my-6">
-            <div class="p-4 bg-black/50 rounded-2xl border border-white/10 text-center">
-              <p class="text-xs text-gray-400 font-bold uppercase mb-1">Today's Revenue</p>
-              <h4 id="adTodayRevenue" class="font-serif font-black text-2xl sm:text-3xl text-emerald-400">$0.00</h4>
-              <p class="text-[10px] text-gray-500 mt-1">SmartLink + Banners</p>
-            </div>
-            <div class="p-4 bg-black/50 rounded-2xl border border-white/10 text-center">
-              <p class="text-xs text-gray-400 font-bold uppercase mb-1">Total Ad Impressions</p>
-              <h4 id="adTodayImpressions" class="font-serif font-black text-2xl sm:text-3xl text-white">0</h4>
-              <p class="text-[10px] text-gray-500 mt-1">Banner & Social Bar hits</p>
-            </div>
-            <div class="p-4 bg-black/50 rounded-2xl border border-white/10 text-center">
-              <p class="text-xs text-gray-400 font-bold uppercase mb-1">Average CPM</p>
-              <h4 id="adAverageCpm" class="font-serif font-black text-2xl sm:text-3xl text-amber-400">$3.40</h4>
-              <p class="text-[10px] text-gray-500 mt-1">Per 1,000 Impressions</p>
-            </div>
-            <div class="p-4 bg-black/50 rounded-2xl border border-white/10 text-center">
-              <p class="text-xs text-gray-400 font-bold uppercase mb-1">Ad Clicks</p>
-              <h4 id="adTodayClicks" class="font-serif font-black text-2xl sm:text-3xl text-pink-400">0</h4>
-              <p class="text-[10px] text-gray-500 mt-1">High-value conversions</p>
-            </div>
-          </div>
-
-          <div class="p-4 bg-emerald-950/40 rounded-2xl border border-emerald-500/40 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div class="flex items-center gap-3 w-full sm:w-auto">
-              <div class="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 border border-emerald-500/40">
-                <i data-lucide="check-circle" class="w-4 h-4"></i>
-              </div>
-              <div class="text-xs">
-                <span class="font-bold text-emerald-300 block flex items-center gap-1.5">
-                  <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                  Official Adsterra API Status: Connected & Live
-                </span>
-                <span class="text-gray-300 text-[11px]">Real-time statistics are automatically syncing with your Adsterra publisher account.</span>
-              </div>
-            </div>
-            <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
-              <button onclick="toggleApiInput()" class="px-3.5 py-1.5 bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border border-white/10 rounded-xl text-[11px] font-semibold transition">
-                Change API Token
-              </button>
-            </div>
-          </div>
-
-          <div id="changeApiWrapper" class="hidden mt-3 p-4 bg-black/70 rounded-2xl border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div class="text-xs text-gray-300">
-              <span class="font-bold text-white block">Update Adsterra API Token:</span>
-              <span class="text-[11px] text-gray-400">Paste a new token from Adsterra Dashboard ➔ API.</span>
-            </div>
-            <div class="flex items-center gap-2 w-full sm:w-auto">
-              <input type="password" id="inputAdsterraApiToken" value="3897aae75b2bfa4492f9bf4145aac236"
-                class="bg-black/90 border border-white/20 rounded-xl px-3 py-2 text-xs text-white placeholder-gray-500 focus:border-amber-400 w-full sm:w-64">
-              <button id="btnSaveAdsterraApiKey" class="px-4 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded-xl text-xs font-bold whitespace-nowrap transition">
-                Save & Update
-              </button>
-            </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-black/60 text-gray-400 uppercase font-bold border-b border-white/10 tracking-wider">
+                <tr>
+                  <th class="py-3 px-4">Ad Placement Name & ID</th>
+                  <th class="py-3 px-4">Impressions</th>
+                  <th class="py-3 px-4">Clicks</th>
+                  <th class="py-3 px-4">CTR (%)</th>
+                  <th class="py-3 px-4">CPM</th>
+                  <th class="py-3 px-4 text-right">Estimated Revenue</th>
+                </tr>
+              </thead>
+              <tbody id="adPlacementsTableBody" class="divide-y divide-white/5"></tbody>
+            </table>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="glass-panel p-6 border border-white/10 rounded-2xl">
-            <h4 class="font-serif font-bold text-base text-white mb-4 flex items-center gap-2">
-              <i data-lucide="smartphone" class="w-4 h-4 text-pink-400"></i>
-              <span>Traffic by Device Type</span>
-            </h4>
-            <div class="space-y-4">
-              <div>
-                <div class="flex justify-between text-xs font-bold mb-1.5">
-                  <span class="text-pink-300 flex items-center gap-1.5"><i data-lucide="smartphone" class="w-3.5 h-3.5"></i> Mobile App & Smartphone</span>
-                  <span id="statMobilePercent" class="text-white">85%</span>
-                </div>
-                <div class="w-full bg-black/60 h-2.5 rounded-full overflow-hidden border border-white/10">
-                  <div id="barMobile" class="bg-gradient-to-r from-pink-500 to-rose-400 h-full rounded-full transition-all duration-500" style="width: 85%"></div>
-                </div>
-              </div>
+        <!-- TWO COLUMN SECTION: TOP MODELS & LIVE ACTIVITY LOG -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-              <div>
-                <div class="flex justify-between text-xs font-bold mb-1.5">
-                  <span class="text-purple-300 flex items-center gap-1.5"><i data-lucide="laptop" class="w-3.5 h-3.5"></i> Desktop / Laptop</span>
-                  <span id="statDesktopPercent" class="text-white">15%</span>
-                </div>
-                <div class="w-full bg-black/60 h-2.5 rounded-full overflow-hidden border border-white/10">
-                  <div id="barDesktop" class="bg-gradient-to-r from-purple-500 to-indigo-400 h-full rounded-full transition-all duration-500" style="width: 15%"></div>
-                </div>
-              </div>
+          <!-- Top Performing Models Leaderboard -->
+          <div class="kpi-card p-6 rounded-3xl border border-white/10 space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-white/10">
+              <h4 class="font-serif font-bold text-base text-white flex items-center gap-2">
+                <i data-lucide="trophy" class="w-4 h-4 text-amber-400"></i>
+                <span>Top Performing VIP Models</span>
+              </h4>
+              <span class="text-[11px] text-gray-400">Ranked by video clicks</span>
             </div>
+            <div id="topModelsLeaderboard" class="space-y-2.5"></div>
           </div>
 
-          <div class="glass-panel p-6 border border-white/10 rounded-2xl">
-            <h4 class="font-serif font-bold text-base text-white mb-4 flex items-center gap-2">
-              <i data-lucide="trophy" class="w-4 h-4 text-amber-400"></i>
-              <span>Top Models Leaderboard (Most Clicks)</span>
-            </h4>
-            <div id="topModelsLeaderboard" class="space-y-2.5"></div>
+          <!-- Live Activity Log Stream -->
+          <div class="kpi-card p-6 rounded-3xl border border-white/10 space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-white/10">
+              <h4 class="font-serif font-bold text-base text-white flex items-center gap-2">
+                <i data-lucide="activity" class="w-4 h-4 text-emerald-400"></i>
+                <span>Live Activity Stream (Real-Time)</span>
+              </h4>
+              <span class="text-[10px] font-bold uppercase text-emerald-400 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> Live Log
+              </span>
+            </div>
+            <div id="liveActivityLog" class="space-y-2 max-h-80 overflow-y-auto pr-1"></div>
           </div>
         </div>
       </section>
@@ -259,7 +368,7 @@
       <!-- TAB 2: MODELS MANAGEMENT -->
       <!-- ============================================================ -->
       <section id="tabModelsSection" class="hidden space-y-6">
-        <div class="glass-panel p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="kpi-card p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
           <div class="relative w-full sm:w-80">
             <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
             <input type="text" id="adminModelSearch" placeholder="Search model name, badge or city..."
@@ -272,7 +381,7 @@
           </button>
         </div>
 
-        <div class="glass-panel overflow-hidden border border-white/10 rounded-2xl">
+        <div class="kpi-card overflow-hidden border border-white/10 rounded-2xl">
           <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
               <thead class="bg-black/60 text-gray-400 uppercase font-bold border-b border-white/10 tracking-wider">
@@ -295,7 +404,7 @@
       <!-- TAB 3: ADSTERRA ADS & MONETIZATION CONTROLS -->
       <!-- ============================================================ -->
       <section id="tabAdsSection" class="hidden space-y-6">
-        <form id="adSettingsForm" class="glass-panel p-6 sm:p-8 border border-white/10 rounded-2xl space-y-6">
+        <form id="adSettingsForm" class="kpi-card p-6 sm:p-8 border border-white/10 rounded-3xl space-y-6">
           <div class="flex items-center justify-between pb-4 border-b border-white/10">
             <div>
               <h3 class="font-serif font-black text-xl text-white flex items-center gap-2">
@@ -389,7 +498,7 @@
       <!-- TAB 4: SITE SETTINGS & SOCIAL SHARE PREVIEW -->
       <!-- ============================================================ -->
       <section id="tabSettingsSection" class="hidden space-y-6">
-        <form id="siteSettingsForm" class="glass-panel p-6 sm:p-8 border border-white/10 rounded-2xl space-y-6">
+        <form id="siteSettingsForm" class="kpi-card p-6 sm:p-8 border border-white/10 rounded-3xl space-y-6">
           <h3 class="font-serif font-black text-xl text-white pb-4 border-b border-white/10 flex items-center gap-2">
             <i data-lucide="sliders" class="w-5 h-5 text-pink-500"></i>
             <span>Global Site Settings, Social Share Photo & Security PIN</span>
