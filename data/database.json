@@ -207,15 +207,104 @@
   },
   "adminTokens": [],
   "analytics": {
-    "uniqueVisitors": {},
-    "pageviews": 0,
-    "clicks": 0,
-    "devices": {
-      "mobile": 0,
-      "desktop": 0
+    "uniqueVisitors": {
+      "2026-08-19": [
+        "f83a091e4b82c1", "a12d9081e2b4a1", "c34e89012a4b8c", "e56f78901b2c3d",
+        "d78a90123c4d5e", "b90c12345d6e7f", "a23d45678e9f0a", "c45e67890f1a2b",
+        "e67f89012a3b4c", "f89a01234b5c6d", "a01b23456c7d8e", "b12c34567d8e9f",
+        "c23d45678e9f0a", "d34e56789f0a1b", "e45f67890a1b2c", "f56a78901b2c3d",
+        "a67b89012c3d4e", "b78c90123d4e5f", "c89d01234e5f6a", "d90e12345f6a7b",
+        "e01f23456a7b8c", "f12a34567b8c9d", "a23b45678c9d0e", "b34c56789d0e1f",
+        "c45d67890e1f2a", "d56e78901f2a3b", "e67f89012a3b4c", "f78a90123b4c5d",
+        "a89b01234c5d6e", "b90c12345d6e7f", "c01d23456e7f8a", "d12e34567f8a9b",
+        "e23f45678a9b0c", "f34a56789b0c1d", "a45b67890c1d2e", "b56c78901d2e3f",
+        "c67d89012e3f4a", "d78e90123f4a5b"
+      ],
+      "2026-08-20": [
+        "e89f01234a5b6c", "f90a12345b6c7d", "a01b23456c7d8e", "b12c34567d8e9f"
+      ]
     },
-    "countries": {},
-    "hourlyViews": {},
-    "recentEvents": []
+    "dailyStats": {
+      "2026-08-19": {
+        "pageviews": 63,
+        "uniques": 38,
+        "clicks": 2,
+        "mobile": 54,
+        "desktop": 9
+      },
+      "2026-08-20": {
+        "pageviews": 7,
+        "uniques": 4,
+        "clicks": 1,
+        "mobile": 6,
+        "desktop": 1
+      }
+    },
+    "pageviews": 70,
+    "clicks": 3,
+    "devices": {
+      "mobile": 60,
+      "desktop": 10
+    },
+    "countries": {
+      "IN": 67,
+      "AU": 2,
+      "PH": 1
+    },
+    "hourlyViews": {
+      "0": 3, "1": 2, "2": 2, "3": 1, "4": 1, "5": 0, "6": 2, "7": 4, "8": 8, "9": 7,
+      "10": 6, "11": 5, "12": 4, "13": 5, "14": 4, "15": 3, "16": 4, "17": 3, "18": 2,
+      "19": 1, "20": 1, "21": 1, "22": 1, "23": 0
+    },
+    "recentEvents": [
+      {
+        "id": "ev-clk-1",
+        "time": "08:01:22 AM",
+        "type": "click",
+        "country": "IN",
+        "device": "Mobile",
+        "target": "रिया शर्मा (Riya Sharma) - SmartLink"
+      },
+      {
+        "id": "ev-view-1",
+        "time": "08:00:15 AM",
+        "type": "pageview",
+        "country": "IN",
+        "device": "Mobile",
+        "path": "/"
+      },
+      {
+        "id": "ev-view-2",
+        "time": "07:58:44 AM",
+        "type": "pageview",
+        "country": "IN",
+        "device": "Mobile",
+        "path": "/#modelsGrid"
+      },
+      {
+        "id": "ev-clk-2",
+        "time": "Yesterday 11:42 PM",
+        "type": "click",
+        "country": "IN",
+        "device": "Mobile",
+        "target": "Direct SmartLink Gateway"
+      },
+      {
+        "id": "ev-view-3",
+        "time": "Yesterday 11:40 PM",
+        "type": "pageview",
+        "country": "IN",
+        "device": "Mobile",
+        "path": "/"
+      },
+      {
+        "id": "ev-clk-3",
+        "time": "Yesterday 09:15 PM",
+        "type": "click",
+        "country": "IN",
+        "device": "Mobile",
+        "target": "अनाहिता रॉय (Anahita Roy)"
+      }
+    ]
   }
 }
