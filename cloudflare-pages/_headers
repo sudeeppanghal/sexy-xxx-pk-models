@@ -1,0 +1,22 @@
+/* Cloudflare Pages Edge Security & Performance Headers */
+/* Caching & Compression for max PageSpeed scores */
+
+/* Assets: Cache aggressively at edge */
+/css/*
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
+
+/js/*
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
+
+/data/*
+  Cache-Control: public, max-age=60, s-maxage=300
+  Access-Control-Allow-Origin: *
+
+/* Root HTML: Fast Edge Revalidation */
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  X-XSS-Protection: 1; mode=block
+  Referrer-Policy: strict-origin-when-cross-origin
